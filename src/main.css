@@ -1,0 +1,73 @@
+@import './ds/tokens.css';
+@import '@fontsource/cinzel-decorative/400.css';
+@import '@fontsource/eb-garamond/400.css';
+@import '@fontsource/eb-garamond/500.css';
+@import '@fontsource/eb-garamond/600.css';
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  background: var(--surface-base);
+}
+
+/* Position zoom controls above the NearbySheet peek handle */
+.maplibregl-ctrl-bottom-right {
+  bottom: calc(var(--bottom-panel-peek, 128px) + env(safe-area-inset-bottom, 0px) + 16px) !important;
+  right: 16px !important;
+}
+
+/* Subtle parchment warmth on map canvas */
+.maplibregl-canvas {
+  filter: sepia(18%) saturate(0.88) brightness(1.02);
+}
+
+/* User location dot */
+.user-location-marker {
+  width: 14px;
+  height: 14px;
+  background: #5C1010;
+  border: 2px solid #E8D5AA;
+  border-radius: 50%;
+  animation: location-pulse 2s ease-out infinite;
+}
+
+@keyframes location-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(92, 16, 16, 0.5); }
+  70%  { box-shadow: 0 0 0 10px rgba(92, 16, 16, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(92, 16, 16, 0); }
+}
+
+/* Geocode result marker (fly-to pin) */
+.geocode-marker {
+  width: 14px;
+  height: 14px;
+  background: #9E6B1A;
+  border: 2px solid #E8D5AA;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  animation: geocode-pop 300ms var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) both;
+}
+
+@keyframes geocode-pop {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* Hide MapLibre attribution (credits in Om-section) */
+.maplibregl-ctrl-attrib {
+  display: none !important;
+}
+
+/* Hide scrollbars globally on chip rows */
+*::-webkit-scrollbar {
+  display: none;
+}

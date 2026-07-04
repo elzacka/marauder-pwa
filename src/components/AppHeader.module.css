@@ -1,0 +1,27 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  padding: calc(env(safe-area-inset-top, 0px) + 10px) 20px 10px;
+  background: var(--surface-overlay);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  border: var(--border-width-thin) solid rgba(158, 107, 26, 0.2);
+  border-top: none;
+  box-shadow: var(--shadow-sm);
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.logo {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wider);
+  color: var(--color-burgundy);
+  line-height: 1;
+}

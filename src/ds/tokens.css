@@ -1,0 +1,163 @@
+/* Marauder Design System — full token set synced from DS v2 */
+
+:root {
+  /* ── Base palette ── */
+  --color-parchment:       #E8D5AA;
+  --color-cream:           #F5ECD7;
+  --color-burgundy:        #5C1010;
+  --color-burgundy-dark:   #3E0A0A;
+  --color-burgundy-light:  #7A1A1A;
+  --color-ink:             #1A0A00;
+  --color-ink-soft:        #2E1505;
+  --color-gold:            #9E6B1A;
+  --color-gold-light:      #C4902A;
+  --color-gold-muted:      #7A5214;
+
+  /* ── Surface tokens ── */
+  --surface-base:                  var(--color-parchment);
+  --surface-card:                  var(--color-cream);
+  --surface-map:                   var(--color-parchment);
+  --surface-overlay:               rgba(245, 236, 215, 0.92);
+  --surface-interactive:           var(--color-burgundy);
+  --surface-interactive-hover:     var(--color-burgundy-dark);
+  --surface-interactive-secondary: transparent;
+
+  /* ── Text tokens ── */
+  --text-primary:        var(--color-ink);
+  --text-secondary:      var(--color-ink-soft);
+  --text-muted:          color-mix(in srgb, var(--color-ink) 50%, var(--color-parchment));
+  --text-on-dark:        var(--color-cream);
+  --text-on-interactive: var(--color-cream);
+  --text-accent:         var(--color-gold);
+  --text-heading:        var(--color-burgundy);
+
+  /* ── Border tokens ── */
+  --border-subtle:      color-mix(in srgb, var(--color-parchment) 30%, var(--color-ink) 70%);
+  --border-default:     color-mix(in srgb, var(--color-gold) 40%, var(--color-ink) 60%);
+  --border-strong:      var(--color-gold);
+  --border-interactive: var(--color-burgundy);
+
+  /* ── Semantic states ── */
+  --color-offline:     #2E6B3E;
+  --color-offline-bg:  #D6EAD8;
+  --color-warning:     #8B5E0A;
+  --color-warning-bg:  #F5E6C8;
+
+  /* ── Typography ── */
+  --font-display: 'Cinzel Decorative', 'Palatino Linotype', serif;
+  --font-body:    'EB Garamond', Georgia, 'Times New Roman', serif;
+  --font-mono:    'Courier New', Courier, monospace;
+
+  --type-app-title: var(--font-display);
+  --type-heading:   var(--font-display);
+  --type-label:     var(--font-body);
+  --type-body:      var(--font-body);
+  --type-caption:   var(--font-body);
+  --type-mono:      var(--font-mono);
+
+  /* Size scale */
+  --text-xs:   11px;
+  --text-sm:   13px;
+  --text-base: 16px;
+  --text-md:   17px;
+  --text-lg:   20px;
+  --text-xl:   24px;
+  --text-2xl:  30px;
+  --text-3xl:  38px;
+  --text-4xl:  48px;
+
+  /* Line height */
+  --leading-tight:   1.2;
+  --leading-snug:    1.35;
+  --leading-normal:  1.55;
+  --leading-relaxed: 1.75;
+
+  /* Letter spacing */
+  --tracking-tight:   -0.01em;
+  --tracking-normal:   0em;
+  --tracking-wide:     0.06em;
+  --tracking-wider:    0.10em;
+  --tracking-widest:   0.18em;
+
+  /* Font weight */
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  /* ── Spacing ── */
+  --space-0:  0px;
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-7:  28px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  --padding-card:     var(--space-4);
+  --padding-card-sm:  var(--space-3);
+  --padding-section:  var(--space-6);
+  --padding-inline:   var(--space-4);
+  --gap-chips:        var(--space-2);
+  --gap-list:         var(--space-3);
+  --gap-section:      var(--space-8);
+
+  /* Touch targets */
+  --touch-min:      44px;
+  --touch-chip:     36px;
+  --touch-icon-btn: 44px;
+
+  /* Layout */
+  --bottom-panel-peek:  128px;
+  --bottom-panel-mid:   360px;
+  --map-control-offset: 56px;
+  --safe-bottom:        env(safe-area-inset-bottom, 16px);
+
+  /* ── Effects ── */
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-2xl:  20px;
+  --radius-full: 9999px;
+
+  --radius-card:  var(--radius-lg);
+  --radius-chip:  var(--radius-full);
+  --radius-btn:   var(--radius-md);
+  --radius-popup: var(--radius-xl);
+  --radius-sheet: var(--radius-2xl);
+
+  --shadow-xs: 0 1px 2px rgba(26, 10, 0, 0.10);
+  --shadow-sm: 0 1px 4px rgba(26, 10, 0, 0.10), 0 1px 2px rgba(26, 10, 0, 0.08);
+  --shadow-md: 0 2px 8px rgba(26, 10, 0, 0.12), 0 1px 3px rgba(26, 10, 0, 0.08);
+  --shadow-lg: 0 4px 16px rgba(26, 10, 0, 0.14), 0 2px 6px rgba(26, 10, 0, 0.08);
+  --shadow-xl: 0 8px 32px rgba(26, 10, 0, 0.16), 0 4px 12px rgba(26, 10, 0, 0.10);
+
+  --shadow-card:  var(--shadow-md);
+  --shadow-sheet: var(--shadow-xl);
+  --shadow-pin:   var(--shadow-sm);
+  --shadow-btn:   var(--shadow-xs);
+
+  --border-width-thin:   1px;
+  --border-width-base:   1.5px;
+  --border-width-thick:  2px;
+  --border-width-accent: 3px;
+
+  --ease-out:    cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --duration-fast: 150ms;
+  --duration-base: 220ms;
+  --duration-slow: 350ms;
+
+  --opacity-disabled: 0.45;
+  --opacity-muted:    0.65;
+  --opacity-overlay:  0.88;
+}

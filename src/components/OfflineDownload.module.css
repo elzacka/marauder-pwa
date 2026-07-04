@@ -1,0 +1,182 @@
+.root {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+/* ── Always-visible pill ── */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  background: var(--surface-overlay);
+  border: var(--border-width-thin) solid rgba(26, 10, 0, 0.12);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.pill:hover {
+  background: var(--surface-card);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--color-gold);
+}
+
+.dot[data-status="ready"]       { background: var(--color-offline); }
+.dot[data-status="downloading"] { background: var(--color-gold); animation: pulse 1.2s ease-in-out infinite; }
+.dot[data-status="error"]       { background: var(--color-burgundy); }
+.dot[data-status="checking"]    { background: rgba(26, 10, 0, 0.3); }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
+}
+
+.pillLabel {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* ── Expanded panel ── */
+.panel {
+  width: 240px;
+  background: var(--surface-card);
+  border: var(--border-width-base) solid var(--color-gold);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-lg);
+  padding: 14px 16px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.title {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: var(--text-primary);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-wide);
+}
+
+.closeBtn {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(26, 10, 0, 0.07);
+  border: none;
+  border-radius: var(--radius-full);
+  font-size: 16px;
+  line-height: 1;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  transition: background var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out);
+}
+
+.closeBtn:hover {
+  background: rgba(26, 10, 0, 0.13);
+  color: var(--text-primary);
+}
+
+.info {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  margin: 0 0 10px;
+  line-height: var(--leading-normal);
+}
+
+.errorText {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-burgundy);
+  margin: 0 0 10px;
+  line-height: var(--leading-snug);
+  word-break: break-word;
+}
+
+.progressBar {
+  height: 5px;
+  background: rgba(158, 107, 26, 0.2);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--color-gold);
+  border-radius: var(--radius-sm);
+  transition: width 200ms var(--ease-out);
+}
+
+.btn {
+  width: 100%;
+  padding: 9px;
+  background: var(--color-burgundy);
+  color: var(--color-cream);
+  border: none;
+  border-radius: var(--radius-btn);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.btn:hover { background: var(--color-burgundy-dark); }
+
+.btnSecondary {
+  width: 100%;
+  padding: 9px;
+  background: none;
+  color: var(--color-burgundy);
+  border: var(--border-width-base) solid var(--color-burgundy);
+  border-radius: var(--radius-btn);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.btnSecondary:hover { background: rgba(92, 16, 16, 0.06); }
+
+.btnDanger {
+  width: 100%;
+  padding: 9px;
+  background: none;
+  color: var(--color-gold-muted);
+  border: var(--border-width-base) solid var(--color-gold-muted);
+  border-radius: var(--radius-btn);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.btnDanger:hover { background: rgba(158, 107, 26, 0.08); }
