@@ -323,29 +323,3 @@
   text-underline-offset: 2px;
 }
 
-/* ── Privacy list ── */
-.privacyList {
-  list-style: none;
-  padding: 6px 14px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.privacyList li {
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
-  color: var(--text-muted);
-  line-height: var(--leading-normal);
-  padding: 5px 0;
-  border-bottom: 1px solid rgba(26, 10, 0, 0.05);
-  padding-left: 14px;
-  position: relative;
-}
-
-.privacyList li::before {
-  content: '·';
-  position: absolute;
-  left: 2px;
-  color: var(--color-gold-muted);
-}

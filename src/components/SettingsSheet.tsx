@@ -188,31 +188,15 @@ export default function SettingsSheet({
           <section className={styles.section}>
             <h3 className={styles.sectionTitle}>Datakilder</h3>
             <div className={styles.card}>
-              <div className={styles.infoRow}>
-                <span className={styles.statusLabel}>Kartdata</span>
-                <span className={styles.infoValue}>© OpenStreetMap-bidragsytere</span>
-              </div>
-              <div className={`${styles.infoRow} ${styles.infoRowBorder}`}>
-                <span className={styles.statusLabel}>Kartvisning</span>
-                <span className={styles.infoValue}>Protomaps</span>
-              </div>
-              <div className={`${styles.infoRow} ${styles.infoRowBorder}`}>
-                <span className={styles.statusLabel}>Adressesøk</span>
-                <span className={styles.infoValue}>Nominatim / OSM</span>
-              </div>
-              <div className={`${styles.infoRow} ${styles.infoRowBorder}`}>
-                <span className={styles.statusLabel}>HP-steder</span>
-                <span className={styles.infoValue}>Offentlig tilgjengelige kilder</span>
-              </div>
               <p className={styles.omText}>
-                Kartdata er lisensiert under ODbL.{' '}
+                Kartdata © OpenStreetMap-bidragsytere (ODbL). Kartvisning: Protomaps. Adressesøk: Nominatim / OSM.{' '}
                 <a
-                  href="https://www.openstreetmap.org/copyright"
+                  href="https://github.com/elzacka/marauder-pwa#datakilder"
                   target="_blank"
                   rel="noopener noreferrer"
                   className={styles.omLink}
                 >
-                  openstreetmap.org/copyright
+                  Full oversikt
                 </a>
               </p>
             </div>
@@ -222,13 +206,17 @@ export default function SettingsSheet({
           <section className={styles.section}>
             <h3 className={styles.sectionTitle}>Personvern</h3>
             <div className={styles.card}>
-              <ul className={styles.privacyList}>
-                <li>Ingen persondata samles inn</li>
-                <li>Ingen data sendes til tredjeparter</li>
-                <li>Posisjonsdata brukes kun lokalt på enheten</li>
-                <li>Favoritter og egne steder lagres kun lokalt</li>
-                <li>Adressesøk sendes til Nominatim (OSM)</li>
-              </ul>
+              <p className={styles.omText}>
+                Appen samler ikke inn persondata. Posisjon, favoritter og egne steder lagres kun lokalt på enheten. Adressesøk sendes til Nominatim (OSM).{' '}
+                <a
+                  href="https://github.com/elzacka/marauder-pwa/blob/main/PERSONVERN.md"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.omLink}
+                >
+                  Les personvernerklæringen
+                </a>
+              </p>
             </div>
           </section>
 
