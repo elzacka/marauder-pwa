@@ -1,4 +1,5 @@
-import { useState, useRef, useCallback, useId } from 'react'
+import { useState, useId } from 'react'
+import { useSheetDrag } from '../hooks/useSheetDrag'
 import styles from './AddPlaceSheet.module.css'
 
 type Props = {
@@ -10,30 +11,9 @@ type Props = {
 export default function AddPlaceSheet({ coords, onSave, onClose }: Props) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
-  const sheetRef = useRef<HTMLDivElement>(null)
-  const dragStartY = useRef(0)
+  const { sheetRef, onDragStart, onDragMove, onDragEnd } = useSheetDrag(onClose)
   const nameId = useId()
   const descId = useId()
-
-  const onDragStart = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId)
-    dragStartY.current = e.clientY
-    const sheet = sheetRef.current
-    if (sheet) sheet.style.transition = 'none'
-  }, [])
-
-  const onDragMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    if (!(e.buttons & 1)) return
-    const dy = Math.max(0, e.clientY - dragStartY.current)
-    const sheet = sheetRef.current
-    if (sheet) sheet.style.transform = `translateY(${dy}px)`
-  }, [])
-
-  const onDragEnd = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    const sheet = sheetRef.current
-    if (sheet) { sheet.style.transition = ''; sheet.style.transform = '' }
-    if (e.clientY - dragStartY.current > 72) onClose()
-  }, [onClose])
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

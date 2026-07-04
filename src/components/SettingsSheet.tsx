@@ -1,6 +1,6 @@
-import { useRef, useCallback } from 'react'
 import type { OfflineStatus } from '../hooks/useOfflineTiles'
 import { formatBytes } from '../offline/OfflineMapManager'
+import { useSheetDrag } from '../hooks/useSheetDrag'
 import styles from './SettingsSheet.module.css'
 
 type Props = {
@@ -43,28 +43,7 @@ export default function SettingsSheet({
   onDownload, onCancel, onDelete,
   online,
 }: Props) {
-  const sheetRef = useRef<HTMLDivElement>(null)
-  const dragStartY = useRef(0)
-
-  const onDragStart = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId)
-    dragStartY.current = e.clientY
-    const sheet = sheetRef.current
-    if (sheet) sheet.style.transition = 'none'
-  }, [])
-
-  const onDragMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    if (!(e.buttons & 1)) return
-    const dy = Math.max(0, e.clientY - dragStartY.current)
-    const sheet = sheetRef.current
-    if (sheet) sheet.style.transform = `translateY(${dy}px)`
-  }, [])
-
-  const onDragEnd = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    const sheet = sheetRef.current
-    if (sheet) { sheet.style.transition = ''; sheet.style.transform = '' }
-    if (e.clientY - dragStartY.current > 72) onClose()
-  }, [onClose])
+  const { sheetRef, onDragStart, onDragMove, onDragEnd } = useSheetDrag(onClose)
 
   const progress = total > 0 ? downloaded / total : 0
 
@@ -201,6 +180,7 @@ export default function SettingsSheet({
               </div>
               <p className={styles.omText}>
                 En reiseguide for Harry Potter-steder i Storbritannia.
+              </p>
             </div>
           </section>
 

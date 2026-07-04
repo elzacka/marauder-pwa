@@ -60,10 +60,13 @@ export default function App() {
   const [pendingLongPress, setPendingLongPress] = useState<{ lng: number; lat: number } | null>(null)
   const [showOnlyFavourites, setShowOnlyFavourites] = useState(false)
   const mapRef = useRef<MapHandle>(null)
+  const geocodeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (status === 'ready') {
       getOfflineFile().then((f) => setOfflineFile(f ?? null))
+    } else if (status === 'none') {
+      setOfflineFile(null)
     }
   }, [status])
 
@@ -108,8 +111,11 @@ export default function App() {
   function handleAddressSelect(lng: number, lat: number) {
     mapRef.current?.flyTo(lng, lat)
     setGeocodeMarker({ lng, lat })
-    // Clear geocode marker after 8 seconds
-    setTimeout(() => setGeocodeMarker(null), 8000)
+    if (geocodeTimerRef.current) clearTimeout(geocodeTimerRef.current)
+    geocodeTimerRef.current = setTimeout(() => {
+      geocodeTimerRef.current = null
+      setGeocodeMarker(null)
+    }, 8000)
   }
 
   function handleLongPress(lng: number, lat: number) {

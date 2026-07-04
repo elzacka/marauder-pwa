@@ -1,7 +1,8 @@
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect } from 'react'
 import { Badge } from '../ds/Badge'
 import { formatHpRef } from '../types/hp-location'
 import type { HPLocation } from '../types/hp-location'
+import { useSheetDrag } from '../hooks/useSheetDrag'
 import styles from './POIDetailSheet.module.css'
 
 type Props = {
@@ -18,8 +19,7 @@ export default function POIDetailSheet({
   isFavourite = false, onToggleFavourite,
   isCustomPlace = false, onDeleteCustomPlace,
 }: Props) {
-  const sheetRef = useRef<HTMLDivElement>(null)
-  const dragStartY = useRef(0)
+  const { sheetRef, onDragStart, onDragMove, onDragEnd } = useSheetDrag(onClose)
 
   useEffect(() => {
     if (!location) return
@@ -29,27 +29,6 @@ export default function POIDetailSheet({
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [location, onClose])
-
-  const onDragStart = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId)
-    dragStartY.current = e.clientY
-    const sheet = sheetRef.current
-    if (sheet) sheet.style.transition = 'none'
-  }, [])
-
-  const onDragMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    if (!(e.buttons & 1)) return
-    const dy = Math.max(0, e.clientY - dragStartY.current)
-    const sheet = sheetRef.current
-    if (sheet) sheet.style.transform = `translateY(${dy}px)`
-  }, [])
-
-  const onDragEnd = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    const dy = e.clientY - dragStartY.current
-    const sheet = sheetRef.current
-    if (sheet) { sheet.style.transition = ''; sheet.style.transform = '' }
-    if (dy > 72) onClose()
-  }, [onClose])
 
   if (!location) return null
 

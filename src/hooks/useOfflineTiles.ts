@@ -21,6 +21,7 @@ export function useOfflineTiles(downloadUrl: string) {
   }, [])
 
   const download = useCallback(async () => {
+    if (!downloadUrl) return
     setStatus('downloading')
     setDownloaded(0)
     setTotal(0)

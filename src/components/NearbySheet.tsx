@@ -1,4 +1,4 @@
-import { useState, useDeferredValue, useId, useEffect } from 'react'
+import { useState, useMemo, useId, useEffect } from 'react'
 import { BottomSheet, type SnapPoint } from '../ds/BottomSheet'
 import { CategoryFilter } from '../ds/CategoryFilter'
 import { type FilterState, CATEGORY_META } from '../ds/filterMeta'
@@ -76,24 +76,25 @@ export default function NearbySheet({
 
   const q = normalize(query.trim())
 
-  const rawFiltered: LocationWithDist[] = ALL_LOCATIONS
-    .filter((loc) => {
-      if (showOnlyFavourites && !favouriteIds.has(loc.id)) return false
-      if (filter.category !== 'all' && loc.category !== filter.category) return false
-      if (filter.locationType !== 'all' && loc.location_type !== filter.locationType) return false
-      if (q && !normalize(loc.name).includes(q) && !normalize(loc.description).includes(q)) return false
-      return true
-    })
-    .map((loc) => ({
-      ...loc,
-      km: position ? haversineKm(position.lat, position.lng, loc.lat, loc.lng) : null,
-    }))
-    .sort((a, b) => {
-      if (a.km !== null && b.km !== null) return a.km - b.km
-      return a.name.localeCompare(b.name, 'en')
-    })
-
-  const filtered = useDeferredValue(rawFiltered)
+  const filtered = useMemo<LocationWithDist[]>(() =>
+    ALL_LOCATIONS
+      .filter((loc) => {
+        if (showOnlyFavourites && !favouriteIds.has(loc.id)) return false
+        if (filter.category !== 'all' && loc.category !== filter.category) return false
+        if (filter.locationType !== 'all' && loc.location_type !== filter.locationType) return false
+        if (q && !normalize(loc.name).includes(q) && !normalize(loc.description).includes(q)) return false
+        return true
+      })
+      .map((loc) => ({
+        ...loc,
+        km: position ? haversineKm(position.lat, position.lng, loc.lat, loc.lng) : null,
+      }))
+      .sort((a, b) => {
+        if (a.km !== null && b.km !== null) return a.km - b.km
+        return a.name.localeCompare(b.name, 'en')
+      }),
+    [q, filter, position, showOnlyFavourites, favouriteIds],
+  )
 
   const customWithDist = customPlaces.map((p) => ({
     ...p,
@@ -246,7 +247,11 @@ export default function NearbySheet({
                   <button
                     type="button"
                     className={styles.item}
-                    onClick={() => handleGeoClick(parseFloat(r.lon), parseFloat(r.lat), name)}
+                    onClick={() => {
+                      const lng = parseFloat(r.lon)
+                      const lat = parseFloat(r.lat)
+                      if (!Number.isNaN(lng) && !Number.isNaN(lat)) handleGeoClick(lng, lat, name)
+                    }}
                   >
                     <span className={styles.geoPin} aria-hidden="true">
                       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">

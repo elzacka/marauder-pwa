@@ -40,10 +40,12 @@ export function useNominatim(query: string) {
         })
         if (!r.ok) throw new Error('nominatim error')
         setResults(await r.json() as NominatimResult[])
-      } catch (e) {
-        if ((e as Error).name !== 'AbortError') setResults([])
-      } finally {
         setLoading(false)
+      } catch (e) {
+        if ((e as Error).name !== 'AbortError') {
+          setResults([])
+          setLoading(false)
+        }
       }
     }, 400)
 

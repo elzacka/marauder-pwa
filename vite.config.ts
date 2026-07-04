@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react-swc'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  base: '/marauder-pwa/',
   server: {
     port: 5173,
   },
@@ -17,7 +18,7 @@ export default defineConfig({
         theme_color: '#1A0A00',
         background_color: '#E8D5AA',
         display: 'standalone',
-        start_url: '/',
+        start_url: '/marauder-pwa/',
         orientation: 'portrait-primary',
         icons: [
           {

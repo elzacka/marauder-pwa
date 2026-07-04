@@ -359,7 +359,11 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
 
   // Offline PMTiles file registration
   useEffect(() => {
-    if (!offlineFile || !pmtilesUrl || offlineRegisteredRef.current) return
+    if (!offlineFile) {
+      offlineRegisteredRef.current = false
+      return
+    }
+    if (!pmtilesUrl || offlineRegisteredRef.current) return
     const source = new FileSource(offlineFile)
     ;(source as unknown as { getKey: () => string }).getKey = () => pmtilesUrl
     const p = new PMTiles(source)
