@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 
-export type Position = { lat: number; lng: number }
+export type Position = { lat: number; lng: number; accuracy: number }
 
 export function useGeolocation() {
   const [position, setPosition] = useState<Position | null>(null)
@@ -25,7 +25,7 @@ export function useGeolocation() {
 
     watchIdRef.current = navigator.geolocation.watchPosition(
       (pos) => {
-        setPosition({ lat: pos.coords.latitude, lng: pos.coords.longitude })
+        setPosition({ lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy })
         setError(null)
       },
       (err) => {
