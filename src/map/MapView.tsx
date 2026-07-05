@@ -1,4 +1,4 @@
-import { useEffect, useRef, forwardRef, useImperativeHandle, useCallback } from 'react'
+import { useEffect, useRef, useState, forwardRef, useImperativeHandle, useCallback } from 'react'
 import maplibregl from 'maplibre-gl'
 import { Protocol, PMTiles, FileSource } from 'pmtiles'
 import { layers, namedFlavor } from '@protomaps/basemaps'
@@ -173,7 +173,7 @@ function addOverlays(
 }
 
 export type MapHandle = {
-  flyTo: (lng: number, lat: number) => void
+  flyTo: (lng: number, lat: number, zoom?: number) => void
 }
 
 export type MapMode = 'browse' | 'measure'
@@ -191,6 +191,7 @@ type Props = {
   onCustomPlaceClick?: (id: string) => void
   onLongPress?: (lng: number, lat: number) => void
   geocodeMarker?: { lng: number; lat: number } | null
+  onGeocodeMarkerClick?: () => void
   selectedLocation?: HPLocation | null
   activeFilter?: FilterState | null
   hpLocations?: FeatureCollection | null
@@ -201,12 +202,19 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
     position, offlineFile, pmtilesUrl, onLocationSelect, showZoomControls = true,
     mapMode = 'browse', measurePoints = [], onMeasurePoint,
     customPlaces = [], onCustomPlaceClick,
-    onLongPress, geocodeMarker, selectedLocation = null, activeFilter = null,
+    onLongPress, geocodeMarker, onGeocodeMarkerClick,
+    selectedLocation = null, activeFilter = null,
     hpLocations = null,
   } = props
 
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
+  // True once map 'load' has fired and overlay sources/layers exist. Data
+  // effects depend on this: locally cached data (service worker) arrives
+  // BEFORE the map finishes loading, so effects that ran too early must
+  // re-run when the map becomes ready — otherwise the layers stay empty
+  // forever and no POI markers ever appear.
+  const [mapReady, setMapReady] = useState(false)
   const markerRef = useRef<maplibregl.Marker | null>(null)
   const geocodeMarkerRef = useRef<maplibregl.Marker | null>(null)
   const navControlRef = useRef<maplibregl.NavigationControl | null>(null)
@@ -221,11 +229,13 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
   useEffect(() => { onMeasurePointRef.current = onMeasurePoint }, [onMeasurePoint])
   const onLongPressRef = useRef(onLongPress)
   useEffect(() => { onLongPressRef.current = onLongPress }, [onLongPress])
+  const onGeocodeMarkerClickRef = useRef(onGeocodeMarkerClick)
+  useEffect(() => { onGeocodeMarkerClickRef.current = onGeocodeMarkerClick }, [onGeocodeMarkerClick])
   const mapModeRef = useRef(mapMode)
   useEffect(() => { mapModeRef.current = mapMode }, [mapMode])
 
-  const flyTo = useCallback((lng: number, lat: number) => {
-    mapRef.current?.flyTo({ center: [lng, lat], zoom: 13, duration: 700 })
+  const flyTo = useCallback((lng: number, lat: number, zoom = 13) => {
+    mapRef.current?.flyTo({ center: [lng, lat], zoom, duration: 700 })
   }, [])
   useImperativeHandle(ref, () => ({ flyTo }), [flyTo])
 
@@ -272,6 +282,7 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
         duration: 0,
       })
       addOverlays(map, onLocationSelectRef, onCustomPlaceClickRef)
+      setMapReady(true)
 
       // Long press (touch) → add custom place
       let lpTimer: ReturnType<typeof setTimeout> | null = null
@@ -300,6 +311,7 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
     })
 
     return () => {
+      setMapReady(false)
       map.remove()
       mapRef.current = null
       markerRef.current = null
@@ -343,10 +355,10 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
     })
   }, [measurePoints])
 
-  // Custom places overlay
+  // Custom places overlay (localStorage data — also arrives before map load)
   useEffect(() => {
     const map = mapRef.current
-    if (!map) return
+    if (!mapReady || !map) return
     const src = map.getSource('custom-places') as maplibregl.GeoJSONSource | undefined
     if (!src) return
     src.setData({
@@ -359,7 +371,8 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
     })
   }, [customPlaces])
 
-  // Geocode marker
+  // Geocode marker — persistent pin; tapping it toggles the result card in App.
+  // anchor: 'bottom' so the pin TIP marks the location, not the pin centre.
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
@@ -368,7 +381,13 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
     if (geocodeMarker) {
       const el = document.createElement('div')
       el.className = 'geocode-marker'
-      geocodeMarkerRef.current = new maplibregl.Marker({ element: el })
+      el.setAttribute('role', 'button')
+      el.setAttribute('aria-label', 'Valgt søketreff — trykk for detaljer')
+      el.addEventListener('click', (e) => {
+        e.stopPropagation()
+        onGeocodeMarkerClickRef.current?.()
+      })
+      geocodeMarkerRef.current = new maplibregl.Marker({ element: el, anchor: 'bottom' })
         .setLngLat([geocodeMarker.lng, geocodeMarker.lat])
         .addTo(map)
     }
@@ -399,10 +418,12 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
     })
   }, [selectedLocation])
 
-  // Active category filter → hp-dots visibility and filter expression
+  // Active category filter → hp-dots visibility and filter expression.
+  // mapReady in deps: a filter chosen before the map finished loading must be
+  // applied once the layer exists.
   useEffect(() => {
     const map = mapRef.current
-    if (!map) return
+    if (!mapReady || !map) return
     if (!map.getLayer('hp-dots')) return
 
     if (!activeFilter) {
@@ -427,15 +448,16 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
     } else {
       map.setFilter('hp-dots', catExpr)
     }
-  }, [activeFilter])
+  }, [activeFilter, mapReady])
 
-  // HP locations data — set when the fetched FeatureCollection arrives
+  // HP locations data — set when the fetched FeatureCollection arrives OR when
+  // the map becomes ready, whichever happens last (see mapReady comment above)
   useEffect(() => {
     const map = mapRef.current
-    if (!map || !hpLocations) return
+    if (!mapReady || !map || !hpLocations) return
     const src = map.getSource('hp-locations') as maplibregl.GeoJSONSource | undefined
     src?.setData(hpLocations)
-  }, [hpLocations])
+  }, [hpLocations, mapReady])
 
   // Offline PMTiles file registration
   useEffect(() => {

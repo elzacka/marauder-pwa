@@ -1,16 +1,27 @@
-import { useState, useId } from 'react'
+import { useState, useEffect, useId } from 'react'
 import { useSheetDrag } from '../hooks/useSheetDrag'
 import styles from './AddPlaceSheet.module.css'
 
 type Props = {
   coords: { lng: number; lat: number } | null
+  /** Prefilled name, e.g. from a saved geocode result */
+  initialName?: string
   onSave: (name: string, description: string) => void
   onClose: () => void
 }
 
-export default function AddPlaceSheet({ coords, onSave, onClose }: Props) {
+export default function AddPlaceSheet({ coords, initialName, onSave, onClose }: Props) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
+
+  // Reset the form each time the sheet opens; prefill name when provided
+  // (saving a geocode search hit passes the hit's name).
+  useEffect(() => {
+    if (coords) {
+      setName(initialName ?? '')
+      setDescription('')
+    }
+  }, [coords, initialName])
   const { sheetRef, onDragStart, onDragMove, onDragEnd } = useSheetDrag(onClose)
   const nameId = useId()
   const descId = useId()

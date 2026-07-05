@@ -13,8 +13,7 @@ import POIDetailSheet from './components/POIDetailSheet'
 import MeasureBar from './components/MeasureBar'
 import AddPlaceSheet from './components/AddPlaceSheet'
 import InstallBanner from './components/InstallBanner'
-// TEMPORARY: viewport diagnosis — remove together with DebugOverlay.tsx
-import DebugOverlay from './components/DebugOverlay'
+import GeocodeCard from './components/GeocodeCard'
 import type { HPLocation } from './types/hp-location'
 import type { CustomPlace } from './types/custom-place'
 import type { FilterState } from './ds/filterMeta'
@@ -58,13 +57,16 @@ export default function App() {
   const [showZoomControls, setShowZoomControls] = useState(getInitialZoomControls)
   const [measureMode, setMeasureMode] = useState(false)
   const [measurePoints, setMeasurePoints] = useState<Array<[number, number]>>([])
-  const [geocodeMarker, setGeocodeMarker] = useState<{ lng: number; lat: number } | null>(null)
-  const [pendingLongPress, setPendingLongPress] = useState<{ lng: number; lat: number } | null>(null)
+  // Selected geocode result: pin + card stay until dismissed, replaced or saved
+  // as a custom place — no auto-timeout (Google/Apple Maps pattern).
+  const [geocodeMarker, setGeocodeMarker] = useState<{ lng: number; lat: number; name: string; detail: string } | null>(null)
+  // Card is shown on pin tap only (Lene, 2026-07-05) — selection drops just the pin.
+  const [showGeocodeCard, setShowGeocodeCard] = useState(false)
+  const [pendingLongPress, setPendingLongPress] = useState<{ lng: number; lat: number; name?: string } | null>(null)
   // Default: show all HP dots on first paint — the map's whole purpose is showing them.
   // The filter narrows the view; it is not a gate for seeing anything at all.
   const [activeFilter, setActiveFilter] = useState<FilterState | null>({ category: 'all', locationType: 'all' })
   const mapRef = useRef<MapHandle>(null)
-  const geocodeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (status === 'ready') {
@@ -112,14 +114,23 @@ export default function App() {
     setMeasurePoints((pts) => pts.slice(0, -1))
   }
 
-  function handleAddressSelect(lng: number, lat: number) {
-    mapRef.current?.flyTo(lng, lat)
-    setGeocodeMarker({ lng, lat })
-    if (geocodeTimerRef.current) clearTimeout(geocodeTimerRef.current)
-    geocodeTimerRef.current = setTimeout(() => {
-      geocodeTimerRef.current = null
-      setGeocodeMarker(null)
-    }, 8000)
+  function handleAddressSelect(lng: number, lat: number, name: string, detail: string) {
+    // Zoom 16: an address selection means "show me this exact place" —
+    // street level, not the region overview the default zoom gives.
+    mapRef.current?.flyTo(lng, lat, 16)
+    setGeocodeMarker({ lng, lat, name, detail })
+    setShowGeocodeCard(false)
+  }
+
+  function handleSaveGeocodeAsPlace() {
+    if (!geocodeMarker) return
+    setShowGeocodeCard(false)
+    setPendingLongPress({ lng: geocodeMarker.lng, lat: geocodeMarker.lat, name: geocodeMarker.name })
+  }
+
+  function handleRemoveGeocodePin() {
+    setGeocodeMarker(null)
+    setShowGeocodeCard(false)
   }
 
   function handleLongPress(lng: number, lat: number) {
@@ -135,12 +146,14 @@ export default function App() {
       lng: pendingLongPress.lng,
     })
     setPendingLongPress(null)
+    // Saved as a custom place: the geocode pin has served its purpose
+    setGeocodeMarker(null)
+    setShowGeocodeCard(false)
     mapRef.current?.flyTo(p.lng, p.lat)
   }
 
   return (
     <>
-      <DebugOverlay />
       <InstallBanner />
       <MapView
         ref={mapRef}
@@ -156,6 +169,7 @@ export default function App() {
         onCustomPlaceClick={handleCustomPlaceClick}
         onLongPress={handleLongPress}
         geocodeMarker={geocodeMarker}
+        onGeocodeMarkerClick={() => setShowGeocodeCard((v) => !v)}
         selectedLocation={selectedLocation}
         activeFilter={activeFilter}
         hpLocations={hpLocations}
@@ -203,8 +217,18 @@ export default function App() {
         isCustomPlace={selectedIsCustom}
         onDeleteCustomPlace={removeCustomPlace}
       />
+      {geocodeMarker && showGeocodeCard && (
+        <GeocodeCard
+          name={geocodeMarker.name}
+          detail={geocodeMarker.detail}
+          onSave={handleSaveGeocodeAsPlace}
+          onRemove={handleRemoveGeocodePin}
+          onClose={() => setShowGeocodeCard(false)}
+        />
+      )}
       <AddPlaceSheet
         coords={pendingLongPress}
+        initialName={pendingLongPress?.name}
         onSave={handleSaveCustomPlace}
         onClose={() => setPendingLongPress(null)}
       />

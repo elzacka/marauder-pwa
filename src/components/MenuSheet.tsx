@@ -69,7 +69,7 @@ type Props = {
   onToggle: () => void
   measureMode: boolean
   onToggleMeasure: () => void
-  onAddressSelect: (lng: number, lat: number) => void
+  onAddressSelect: (lng: number, lat: number, name: string, detail: string) => void
   onLocationSelect: (loc: HPLocation) => void
   favouriteIds: Set<string>
   hpLocations: HPLocation[]
@@ -120,8 +120,10 @@ export default function MenuSheet({
     if (activeFilter === null) setFilter({ category: 'all', locationType: 'all' })
   }, [activeFilter])
 
+  // List results are search-driven only. Picking a category filters the map
+  // markers (via activeFilter in App) and must NOT render a list in the menu.
   const filteredHP = useMemo<HPLocationWithDist[]>(() => {
-    if (!q && filter.category === 'all') return []
+    if (!q) return []
     return withDistAndSort(
       hpLocations.filter((loc) => {
         if (filter.category !== 'all' && !loc.categories.includes(filter.category as LocationCategory)) return false
@@ -133,8 +135,10 @@ export default function MenuSheet({
     )
   }, [q, filter, position, hpLocations])
 
+  // Favourites are always listed regardless of category filter (Lene, 2026-07-05);
+  // they yield only to active search, like everything else below the search field.
   const favouriteLocations = useMemo<HPLocationWithDist[]>(() => {
-    if (q || filter.category !== 'all') return []
+    if (q) return []
     return withDistAndSort(hpLocations.filter((loc) => favouriteIds.has(loc.id)), position)
   }, [q, filter.category, favouriteIds, position, hpLocations])
 
@@ -180,8 +184,8 @@ export default function MenuSheet({
     if (dy > 80) setIsOpen(false)
   }, [])
 
-  function handleGeoClick(lng: number, lat: number) {
-    onAddressSelect(lng, lat)
+  function handleGeoClick(lng: number, lat: number, name: string, detail: string) {
+    onAddressSelect(lng, lat, name, detail)
     setIsOpen(false)
     setQuery('')
   }
@@ -297,16 +301,18 @@ export default function MenuSheet({
                 </div>
               </div>
 
-              <CategoryTree value={filter} onChange={handleFilterChange} />
+              {/* Categories yield to search results while typing (Tråkke pattern):
+                  one job at a time — searching means "find this place", not "browse". */}
+              {!q && <CategoryTree value={filter} onChange={handleFilterChange} />}
 
               <div className={styles.scrollArea}>
-                {/* HP location search results — shown when query or category filter active */}
-                {(q || filter.category !== 'all') && (
+                {/* HP location search results — shown only while searching */}
+                {q && (
                   <div>
                     <p className={styles.sectionHeader}>Harry Potter-steder</p>
                     {filteredHP.length === 0 ? (
                       <p className={styles.empty}>
-                        {q ? `Ingen treff for «${query}»` : 'Ingen steder for dette filteret.'}
+                        {`Ingen treff for «${query}»`}
                       </p>
                     ) : (
                       <ul className={styles.list} role="list">
@@ -356,7 +362,7 @@ export default function MenuSheet({
                               onClick={() => {
                                 const lng = parseFloat(r.lon)
                                 const lat = parseFloat(r.lat)
-                                if (!Number.isNaN(lng) && !Number.isNaN(lat)) handleGeoClick(lng, lat)
+                                if (!Number.isNaN(lng) && !Number.isNaN(lat)) handleGeoClick(lng, lat, name, detail)
                               }}
                             >
                               <div className={styles.itemMain}>
@@ -375,8 +381,8 @@ export default function MenuSheet({
                   <p className={styles.searchingText}>Søker…</p>
                 )}
 
-                {/* Favourites — shown when not searching and no category filter */}
-                {!q && filter.category === 'all' && (
+                {/* Favourites — always shown except during active search */}
+                {!q && (
                   <div>
                     <p className={styles.sectionHeader}>Favoritter</p>
                     {favouriteLocations.length === 0 ? (
@@ -414,7 +420,7 @@ export default function MenuSheet({
                   </div>
                 )}
 
-                {hasCustom && (
+                {!q && hasCustom && (
                   <div>
                     <p className={styles.sectionHeader}>Mine steder</p>
                     <ul className={styles.list} role="list">

@@ -65,7 +65,18 @@ Whenever a location is selected (HP location, custom place, geocode result), the
 - Geocode: `mapRef.current?.flyTo(lng, lat)` — already in `handleAddressSelect`
 - Custom place add: `mapRef.current?.flyTo(p.lng, p.lat)` — already in `handleSaveCustomPlace`
 
+## iOS 26 / Safari 26 platform notes
+
+Current target: iOS 26.5.2 / Safari 26.5.2 (as of 2026-07-05).
+
+**Status bar style** — `apple-mobile-web-app-status-bar-style` must be `default`, not `black-translucent`.
+With `black-translucent` iOS 26 places the standalone webview at the top of the screen but sizes it screen-minus-status-bar (inner 793 of 852pt measured on-device), leaving a dead 59pt strip at the bottom that no CSS can paint. With `default` the webview sits below the status bar and reaches the physical bottom edge.
+
+**Body/manifest background** — iOS 26 reserves a bottom zone (home indicator area) and tints it by sampling the page background. `html, body, #root { background }` and `background_color` in the PWA manifest must be set to `#E3DCCD` — the rendered parchment tone of the map (world-mask #EAD8AE at 0.72 opacity over tiles + sepia filter, measured from device screenshot 2026-07-05). If either value drifts from the other, the reserved zone will show as a distinct bar. See `src/main.css` and `vite.config.ts`.
+
 ## Design tokens
 
 Parchment #E8D5AA · Burgundy #5C1010 · Dark ink #1A0A00 · Gold #9E6B1A
 Fonts: Cinzel Decorative (headings) + EB Garamond (body), self-hosted via @fontsource
+
+Note: `html/body` background and PWA manifest `background_color` are `#E3DCCD` — distinct from the Parchment design token (#E8D5AA). See iOS 26 platform notes above for why.
