@@ -7,7 +7,7 @@ import { useFavourites } from './hooks/useFavourites'
 import { useCustomPlaces } from './hooks/useCustomPlaces'
 import { getOfflineFile } from './offline/OfflineMapManager'
 import MapView, { type MapHandle } from './map/MapView'
-import NearbySheet from './components/NearbySheet'
+import MenuSheet from './components/MenuSheet'
 import POIDetailSheet from './components/POIDetailSheet'
 import SettingsSheet from './components/SettingsSheet'
 import MeasureBar from './components/MeasureBar'
@@ -16,6 +16,7 @@ import InstallBanner from './components/InstallBanner'
 import AppHeader from './components/AppHeader'
 import type { HPLocation } from './types/hp-location'
 import type { CustomPlace } from './types/custom-place'
+import type { FilterState } from './ds/filterMeta'
 
 const PMTILES_URL = import.meta.env.VITE_PMTILES_URL as string | undefined
 
@@ -28,7 +29,7 @@ function customPlaceToHPLocation(p: CustomPlace): HPLocation {
     id: p.id,
     name: p.name,
     location_type: 'interpreted',
-    category: 'other_wizarding',
+    categories: [],
     hp_references: [],
     description: p.description,
     source: 'custom',
@@ -58,7 +59,7 @@ export default function App() {
   const [measurePoints, setMeasurePoints] = useState<Array<[number, number]>>([])
   const [geocodeMarker, setGeocodeMarker] = useState<{ lng: number; lat: number } | null>(null)
   const [pendingLongPress, setPendingLongPress] = useState<{ lng: number; lat: number } | null>(null)
-  const [showOnlyFavourites, setShowOnlyFavourites] = useState(false)
+  const [activeFilter, setActiveFilter] = useState<FilterState | null>(null)
   const mapRef = useRef<MapHandle>(null)
   const geocodeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -73,7 +74,6 @@ export default function App() {
   const handleLocationSelect = useCallback((loc: HPLocation) => {
     setSelectedLocation(loc)
     setSelectedIsCustom(false)
-    mapRef.current?.flyTo(loc.lng, loc.lat)
   }, [])
 
   const handleCustomPlaceClick = useCallback((id: string) => {
@@ -81,7 +81,6 @@ export default function App() {
     if (!p) return
     setSelectedLocation(customPlaceToHPLocation(p))
     setSelectedIsCustom(true)
-    mapRef.current?.flyTo(p.lng, p.lat)
   }, [customPlaces])
 
   const handleCloseDetail = useCallback(() => {
@@ -152,6 +151,8 @@ export default function App() {
         onCustomPlaceClick={handleCustomPlaceClick}
         onLongPress={handleLongPress}
         geocodeMarker={geocodeMarker}
+        selectedLocation={selectedLocation}
+        activeFilter={activeFilter}
       />
       {measureMode && (
         <MeasureBar
@@ -160,7 +161,7 @@ export default function App() {
           onClose={handleToggleMeasure}
         />
       )}
-      <NearbySheet
+      <MenuSheet
         position={position}
         active={active}
         error={error}
@@ -171,10 +172,10 @@ export default function App() {
         onToggleMeasure={handleToggleMeasure}
         onAddressSelect={handleAddressSelect}
         favouriteIds={favouriteIds}
-        showOnlyFavourites={showOnlyFavourites}
-        onToggleFavourites={() => setShowOnlyFavourites((v) => !v)}
         customPlaces={customPlaces}
         onCustomPlaceClick={handleCustomPlaceClick}
+        activeFilter={activeFilter}
+        onFilterChange={setActiveFilter}
       />
       <POIDetailSheet
         location={selectedLocation}

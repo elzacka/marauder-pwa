@@ -1,16 +1,18 @@
 export type LocationType = 'filming' | 'canonical' | 'interpreted'
 export type LocationCategory =
-  | 'hogwarts'
-  | 'diagon_alley'
-  | 'hogsmeade'
-  | 'ministry'
-  | 'other_wizarding'
+  | 'atmosphere'
+  | 'attractions'
+  | 'eat_and_drink'
+  | 'inspiration'
+  | 'sleep'
+  | 'locations'
+  | 'transport'
 
 export type HPLocation = {
   id: string
   name: string
   location_type: LocationType
-  category: LocationCategory
+  categories: LocationCategory[]
   hp_references: string[]
   description: string
   source: string

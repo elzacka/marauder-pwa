@@ -59,7 +59,9 @@ export default function POIDetailSheet({
               {!isCustomPlace && (
                 <>
                   <Badge type={location.location_type} />
-                  <Badge category={location.category} />
+                  {location.categories.map((cat) => (
+                    <Badge key={cat} category={cat} />
+                  ))}
                 </>
               )}
               {isCustomPlace && (

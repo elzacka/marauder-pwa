@@ -6,10 +6,12 @@ export type FilterState = {
 export type CategoryMeta = { key: string; label: string; types: string[] }
 
 export const CATEGORY_META: CategoryMeta[] = [
-  { key: 'all',             label: 'Alle',         types: ['filming', 'canonical', 'interpreted'] },
-  { key: 'hogwarts',        label: 'Hogwarts',     types: ['filming', 'canonical', 'interpreted'] },
-  { key: 'diagon_alley',    label: 'Diagon Alley', types: ['filming', 'interpreted'] },
-  { key: 'hogsmeade',       label: 'Hogsmeade',    types: ['filming'] },
-  { key: 'ministry',        label: 'Ministry',     types: ['filming'] },
-  { key: 'other_wizarding', label: 'Annet',        types: ['canonical', 'interpreted'] },
+  { key: 'all',          label: 'All',          types: [] },
+  { key: 'atmosphere',   label: 'Atmosphere',   types: [] },
+  { key: 'attractions',  label: 'Attractions',  types: [] },
+  { key: 'eat_and_drink', label: 'Eat and drink', types: [] },
+  { key: 'inspiration',  label: 'Inspiration',  types: [] },
+  { key: 'locations',    label: 'Locations',    types: ['filming', 'canonical', 'interpreted'] },
+  { key: 'sleep',        label: 'Sleep',        types: [] },
+  { key: 'transport',    label: 'Transport',    types: [] },
 ]

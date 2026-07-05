@@ -7,6 +7,7 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import type { Position } from '../hooks/useGeolocation'
 import type { HPLocation, LocationType, LocationCategory } from '../types/hp-location'
 import type { CustomPlace } from '../types/custom-place'
+import type { FilterState } from '../ds/filterMeta'
 import hpLocationsData from '../data/hp-locations.json'
 import styles from './MapView.module.css'
 
@@ -49,6 +50,20 @@ const HP_PAINT: maplibregl.CircleLayerSpecification['paint'] = {
   'circle-opacity': 0.92,
 }
 
+const SELECTED_HP_PAINT: maplibregl.CircleLayerSpecification['paint'] = {
+  'circle-radius': ['interpolate', ['linear'], ['zoom'], 5, 10, 12, 15],
+  'circle-color': [
+    'match', ['get', 'location_type'],
+    'filming',     '#5C1010',
+    'canonical',   '#9E6B1A',
+    'interpreted', '#4A3B6B',
+    '#5C1010',
+  ],
+  'circle-stroke-width': 3,
+  'circle-stroke-color': '#FFFFFF',
+  'circle-opacity': 1,
+}
+
 function buildStyle(tilesUrl: string): maplibregl.StyleSpecification {
   return {
     version: 8,
@@ -81,9 +96,19 @@ function addOverlays(
     paint: { 'fill-color': '#EAD8AE', 'fill-opacity': 0.72 },
   })
 
-  // HP locations
+  // HP locations — hidden by default, only the selected one is shown via selected-hp-dot
   map.addSource('hp-locations', { type: 'geojson', data: hpLocations })
-  map.addLayer({ id: 'hp-dots', type: 'circle', source: 'hp-locations', paint: HP_PAINT })
+  map.addLayer({
+    id: 'hp-dots',
+    type: 'circle',
+    source: 'hp-locations',
+    paint: HP_PAINT,
+    layout: { visibility: 'none' },
+  })
+
+  // Selected HP location (single marker)
+  map.addSource('selected-hp-location', { type: 'geojson', data: EMPTY_FC })
+  map.addLayer({ id: 'selected-hp-dot', type: 'circle', source: 'selected-hp-location', paint: SELECTED_HP_PAINT })
 
   map.on('click', 'hp-dots', (e) => {
     if (!e.features?.length || !onLocationSelectRef.current) return
@@ -98,7 +123,7 @@ function addOverlays(
       id: props.id as string,
       name: props.name as string,
       location_type: props.location_type as LocationType,
-      category: props.category as LocationCategory,
+      categories: (typeof props.categories === 'string' ? JSON.parse(props.categories) : props.categories) as LocationCategory[],
       hp_references: refs,
       description: props.description as string,
       source: props.source as string,
@@ -178,6 +203,8 @@ type Props = {
   onCustomPlaceClick?: (id: string) => void
   onLongPress?: (lng: number, lat: number) => void
   geocodeMarker?: { lng: number; lat: number } | null
+  selectedLocation?: HPLocation | null
+  activeFilter?: FilterState | null
 }
 
 const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
@@ -185,7 +212,7 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
     position, offlineFile, pmtilesUrl, onLocationSelect, showZoomControls = true,
     mapMode = 'browse', measurePoints = [], onMeasurePoint,
     customPlaces = [], onCustomPlaceClick,
-    onLongPress, geocodeMarker,
+    onLongPress, geocodeMarker, selectedLocation = null, activeFilter = null,
   } = props
 
   const containerRef = useRef<HTMLDivElement>(null)
@@ -275,7 +302,7 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
       map.on('click', (e) => {
         if (mapModeRef.current !== 'measure') return
         const features = map.queryRenderedFeatures(e.point, {
-          layers: ['hp-dots', 'custom-place-dots'],
+          layers: ['hp-dots', 'custom-place-dots', 'selected-hp-dot'],
         })
         if (features.length > 0) return
         onMeasurePointRef.current?.(e.lngLat.lng, e.lngLat.lat)
@@ -356,6 +383,61 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
         .addTo(map)
     }
   }, [geocodeMarker])
+
+  // Selected HP location marker
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+    const src = map.getSource('selected-hp-location') as maplibregl.GeoJSONSource | undefined
+    if (!src) return
+    if (!selectedLocation) {
+      src.setData(EMPTY_FC)
+      return
+    }
+    src.setData({
+      type: 'FeatureCollection',
+      features: [{
+        type: 'Feature',
+        properties: {
+          id: selectedLocation.id,
+          name: selectedLocation.name,
+          location_type: selectedLocation.location_type,
+          categories: JSON.stringify(selectedLocation.categories),
+        },
+        geometry: { type: 'Point', coordinates: [selectedLocation.lng, selectedLocation.lat] },
+      }],
+    })
+  }, [selectedLocation])
+
+  // Active category filter → hp-dots visibility and filter expression
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+    if (!map.getLayer('hp-dots')) return
+
+    if (!activeFilter) {
+      map.setLayoutProperty('hp-dots', 'visibility', 'none')
+      return
+    }
+
+    map.setLayoutProperty('hp-dots', 'visibility', 'visible')
+
+    if (activeFilter.category === 'all') {
+      map.setFilter('hp-dots', null)
+      return
+    }
+
+    const catExpr = ['in', activeFilter.category, ['get', 'categories']] as unknown as maplibregl.FilterSpecification
+
+    if (activeFilter.locationType !== 'all') {
+      map.setFilter('hp-dots', ['all',
+        catExpr,
+        ['==', ['get', 'location_type'], activeFilter.locationType],
+      ] as unknown as maplibregl.FilterSpecification)
+    } else {
+      map.setFilter('hp-dots', catExpr)
+    }
+  }, [activeFilter])
 
   // Offline PMTiles file registration
   useEffect(() => {

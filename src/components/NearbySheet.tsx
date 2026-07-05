@@ -39,7 +39,7 @@ function featureToLocation(f: FeatureCollection<Point>['features'][number]): Loc
     id: p.id as string,
     name: p.name as string,
     location_type: p.location_type as LocationType,
-    category: p.category as LocationCategory,
+    categories: p.categories as LocationCategory[],
     hp_references: p.hp_references as string[],
     description: p.description as string,
     source: p.source as string,
@@ -80,8 +80,8 @@ export default function NearbySheet({
     ALL_LOCATIONS
       .filter((loc) => {
         if (showOnlyFavourites && !favouriteIds.has(loc.id)) return false
-        if (filter.category !== 'all' && loc.category !== filter.category) return false
-        if (filter.locationType !== 'all' && loc.location_type !== filter.locationType) return false
+        if (filter.category !== 'all' && !loc.categories.includes(filter.category as LocationCategory)) return false
+        if (filter.category === 'locations' && filter.locationType !== 'all' && loc.location_type !== filter.locationType) return false
         if (q && !normalize(loc.name).includes(q) && !normalize(loc.description).includes(q)) return false
         return true
       })
@@ -303,8 +303,9 @@ export default function NearbySheet({
                       {loc.name}
                     </span>
                     <div className={styles.itemBadges}>
-                      <Badge type={loc.location_type} size="sm" />
-                      <Badge category={loc.category} size="sm" />
+                      {loc.categories.slice(0, 2).map((cat) => (
+                        <Badge key={cat} category={cat} size="sm" />
+                      ))}
                     </div>
                   </div>
                   {loc.km !== null && (

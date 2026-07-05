@@ -1,35 +1,33 @@
 import type { CSSProperties } from 'react'
 
 const VARIANT_STYLES: Record<string, { bg: string; color: string }> = {
-  filming:         { bg: '#3E1F6B', color: '#F5ECD7' },
-  canonical:       { bg: '#5C1010', color: '#F5ECD7' },
-  interpreted:     { bg: '#9E6B1A', color: '#F5ECD7' },
-  practical:       { bg: '#2E6B3E', color: '#F5ECD7' },
-  hogwarts:        { bg: '#5C1010', color: '#F5ECD7' },
-  diagon_alley:    { bg: '#3E1F6B', color: '#F5ECD7' },
-  hogsmeade:       { bg: '#2A5070', color: '#F5ECD7' },
-  ministry:        { bg: '#1A4A1A', color: '#F5ECD7' },
-  other_wizarding: { bg: '#6B3E1A', color: '#F5ECD7' },
-  food:            { bg: '#9E6B1A', color: '#F5ECD7' },
-  accommodation:   { bg: '#2E6B3E', color: '#F5ECD7' },
-  default:         { bg: '#2E1505', color: '#F5ECD7' },
+  filming:       { bg: '#3E1F6B', color: '#F5ECD7' },
+  canonical:     { bg: '#5C1010', color: '#F5ECD7' },
+  interpreted:   { bg: '#9E6B1A', color: '#F5ECD7' },
+  atmosphere:    { bg: '#2A5070', color: '#F5ECD7' },
+  attractions:   { bg: '#5C1010', color: '#F5ECD7' },
+  eat_and_drink: { bg: '#6B3E1A', color: '#F5ECD7' },
+  inspiration:   { bg: '#4A3B6B', color: '#F5ECD7' },
+  sleep:         { bg: '#2E6B3E', color: '#F5ECD7' },
+  locations:     { bg: '#3E1F6B', color: '#F5ECD7' },
+  transport:     { bg: '#1A4A1A', color: '#F5ECD7' },
+  default:       { bg: '#2E1505', color: '#F5ECD7' },
 }
 
 const LOCATION_TYPE_LABELS: Record<string, string> = {
   filming:     'Filming',
   canonical:   'Canonical',
   interpreted: 'Interpreted',
-  practical:   'Practical',
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  hogwarts:        'Hogwarts',
-  diagon_alley:    'Diagon Alley',
-  hogsmeade:       'Hogsmeade',
-  ministry:        'Ministry',
-  other_wizarding: 'Wizarding',
-  food:            'Food',
-  accommodation:   'Accommodation',
+  atmosphere:    'Atmosphere',
+  attractions:   'Attractions',
+  eat_and_drink: 'Eat & drink',
+  inspiration:   'Inspiration',
+  sleep:         'Sleep',
+  locations:     'Locations',
+  transport:     'Transport',
 }
 
 type BadgeSize = 'sm' | 'md' | 'lg'

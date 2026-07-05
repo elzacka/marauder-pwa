@@ -19,10 +19,10 @@ html, body, #root {
   background: var(--surface-base);
 }
 
-/* Position zoom controls above the NearbySheet peek handle */
+/* Position zoom controls above the FAB (56px tall + 24px bottom offset + 16px gap = 96px) */
 .maplibregl-ctrl-bottom-right {
-  bottom: calc(var(--bottom-panel-peek, 128px) + env(safe-area-inset-bottom, 0px) + 16px) !important;
-  right: 16px !important;
+  bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+  right: 24px !important;
 }
 
 /* Subtle parchment warmth on map canvas */
