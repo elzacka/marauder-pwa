@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "fetch-data": "node scripts/fetch-hp-data.mjs"
   },
   "dependencies": {
     "@fontsource/cinzel-decorative": "^5.2.8",

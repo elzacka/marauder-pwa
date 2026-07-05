@@ -8,10 +8,7 @@ import type { Position } from '../hooks/useGeolocation'
 import type { HPLocation, LocationType, LocationCategory } from '../types/hp-location'
 import type { CustomPlace } from '../types/custom-place'
 import type { FilterState } from '../ds/filterMeta'
-import hpLocationsData from '../data/hp-locations.json'
 import styles from './MapView.module.css'
-
-const hpLocations = hpLocationsData as unknown as FeatureCollection
 
 const VIEW_BOUNDS: maplibregl.LngLatBoundsLike = [[-13.0, 48.0], [3.5, 62.0]]
 
@@ -97,7 +94,7 @@ function addOverlays(
   })
 
   // HP locations — hidden by default, only the selected one is shown via selected-hp-dot
-  map.addSource('hp-locations', { type: 'geojson', data: hpLocations })
+  map.addSource('hp-locations', { type: 'geojson', data: EMPTY_FC })
   map.addLayer({
     id: 'hp-dots',
     type: 'circle',
@@ -205,6 +202,7 @@ type Props = {
   geocodeMarker?: { lng: number; lat: number } | null
   selectedLocation?: HPLocation | null
   activeFilter?: FilterState | null
+  hpLocations?: FeatureCollection | null
 }
 
 const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
@@ -213,6 +211,7 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
     mapMode = 'browse', measurePoints = [], onMeasurePoint,
     customPlaces = [], onCustomPlaceClick,
     onLongPress, geocodeMarker, selectedLocation = null, activeFilter = null,
+    hpLocations = null,
   } = props
 
   const containerRef = useRef<HTMLDivElement>(null)
@@ -438,6 +437,14 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
       map.setFilter('hp-dots', catExpr)
     }
   }, [activeFilter])
+
+  // HP locations data — set when the fetched FeatureCollection arrives
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !hpLocations) return
+    const src = map.getSource('hp-locations') as maplibregl.GeoJSONSource | undefined
+    src?.setData(hpLocations)
+  }, [hpLocations])
 
   // Offline PMTiles file registration
   useEffect(() => {

@@ -1,0 +1,793 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -3.1917,
+          55.9486
+        ]
+      },
+      "properties": {
+        "id": "elephant-house",
+        "name": "The Elephant House",
+        "location_type": "canonical",
+        "categories": [
+          "inspiration",
+          "eat_and_drink"
+        ],
+        "hp_references": [
+          "HP1",
+          "HP2",
+          "HP3"
+        ],
+        "description": "Kaffebaren der J.K. Rowling satt og skrev de første Harry Potter-bøkene.",
+        "source": "manual",
+        "external_url": "https://www.elephanthouse.biz"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -3.1927,
+          55.9477
+        ]
+      },
+      "properties": {
+        "id": "victoria-street",
+        "name": "Victoria Street",
+        "location_type": "interpreted",
+        "categories": [
+          "inspiration"
+        ],
+        "hp_references": [
+          "HP1"
+        ],
+        "description": "Den buede gaten med fargerike fasader som sies å ha inspirert Diagon Alley.",
+        "source": "manual",
+        "external_url": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -3.1924,
+          55.9463
+        ]
+      },
+      "properties": {
+        "id": "greyfriars-kirkyard",
+        "name": "Greyfriars Kirkyard",
+        "location_type": "interpreted",
+        "categories": [
+          "inspiration",
+          "atmosphere"
+        ],
+        "hp_references": [
+          "HP1"
+        ],
+        "description": "Kirkegården der gravsteinen til Thomas Riddle antas å ha inspirert Tom Riddle/Voldemort.",
+        "source": "manual",
+        "external_url": "https://www.greyfriarskirk.com"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -3.1919,
+          55.9455
+        ]
+      },
+      "properties": {
+        "id": "george-heriots-school",
+        "name": "George Heriot's School",
+        "location_type": "interpreted",
+        "categories": [
+          "inspiration",
+          "atmosphere"
+        ],
+        "hp_references": [
+          "HP1"
+        ],
+        "description": "Det imposante renessanseslottet som sies å ha inspirert Rowling til Hogwarts-bygningen.",
+        "source": "manual",
+        "external_url": "https://www.george-heriots.com"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -3.1882,
+          55.952
+        ]
+      },
+      "properties": {
+        "id": "balmoral-hotel",
+        "name": "The Balmoral Hotel",
+        "location_type": "canonical",
+        "categories": [
+          "inspiration",
+          "sleep"
+        ],
+        "hp_references": [
+          "HP7"
+        ],
+        "description": "Her fullførte J.K. Rowling Dødstalismanene i 2007. Rommet er nå kjent som Harry Potter-suiten.",
+        "source": "manual",
+        "external_url": "https://www.roccofortehotels.com/hotels-and-resorts/the-balmoral-hotel"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -5.4312,
+          56.8726
+        ]
+      },
+      "properties": {
+        "id": "glenfinnan-viaduct",
+        "name": "Glenfinnan-viadukten",
+        "location_type": "filming",
+        "categories": [
+          "locations",
+          "transport",
+          "atmosphere"
+        ],
+        "hp_references": [
+          "HP2",
+          "HP3",
+          "HP4",
+          "HP5",
+          "HP6"
+        ],
+        "description": "Den ikoniske jernbanebroen over Loch Shiel som Hogwarts Express krysser i filmene. Loch Shiel ble også brukt som Hogwarts-sjøen.",
+        "source": "manual",
+        "external_url": "https://www.nts.org.uk/visit/places/glenfinnan-monument"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -5.1063,
+          56.8185
+        ]
+      },
+      "properties": {
+        "id": "jacobite-steam-train",
+        "name": "The Jacobite – Hogwarts Express-ruten",
+        "location_type": "filming",
+        "categories": [
+          "transport",
+          "attractions"
+        ],
+        "hp_references": [
+          "HP2",
+          "HP3",
+          "HP4",
+          "HP5",
+          "HP6"
+        ],
+        "description": "The Jacobite er det nærmeste man kommer å ri Hogwarts Express. Damptog kjører daglig Fort William–Mallaig over Glenfinnan-viadukten der togscenene ble filmet.",
+        "source": "manual",
+        "external_url": "https://www.westcoastrailways.co.uk/jacobite"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -5.1012,
+          56.676
+        ]
+      },
+      "properties": {
+        "id": "glencoe",
+        "name": "Glencoe",
+        "location_type": "filming",
+        "categories": [
+          "locations",
+          "atmosphere"
+        ],
+        "hp_references": [
+          "HP3",
+          "HP4"
+        ],
+        "description": "Dramatiske fjell og landskap brukt som eksteriører i Fangen fra Azkaban og Ildbegeret.",
+        "source": "manual",
+        "external_url": "https://www.nts.org.uk/visit/places/glencoe"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -5.035555555,
+          56.770555555
+        ]
+      },
+      "properties": {
+        "id": "glen-nevis",
+        "name": "Glen Nevis og Steall Falls",
+        "location_type": "filming",
+        "categories": [
+          "locations",
+          "atmosphere"
+        ],
+        "hp_references": [
+          "HP4"
+        ],
+        "description": "Dalen ved Storbritannias høyeste fjell ble brukt til Triwizard-labyrinten, og Steall Falls (Steall-fossen) ble filmsted for den andre oppgaven i Ildbegeret.",
+        "source": "wikidata",
+        "external_url": "https://www.walkhighlands.co.uk/lochaber/glen-nevis.shtml",
+        "wikidata_id": "Q3108687"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.725,
+          54.3996
+        ]
+      },
+      "properties": {
+        "id": "goathland-station",
+        "name": "Goathland Station",
+        "location_type": "filming",
+        "categories": [
+          "locations",
+          "transport"
+        ],
+        "hp_references": [
+          "HP1"
+        ],
+        "description": "Stasjonen på North Yorkshire Moors Railway som ble Hogsmeade stasjon i Filosofens stein.",
+        "source": "manual",
+        "external_url": "https://www.nymr.co.uk"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.1572,
+          54.0706
+        ]
+      },
+      "properties": {
+        "id": "malham-cove",
+        "name": "Malham Cove",
+        "location_type": "filming",
+        "categories": [
+          "locations",
+          "atmosphere"
+        ],
+        "hp_references": [
+          "HP7"
+        ],
+        "description": "Det mektige kalksteinsamfieteret i North Yorkshire ble Godric Grevende og campinglandskapet der Harry og Hermione søker Horkrukser i Dødstalismanene.",
+        "source": "manual",
+        "external_url": "https://www.nationaltrust.org.uk/visit/yorkshire/malham-cove"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.706078,
+          55.415783
+        ]
+      },
+      "properties": {
+        "id": "alnwick-castle",
+        "name": "Alnwick Castle",
+        "location_type": "filming",
+        "categories": [
+          "locations",
+          "attractions"
+        ],
+        "hp_references": [
+          "HP1",
+          "HP2"
+        ],
+        "description": "Brukt som Hogwarts-eksteriør og til Madam Hoochs flygetime med kosterne i HP1 og HP2.",
+        "source": "wikidata",
+        "external_url": "https://www.alnwickcastle.com",
+        "wikidata_id": "Q1320427"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.24654,
+          51.8673
+        ]
+      },
+      "properties": {
+        "id": "gloucester-cathedral",
+        "name": "Gloucester Cathedral",
+        "location_type": "filming",
+        "categories": [
+          "locations",
+          "atmosphere"
+        ],
+        "hp_references": [
+          "HP1",
+          "HP2",
+          "HP6"
+        ],
+        "description": "Gloucester Cathedrals middelaldersgang ble Hogwarts-korridorene der trollmannsstudentene vandrer i HP1, HP2 og HP6.",
+        "source": "wikidata",
+        "external_url": "https://www.gloucestercathedral.org.uk",
+        "wikidata_id": "Q262500"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.121,
+          51.4158
+        ]
+      },
+      "properties": {
+        "id": "lacock-abbey",
+        "name": "Lacock Abbey",
+        "location_type": "filming",
+        "categories": [
+          "locations"
+        ],
+        "hp_references": [
+          "HP1",
+          "HP2",
+          "HP6",
+          "HP7"
+        ],
+        "description": "Lacock Abbey i Wiltshire ble brukt i fire filmer – Snapes klasserom, Quirrells klasserom, korridor-scener og eksteriører til Godric Grevende.",
+        "source": "wikidata",
+        "external_url": "https://www.nationaltrust.org.uk/visit/wiltshire/lacock-abbey-village-and-clutterbuck",
+        "wikidata_id": "Q1148460"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.1218,
+          51.4168
+        ]
+      },
+      "properties": {
+        "id": "lacock-village",
+        "name": "Lacock Village",
+        "location_type": "filming",
+        "categories": [
+          "locations",
+          "atmosphere"
+        ],
+        "hp_references": [
+          "HP1",
+          "HP7"
+        ],
+        "description": "Den middelalderske landsbyen Lacock ble Godric Grevende – gatene der Voldemort angrep Potters og huset der Harry vokste opp finnes her.",
+        "source": "manual",
+        "external_url": "https://www.nationaltrust.org.uk/visit/wiltshire/lacock-abbey-village-and-clutterbuck"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.3052,
+          53.1628
+        ]
+      },
+      "properties": {
+        "id": "hardwick-hall",
+        "name": "Hardwick Hall",
+        "location_type": "filming",
+        "categories": [
+          "locations"
+        ],
+        "hp_references": [
+          "HP7"
+        ],
+        "description": "Hardwick Halls majestetiske elisabetanske fasade ble Malfoy Manor i Dødstalismanene – stedet der Harry, Ron og Hermione holdes fanget.",
+        "source": "manual",
+        "external_url": "https://www.nationaltrust.org.uk/visit/derbyshire/hardwick-hall"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.7971,
+          52.1052
+        ]
+      },
+      "properties": {
+        "id": "lavenham",
+        "name": "Lavenham",
+        "location_type": "filming",
+        "categories": [
+          "locations",
+          "atmosphere"
+        ],
+        "hp_references": [
+          "HP7"
+        ],
+        "description": "Den vakre trehus-landsbyen Lavenham i Suffolk ble brukt som Godric Grevende i Dødstalismanene del 1.",
+        "source": "manual",
+        "external_url": "https://www.discoversuffolk.org.uk/places/lavenham/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.25585,
+          51.7502
+        ]
+      },
+      "properties": {
+        "id": "christ-church-oxford",
+        "name": "Christ Church, Oxford",
+        "location_type": "filming",
+        "categories": [
+          "locations",
+          "attractions"
+        ],
+        "hp_references": [
+          "HP1",
+          "HP2"
+        ],
+        "description": "Trappegangen i Christ Church ble Hogwarts-trappen der Minerva McGonagall tar imot de nye elevene i HP1. Storsalen inspirerte Hogwarts Storsalen.",
+        "source": "wikidata",
+        "external_url": "https://www.chch.ox.ac.uk",
+        "wikidata_id": "Q745967"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.254,
+          51.7542
+        ]
+      },
+      "properties": {
+        "id": "bodleian-library",
+        "name": "Bodleian Library, Oxford",
+        "location_type": "filming",
+        "categories": [
+          "locations",
+          "attractions"
+        ],
+        "hp_references": [
+          "HP1",
+          "HP2"
+        ],
+        "description": "Duke Humfrey's Library ble Hogwarts-biblioteket, og Divinity School ble sykehusfløyen der Harry våkner etter HP1s finalekamp.",
+        "source": "wikidata",
+        "external_url": "https://www.bodleian.ox.ac.uk",
+        "wikidata_id": "Q82133"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.2487,
+          51.7534
+        ]
+      },
+      "properties": {
+        "id": "new-college-oxford",
+        "name": "New College, Oxford",
+        "location_type": "filming",
+        "categories": [
+          "locations"
+        ],
+        "hp_references": [
+          "HP4"
+        ],
+        "description": "New Colleges middelalderklostergang ble Hogwarts-gårdsplassen der Draco Malfoy og vennene hans skuler i Ildbegeret.",
+        "source": "wikidata",
+        "external_url": "https://www.new.ox.ac.uk",
+        "wikidata_id": "Q1179523"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.576214961,
+          54.77347539
+        ]
+      },
+      "properties": {
+        "id": "durham-cathedral",
+        "name": "Durham Cathedral",
+        "location_type": "filming",
+        "categories": [
+          "locations",
+          "atmosphere"
+        ],
+        "hp_references": [
+          "HP1",
+          "HP2"
+        ],
+        "description": "Den normanniske katedralen i Durham ble Hogwarts-korridorer og klostrene der Nevilles padde ble forvandlet til en katt i HP1.",
+        "source": "wikidata",
+        "external_url": "https://www.durhamcathedral.co.uk",
+        "wikidata_id": "Q746207"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.4191,
+          51.6909
+        ]
+      },
+      "properties": {
+        "id": "wb-studio-tour",
+        "name": "Warner Bros. Studio Tour London",
+        "location_type": "filming",
+        "categories": [
+          "locations",
+          "attractions"
+        ],
+        "hp_references": [
+          "HP1",
+          "HP2",
+          "HP3",
+          "HP4",
+          "HP5",
+          "HP6",
+          "HP7",
+          "HP8"
+        ],
+        "description": "The Making of Harry Potter – originalrekvisitter, kostymer og settet fra alle filmene.",
+        "source": "manual",
+        "external_url": "https://www.wbstudiotour.co.uk"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.1236,
+          51.5322
+        ]
+      },
+      "properties": {
+        "id": "kings-cross",
+        "name": "King's Cross – Plattform 9¾",
+        "location_type": "canonical",
+        "categories": [
+          "locations",
+          "attractions",
+          "transport"
+        ],
+        "hp_references": [
+          "HP1",
+          "HP2",
+          "HP3",
+          "HP4",
+          "HP5",
+          "HP6",
+          "HP7"
+        ],
+        "description": "Den magiske plattformen der Hogwarts Express avgår hvert år 1. september. Trolleyvognen i veggen er idag et turistikon.",
+        "source": "manual",
+        "external_url": "https://www.harrypotter.com/visit/platform-nine-three-quarters"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.0835,
+          51.5127
+        ]
+      },
+      "properties": {
+        "id": "leadenhall-market",
+        "name": "Leadenhall Market",
+        "location_type": "filming",
+        "categories": [
+          "locations"
+        ],
+        "hp_references": [
+          "HP1"
+        ],
+        "description": "Den overdekte markedshallen ble Diagon Alley-inngangen og The Leaky Cauldron-inngangen i Filosofens stein.",
+        "source": "wikidata",
+        "external_url": null,
+        "wikidata_id": "Q961148"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.1183,
+          51.5131
+        ]
+      },
+      "properties": {
+        "id": "australia-house",
+        "name": "Australia House",
+        "location_type": "filming",
+        "categories": [
+          "locations"
+        ],
+        "hp_references": [
+          "HP1",
+          "HP2"
+        ],
+        "description": "Interiøret i Australia House ble brukt som filmsettet til Gringotts-banken.",
+        "source": "manual",
+        "external_url": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.1073,
+          51.5319
+        ]
+      },
+      "properties": {
+        "id": "claremont-square",
+        "name": "Claremont Square",
+        "location_type": "filming",
+        "categories": [
+          "locations"
+        ],
+        "hp_references": [
+          "HP5",
+          "HP7"
+        ],
+        "description": "Torget ble filmet som Grimmauldsplass 12, hjemmet til familien Black og Ordens høkvarter.",
+        "source": "manual",
+        "external_url": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.098,
+          51.5094
+        ]
+      },
+      "properties": {
+        "id": "millennium-bridge",
+        "name": "Millennium Bridge",
+        "location_type": "filming",
+        "categories": [
+          "locations"
+        ],
+        "hp_references": [
+          "HP6"
+        ],
+        "description": "Millennium Bridge ble dramatisk revet ned av Voldemorts dødisere i åpningsscenen fra Halvblodsprinsen.",
+        "source": "manual",
+        "external_url": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.155833333,
+          51.535555555
+        ]
+      },
+      "properties": {
+        "id": "london-zoo",
+        "name": "Reptilhuset, London Zoo",
+        "location_type": "filming",
+        "categories": [
+          "locations",
+          "attractions"
+        ],
+        "hp_references": [
+          "HP1"
+        ],
+        "description": "Reptilhuset i London Zoo er der Harry Potter for første gang snakket med en boa-slange og uforvarende sendte Dudley inn i beholderen i Filosofens stein.",
+        "source": "wikidata",
+        "external_url": "https://www.zsl.org/london-zoo",
+        "wikidata_id": "Q270263"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.124,
+          51.5112
+        ]
+      },
+      "properties": {
+        "id": "goodwins-court",
+        "name": "Goodwin's Court",
+        "location_type": "interpreted",
+        "categories": [
+          "inspiration",
+          "atmosphere"
+        ],
+        "hp_references": [],
+        "description": "Den smaleste gaten i Covent Garden, bygget på 1600-tallet, er en av inspirasjonskildene til Diagon Alley med sine buede vinduer og gammeldagse lykter.",
+        "source": "manual",
+        "external_url": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -5.0942,
+          51.6277
+        ]
+      },
+      "properties": {
+        "id": "freshwater-west",
+        "name": "Freshwater West, Pembrokeshire",
+        "location_type": "filming",
+        "categories": [
+          "locations",
+          "atmosphere"
+        ],
+        "hp_references": [
+          "HP7"
+        ],
+        "description": "Den avsidesliggende stranden i Wales ble Shell Cottage og stedet der Dobby ble gravlagt i Dødstalismanene. Fans bringer fremdeles tributter til Dobbys lille grav.",
+        "source": "manual",
+        "external_url": "https://www.pembrokeshirecoast.wales/things-to-do/beaches/freshwater-west/"
+      }
+    }
+  ]
+}
