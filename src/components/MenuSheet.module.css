@@ -601,6 +601,95 @@
 
 .btnPrimary:hover { background: var(--color-burgundy-dark); }
 
+/* List row with tappable geo chips below the main button (favourites, tag view).
+   Chips are separate buttons — never nest buttons inside the row button. */
+.itemBlock {
+  padding: 2px 16px 10px;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.itemBlock:last-child {
+  border-bottom: none;
+}
+
+.itemMainBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: var(--touch-min);
+  padding: 4px 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.geoChips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding-bottom: 2px;
+}
+
+.geoChip {
+  min-height: 30px;
+  padding: 3px 12px;
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-full);
+  background: none;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out);
+}
+
+.geoChip:hover {
+  background: var(--bg-hover);
+}
+
+.geoChipActive {
+  background: var(--color-burgundy);
+  border-color: var(--color-burgundy);
+  color: var(--color-cream);
+  font-weight: var(--weight-semibold);
+}
+
+/* Tag view header ("Merket med Edinburgh" + clear) */
+.tagHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 8px 4px 16px;
+}
+
+.tagTitle {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.tagClear {
+  width: var(--touch-min);
+  height: var(--touch-min);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
 /* Delete button in the offline area list */
 .areaDeleteBtn {
   width: var(--touch-min);

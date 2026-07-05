@@ -25,7 +25,9 @@
         ],
         "description": "Kaffebaren der J.K. Rowling satt og skrev de første Harry Potter-bøkene.",
         "source": "manual",
-        "external_url": "https://www.elephanthouse.biz"
+        "external_url": "https://www.elephanthouse.biz",
+        "country": "Scotland",
+        "city": "Edinburgh"
       }
     },
     {
@@ -49,7 +51,9 @@
         ],
         "description": "Den buede gaten med fargerike fasader som sies å ha inspirert Diagon Alley.",
         "source": "manual",
-        "external_url": null
+        "external_url": null,
+        "country": "Scotland",
+        "city": "Edinburgh"
       }
     },
     {
@@ -74,7 +78,9 @@
         ],
         "description": "Kirkegården der gravsteinen til Thomas Riddle antas å ha inspirert Tom Riddle/Voldemort.",
         "source": "manual",
-        "external_url": "https://www.greyfriarskirk.com"
+        "external_url": "https://www.greyfriarskirk.com",
+        "country": "Scotland",
+        "city": "Edinburgh"
       }
     },
     {
@@ -99,7 +105,9 @@
         ],
         "description": "Det imposante renessanseslottet som sies å ha inspirert Rowling til Hogwarts-bygningen.",
         "source": "manual",
-        "external_url": "https://www.george-heriots.com"
+        "external_url": "https://www.george-heriots.com",
+        "country": "Scotland",
+        "city": "Edinburgh"
       }
     },
     {
@@ -124,7 +132,9 @@
         ],
         "description": "Her fullførte J.K. Rowling Dødstalismanene i 2007. Rommet er nå kjent som Harry Potter-suiten.",
         "source": "manual",
-        "external_url": "https://www.roccofortehotels.com/hotels-and-resorts/the-balmoral-hotel"
+        "external_url": "https://www.roccofortehotels.com/hotels-and-resorts/the-balmoral-hotel",
+        "country": "Scotland",
+        "city": "Edinburgh"
       }
     },
     {
@@ -154,7 +164,9 @@
         ],
         "description": "Den ikoniske jernbanebroen over Loch Shiel som Hogwarts Express krysser i filmene. Loch Shiel ble også brukt som Hogwarts-sjøen.",
         "source": "manual",
-        "external_url": "https://www.nts.org.uk/visit/places/glenfinnan-monument"
+        "external_url": "https://www.nts.org.uk/visit/places/glenfinnan-monument",
+        "country": "Scotland",
+        "city": "Glenfinnan"
       }
     },
     {
@@ -183,7 +195,9 @@
         ],
         "description": "The Jacobite er det nærmeste man kommer å ri Hogwarts Express. Damptog kjører daglig Fort William–Mallaig over Glenfinnan-viadukten der togscenene ble filmet.",
         "source": "manual",
-        "external_url": "https://www.westcoastrailways.co.uk/jacobite"
+        "external_url": "https://www.westcoastrailways.co.uk/jacobite",
+        "country": "Scotland",
+        "city": "Fort William"
       }
     },
     {
@@ -209,7 +223,9 @@
         ],
         "description": "Dramatiske fjell og landskap brukt som eksteriører i Fangen fra Azkaban og Ildbegeret.",
         "source": "manual",
-        "external_url": "https://www.nts.org.uk/visit/places/glencoe"
+        "external_url": "https://www.nts.org.uk/visit/places/glencoe",
+        "country": "Scotland",
+        "city": "Glencoe"
       }
     },
     {
@@ -235,7 +251,9 @@
         "description": "Dalen ved Storbritannias høyeste fjell ble brukt til Triwizard-labyrinten, og Steall Falls (Steall-fossen) ble filmsted for den andre oppgaven i Ildbegeret.",
         "source": "wikidata",
         "external_url": "https://www.walkhighlands.co.uk/lochaber/glen-nevis.shtml",
-        "wikidata_id": "Q3108687"
+        "wikidata_id": "Q3108687",
+        "country": "Scotland",
+        "city": "Fort William"
       }
     },
     {
@@ -260,7 +278,9 @@
         ],
         "description": "Stasjonen på North Yorkshire Moors Railway som ble Hogsmeade stasjon i Filosofens stein.",
         "source": "manual",
-        "external_url": "https://www.nymr.co.uk"
+        "external_url": "https://www.nymr.co.uk",
+        "country": "England",
+        "city": "Goathland"
       }
     },
     {
@@ -285,7 +305,9 @@
         ],
         "description": "Det mektige kalksteinsamfieteret i North Yorkshire ble Godric Grevende og campinglandskapet der Harry og Hermione søker Horkrukser i Dødstalismanene.",
         "source": "manual",
-        "external_url": "https://www.nationaltrust.org.uk/visit/yorkshire/malham-cove"
+        "external_url": "https://www.nationaltrust.org.uk/visit/yorkshire/malham-cove",
+        "country": "England",
+        "city": "Malham"
       }
     },
     {
@@ -312,7 +334,9 @@
         "description": "Brukt som Hogwarts-eksteriør og til Madam Hoochs flygetime med kosterne i HP1 og HP2.",
         "source": "wikidata",
         "external_url": "https://www.alnwickcastle.com",
-        "wikidata_id": "Q1320427"
+        "wikidata_id": "Q1320427",
+        "country": "England",
+        "city": "Alnwick"
       }
     },
     {
@@ -340,7 +364,9 @@
         "description": "Gloucester Cathedrals middelaldersgang ble Hogwarts-korridorene der trollmannsstudentene vandrer i HP1, HP2 og HP6.",
         "source": "wikidata",
         "external_url": "https://www.gloucestercathedral.org.uk",
-        "wikidata_id": "Q262500"
+        "wikidata_id": "Q262500",
+        "country": "England",
+        "city": "Gloucester"
       }
     },
     {
@@ -368,7 +394,9 @@
         "description": "Lacock Abbey i Wiltshire ble brukt i fire filmer – Snapes klasserom, Quirrells klasserom, korridor-scener og eksteriører til Godric Grevende.",
         "source": "wikidata",
         "external_url": "https://www.nationaltrust.org.uk/visit/wiltshire/lacock-abbey-village-and-clutterbuck",
-        "wikidata_id": "Q1148460"
+        "wikidata_id": "Q1148460",
+        "country": "England",
+        "city": "Lacock"
       }
     },
     {
@@ -394,7 +422,9 @@
         ],
         "description": "Den middelalderske landsbyen Lacock ble Godric Grevende – gatene der Voldemort angrep Potters og huset der Harry vokste opp finnes her.",
         "source": "manual",
-        "external_url": "https://www.nationaltrust.org.uk/visit/wiltshire/lacock-abbey-village-and-clutterbuck"
+        "external_url": "https://www.nationaltrust.org.uk/visit/wiltshire/lacock-abbey-village-and-clutterbuck",
+        "country": "England",
+        "city": "Lacock"
       }
     },
     {
@@ -418,7 +448,9 @@
         ],
         "description": "Hardwick Halls majestetiske elisabetanske fasade ble Malfoy Manor i Dødstalismanene – stedet der Harry, Ron og Hermione holdes fanget.",
         "source": "manual",
-        "external_url": "https://www.nationaltrust.org.uk/visit/derbyshire/hardwick-hall"
+        "external_url": "https://www.nationaltrust.org.uk/visit/derbyshire/hardwick-hall",
+        "country": "England",
+        "city": "Chesterfield"
       }
     },
     {
@@ -443,7 +475,9 @@
         ],
         "description": "Den vakre trehus-landsbyen Lavenham i Suffolk ble brukt som Godric Grevende i Dødstalismanene del 1.",
         "source": "manual",
-        "external_url": "https://www.discoversuffolk.org.uk/places/lavenham/"
+        "external_url": "https://www.discoversuffolk.org.uk/places/lavenham/",
+        "country": "England",
+        "city": "Lavenham"
       }
     },
     {
@@ -470,7 +504,9 @@
         "description": "Trappegangen i Christ Church ble Hogwarts-trappen der Minerva McGonagall tar imot de nye elevene i HP1. Storsalen inspirerte Hogwarts Storsalen.",
         "source": "wikidata",
         "external_url": "https://www.chch.ox.ac.uk",
-        "wikidata_id": "Q745967"
+        "wikidata_id": "Q745967",
+        "country": "England",
+        "city": "Oxford"
       }
     },
     {
@@ -497,7 +533,9 @@
         "description": "Duke Humfrey's Library ble Hogwarts-biblioteket, og Divinity School ble sykehusfløyen der Harry våkner etter HP1s finalekamp.",
         "source": "wikidata",
         "external_url": "https://www.bodleian.ox.ac.uk",
-        "wikidata_id": "Q82133"
+        "wikidata_id": "Q82133",
+        "country": "England",
+        "city": "Oxford"
       }
     },
     {
@@ -522,7 +560,9 @@
         "description": "New Colleges middelalderklostergang ble Hogwarts-gårdsplassen der Draco Malfoy og vennene hans skuler i Ildbegeret.",
         "source": "wikidata",
         "external_url": "https://www.new.ox.ac.uk",
-        "wikidata_id": "Q1179523"
+        "wikidata_id": "Q1179523",
+        "country": "England",
+        "city": "Oxford"
       }
     },
     {
@@ -549,7 +589,9 @@
         "description": "Den normanniske katedralen i Durham ble Hogwarts-korridorer og klostrene der Nevilles padde ble forvandlet til en katt i HP1.",
         "source": "wikidata",
         "external_url": "https://www.durhamcathedral.co.uk",
-        "wikidata_id": "Q746207"
+        "wikidata_id": "Q746207",
+        "country": "England",
+        "city": "Durham"
       }
     },
     {
@@ -581,7 +623,9 @@
         ],
         "description": "The Making of Harry Potter – originalrekvisitter, kostymer og settet fra alle filmene.",
         "source": "manual",
-        "external_url": "https://www.wbstudiotour.co.uk"
+        "external_url": "https://www.wbstudiotour.co.uk",
+        "country": "England",
+        "city": "Leavesden"
       }
     },
     {
@@ -613,7 +657,9 @@
         ],
         "description": "Den magiske plattformen der Hogwarts Express avgår hvert år 1. september. Trolleyvognen i veggen er idag et turistikon.",
         "source": "manual",
-        "external_url": "https://www.harrypotter.com/visit/platform-nine-three-quarters"
+        "external_url": "https://www.harrypotter.com/visit/platform-nine-three-quarters",
+        "country": "England",
+        "city": "London"
       }
     },
     {
@@ -638,7 +684,9 @@
         "description": "Den overdekte markedshallen ble Diagon Alley-inngangen og The Leaky Cauldron-inngangen i Filosofens stein.",
         "source": "wikidata",
         "external_url": null,
-        "wikidata_id": "Q961148"
+        "wikidata_id": "Q961148",
+        "country": "England",
+        "city": "London"
       }
     },
     {
@@ -663,7 +711,9 @@
         ],
         "description": "Interiøret i Australia House ble brukt som filmsettet til Gringotts-banken.",
         "source": "manual",
-        "external_url": null
+        "external_url": null,
+        "country": "England",
+        "city": "London"
       }
     },
     {
@@ -688,7 +738,9 @@
         ],
         "description": "Torget ble filmet som Grimmauldsplass 12, hjemmet til familien Black og Ordens høkvarter.",
         "source": "manual",
-        "external_url": null
+        "external_url": null,
+        "country": "England",
+        "city": "London"
       }
     },
     {
@@ -712,7 +764,9 @@
         ],
         "description": "Millennium Bridge ble dramatisk revet ned av Voldemorts dødisere i åpningsscenen fra Halvblodsprinsen.",
         "source": "manual",
-        "external_url": null
+        "external_url": null,
+        "country": "England",
+        "city": "London"
       }
     },
     {
@@ -738,7 +792,9 @@
         "description": "Reptilhuset i London Zoo er der Harry Potter for første gang snakket med en boa-slange og uforvarende sendte Dudley inn i beholderen i Filosofens stein.",
         "source": "wikidata",
         "external_url": "https://www.zsl.org/london-zoo",
-        "wikidata_id": "Q270263"
+        "wikidata_id": "Q270263",
+        "country": "England",
+        "city": "London"
       }
     },
     {
@@ -761,7 +817,9 @@
         "hp_references": [],
         "description": "Den smaleste gaten i Covent Garden, bygget på 1600-tallet, er en av inspirasjonskildene til Diagon Alley med sine buede vinduer og gammeldagse lykter.",
         "source": "manual",
-        "external_url": null
+        "external_url": null,
+        "country": "England",
+        "city": "London"
       }
     },
     {
@@ -786,7 +844,9 @@
         ],
         "description": "Den avsidesliggende stranden i Wales ble Shell Cottage og stedet der Dobby ble gravlagt i Dødstalismanene. Fans bringer fremdeles tributter til Dobbys lille grav.",
         "source": "manual",
-        "external_url": "https://www.pembrokeshirecoast.wales/things-to-do/beaches/freshwater-west/"
+        "external_url": "https://www.pembrokeshirecoast.wales/things-to-do/beaches/freshwater-west/",
+        "country": "Wales",
+        "city": "Pembrokeshire"
       }
     }
   ]

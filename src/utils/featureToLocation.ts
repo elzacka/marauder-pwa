@@ -43,6 +43,8 @@ export function propsToLocation(
     description: (p.description ?? '') as string,
     source: p.source as string,
     external_url: safeExternalUrl(p.external_url),
+    country: (p.country ?? null) as string | null,
+    city: (p.city ?? null) as string | null,
     lat,
     lng,
   }

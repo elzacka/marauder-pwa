@@ -518,6 +518,44 @@ function mergeWithWikidata(curated, wikidataResults) {
 }
 
 /**
+ * Geo tags (country/city) per POI — powers the clickable tag chips in the app.
+ * Curated manually (English established names, per CLAUDE.md label rule).
+ * Add an entry here when adding a new POI.
+ */
+const GEO_TAGS = {
+  'elephant-house':        ['Scotland', 'Edinburgh'],
+  'victoria-street':       ['Scotland', 'Edinburgh'],
+  'greyfriars-kirkyard':   ['Scotland', 'Edinburgh'],
+  'george-heriots-school': ['Scotland', 'Edinburgh'],
+  'balmoral-hotel':        ['Scotland', 'Edinburgh'],
+  'glenfinnan-viaduct':    ['Scotland', 'Glenfinnan'],
+  'jacobite-steam-train':  ['Scotland', 'Fort William'],
+  'glencoe':               ['Scotland', 'Glencoe'],
+  'glen-nevis':            ['Scotland', 'Fort William'],
+  'goathland-station':     ['England', 'Goathland'],
+  'malham-cove':           ['England', 'Malham'],
+  'alnwick-castle':        ['England', 'Alnwick'],
+  'gloucester-cathedral':  ['England', 'Gloucester'],
+  'lacock-abbey':          ['England', 'Lacock'],
+  'lacock-village':        ['England', 'Lacock'],
+  'hardwick-hall':         ['England', 'Chesterfield'],
+  'lavenham':              ['England', 'Lavenham'],
+  'christ-church-oxford':  ['England', 'Oxford'],
+  'bodleian-library':      ['England', 'Oxford'],
+  'new-college-oxford':    ['England', 'Oxford'],
+  'durham-cathedral':      ['England', 'Durham'],
+  'wb-studio-tour':        ['England', 'Leavesden'],
+  'kings-cross':           ['England', 'London'],
+  'leadenhall-market':     ['England', 'London'],
+  'australia-house':       ['England', 'London'],
+  'claremont-square':      ['England', 'London'],
+  'millennium-bridge':     ['England', 'London'],
+  'london-zoo':            ['England', 'London'],
+  'goodwins-court':        ['England', 'London'],
+  'freshwater-west':       ['Wales', 'Pembrokeshire'],
+}
+
+/**
  * Convert internal curated format → GeoJSON Feature
  */
 function toFeature(poi) {
@@ -528,6 +566,13 @@ function toFeature(poi) {
     properties: props,
   }
   if (wikidata_id) feature.properties.wikidata_id = wikidata_id
+  const geo = GEO_TAGS[poi.id]
+  if (geo) {
+    feature.properties.country = geo[0]
+    feature.properties.city = geo[1]
+  } else {
+    console.warn(`  [GeoTags] Missing country/city for ${poi.id} — add it to GEO_TAGS`)
+  }
   return feature
 }
 

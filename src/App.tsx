@@ -32,6 +32,8 @@ function customPlaceToHPLocation(p: CustomPlace): HPLocation {
     description: p.description,
     source: 'custom',
     external_url: null,
+    country: null,
+    city: null,
     lat: p.lat,
     lng: p.lng,
   }

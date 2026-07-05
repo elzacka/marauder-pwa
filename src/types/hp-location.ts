@@ -17,6 +17,9 @@ export type HPLocation = {
   description: string
   source: string
   external_url: string | null
+  /** Geo tags for the clickable tag chips (English established names) */
+  country: string | null
+  city: string | null
   lat: number
   lng: number
 }

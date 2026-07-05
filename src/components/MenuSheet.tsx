@@ -36,6 +36,31 @@ function FavHeart() {
   )
 }
 
+/** Clickable country/city tag chips — tapping one filters on that tag */
+function GeoChips({ loc, activeTag, onTag }: {
+  loc: HPLocation
+  activeTag: string | null
+  onTag: (tag: string) => void
+}) {
+  const tags = [loc.city, loc.country].filter((t): t is string => !!t)
+  if (tags.length === 0) return null
+  return (
+    <div className={styles.geoChips}>
+      {tags.map((tag) => (
+        <button
+          key={tag}
+          type="button"
+          className={`${styles.geoChip} ${activeTag === tag ? styles.geoChipActive : ''}`}
+          onClick={() => onTag(tag)}
+          aria-pressed={activeTag === tag}
+        >
+          {tag}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 const SEARCH_PLACEHOLDERS = [
   'Søk på adresser...',
   'Søk på steder...',
@@ -106,6 +131,9 @@ export default function MenuSheet({
   // start collapsed
   const [showCategories, setShowCategories] = useState(false)
   const [showFavouritesList, setShowFavouritesList] = useState(false)
+  // Geo tag filter (Lene, 2026-07-05): tapping a country/city chip shows every
+  // place carrying that tag. Cleared by ×, or when a search starts.
+  const [activeTag, setActiveTag] = useState<string | null>(null)
   const [placeholderIdx, setPlaceholderIdx] = useState(0)
   const searchId = useId()
 
@@ -159,8 +187,24 @@ export default function MenuSheet({
   // active — at default 33svh height the address results sat below the fold
   // and looked "broken" (diagnosed live 2026-07-05).
   useEffect(() => {
-    if (q) setExpanded(true)
+    if (q) {
+      setExpanded(true)
+      setActiveTag(null)
+    }
   }, [q, setExpanded])
+
+  // Chips toggle (Lene, 2026-07-05): tapping the active chip clears the filter
+  const toggleTag = useCallback((tag: string) => {
+    setActiveTag((cur) => (cur === tag ? null : tag))
+  }, [])
+
+  const taggedLocations = useMemo<HPLocationWithDist[]>(() => {
+    if (!activeTag) return []
+    return withDistAndSort(
+      hpLocations.filter((loc) => loc.city === activeTag || loc.country === activeTag),
+      position,
+    )
+  }, [activeTag, hpLocations, position])
 
   function handleGeoClick(lng: number, lat: number, name: string, detail: string) {
     onAddressSelect(lng, lat, name, detail)
@@ -365,9 +409,50 @@ export default function MenuSheet({
                   <p className={styles.empty}>{`Ingen treff for «${query}»`}</p>
                 )}
 
+                {/* Geo tag view — tapping a country/city chip filters here */}
+                {!q && activeTag && (
+                  <div>
+                    <div className={styles.tagHeader}>
+                      <span className={styles.tagTitle}>Merket med {activeTag}</span>
+                      <button
+                        type="button"
+                        className={styles.tagClear}
+                        onClick={() => setActiveTag(null)}
+                        aria-label="Fjern stedsfilter"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                          <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                        </svg>
+                      </button>
+                    </div>
+                    <ul className={styles.list} role="list">
+                      {taggedLocations.map((loc) => (
+                        <li key={loc.id} className={styles.itemBlock}>
+                          <button
+                            type="button"
+                            className={styles.itemMainBtn}
+                            onClick={() => handleHPClick(loc)}
+                          >
+                            <span className={styles.itemName}>
+                              {favouriteIds.has(loc.id) && (
+                                <span className={styles.favStar} aria-hidden="true"><FavHeart /> </span>
+                              )}
+                              {loc.name}
+                            </span>
+                            {loc.km !== null && (
+                              <span className={styles.itemDistance}>{formatDistance(loc.km)}</span>
+                            )}
+                          </button>
+                          <GeoChips loc={loc} activeTag={activeTag} onTag={toggleTag} />
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
                 {/* Collapsible sections — yield to search results while typing
-                    (Tråkke pattern): one job at a time */}
-                {!q && (
+                    (Tråkke pattern) and to an active tag filter: one job at a time */}
+                {!q && !activeTag && (
                   <div>
                     <button
                       type="button"
@@ -422,27 +507,21 @@ export default function MenuSheet({
                         </button>
                       <ul className={styles.list} role="list">
                         {favouriteLocations.map((loc) => (
-                          <li key={loc.id}>
+                          <li key={loc.id} className={styles.itemBlock}>
                             <button
                               type="button"
-                              className={styles.item}
+                              className={styles.itemMainBtn}
                               onClick={() => handleHPClick(loc)}
                             >
-                              <div className={styles.itemMain}>
-                                <span className={styles.itemName}>
-                                  <span className={styles.favStar} aria-hidden="true"><FavHeart /> </span>
-                                  {loc.name}
-                                </span>
-                                <div className={styles.itemBadges}>
-                                  {loc.categories.slice(0, 2).map((cat) => (
-                                    <Badge key={cat} category={cat} size="sm" />
-                                  ))}
-                                </div>
-                              </div>
+                              <span className={styles.itemName}>
+                                <span className={styles.favStar} aria-hidden="true"><FavHeart /> </span>
+                                {loc.name}
+                              </span>
                               {loc.km !== null && (
                                 <span className={styles.itemDistance}>{formatDistance(loc.km)}</span>
                               )}
                             </button>
+                            <GeoChips loc={loc} activeTag={activeTag} onTag={toggleTag} />
                           </li>
                         ))}
                       </ul>
@@ -451,7 +530,7 @@ export default function MenuSheet({
                   </div>
                 )}
 
-                {!q && hasCustom && (
+                {!q && !activeTag && hasCustom && (
                   <div>
                     <p className={styles.sectionHeader}>Mine steder</p>
                     <ul className={styles.list} role="list">
