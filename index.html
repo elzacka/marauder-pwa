@@ -6,7 +6,12 @@
     <meta name="theme-color" content="#1A0A00" />
     <meta name="description" content="Utforsk Harry Potter-universet i Storbritannia" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- "default" (not "black-translucent"): with black-translucent iOS placed the
+         standalone webview at the top of the screen but sized it screen-minus-status-bar
+         (inner 793 of 852pt, measured on-device 2026-07-05), leaving a dead 59pt strip
+         at the bottom that no CSS can paint. With "default" the webview sits below the
+         status bar and reaches the physical bottom; the status bar is drawn by iOS. -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Marauder" />
     <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png" />

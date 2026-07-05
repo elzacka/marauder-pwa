@@ -20,7 +20,9 @@ export default defineConfig({
         description: 'Utforsk Harry Potter-universet i Storbritannia',
         lang: 'no',
         theme_color: '#1A0A00',
-        background_color: '#E8D5AA',
+        // Matches the map's rendered parchment tone (see html/body background in
+        // main.css) so iOS 26's reserved bottom zone blends into the map.
+        background_color: '#E3DCCD',
         display: 'standalone',
         start_url: '/marauder-pwa/',
         orientation: 'portrait-primary',

@@ -16,7 +16,13 @@ html, body, #root {
   overflow: hidden;
   font-family: var(--font-body);
   color: var(--text-primary);
-  background: var(--surface-base);
+  /* #E3DCCD, NOT var(--surface-base): iOS 26 reserves a bottom zone that web
+     content cannot paint, and tints it by sampling the page background. This
+     value matches the map's rendered parchment mask (world-mask #EAD8AE @ 0.72
+     over tiles + sepia filter, measured from device screenshot 2026-07-05), so
+     the reserved zone blends into the map instead of showing as a distinct bar.
+     Keep in sync with manifest background_color in vite.config.ts. */
+  background: #E3DCCD;
 }
 
 /* Zoom controls sit clear of the FAB (FAB: 6px + 56px = 62px from safe-area
