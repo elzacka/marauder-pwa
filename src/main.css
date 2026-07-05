@@ -20,11 +20,15 @@ html, body, #root {
 }
 
 /* Zoom controls sit clear of the FAB (FAB: 6px + 56px = 62px from safe-area
-   bottom). 80px + MapLibre's internal 10px control margin gives ~28px clearance,
-   so minor viewport drift on iOS cannot collide the two. */
-.maplibregl-ctrl-bottom-right {
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 80px) !important;
-  right: 12px !important;
+   bottom). 80px + MapLibre's internal 10px control margin gives ~28px clearance.
+   NOTE: the selector is intentionally MORE SPECIFIC than MapLibre's own
+   `.maplibregl-ctrl-bottom-right { bottom: 0 }`. With the identical selector the
+   bundler merged the two duplicate rules and MapLibre's value won — the override
+   was silently missing from the built CSS (diagnosed on-device 2026-07-05).
+   Do not "simplify" this selector back. */
+.maplibregl-map .maplibregl-ctrl-bottom-right {
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
+  right: 12px;
 }
 
 /* Subtle parchment warmth on map canvas */
