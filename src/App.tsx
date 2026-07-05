@@ -12,7 +12,6 @@ import POIDetailSheet from './components/POIDetailSheet'
 import MeasureBar from './components/MeasureBar'
 import AddPlaceSheet from './components/AddPlaceSheet'
 import InstallBanner from './components/InstallBanner'
-import AppHeader from './components/AppHeader'
 import type { HPLocation } from './types/hp-location'
 import type { CustomPlace } from './types/custom-place'
 import type { FilterState } from './ds/filterMeta'
@@ -135,7 +134,6 @@ export default function App() {
   return (
     <>
       <InstallBanner />
-      <AppHeader />
       <MapView
         ref={mapRef}
         position={position}
@@ -152,6 +150,7 @@ export default function App() {
         geocodeMarker={geocodeMarker}
         selectedLocation={selectedLocation}
         activeFilter={activeFilter}
+        hpLocations={hpLocations}
       />
       {measureMode && (
         <MeasureBar

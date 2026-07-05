@@ -8,8 +8,8 @@
 /* FAB */
 .fab {
   position: fixed;
-  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
-  right: 24px;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 6px);
+  right: 12px;
   width: 56px;
   height: 56px;
   border-radius: var(--radius-xl);
