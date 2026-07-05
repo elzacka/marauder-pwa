@@ -20,7 +20,7 @@ export default function POIDetailSheet({
   isFavourite = false, onToggleFavourite,
   isCustomPlace = false, onDeleteCustomPlace, onEditCustomPlace,
 }: Props) {
-  const { sheetRef, expanded, onDragStart, onDragMove, onDragEnd } = useSheetDrag(onClose)
+  const { sheetRef, size, onDragStart, onDragMove, onDragEnd } = useSheetDrag(onClose)
 
   useEffect(() => {
     if (!location) return
@@ -33,14 +33,15 @@ export default function POIDetailSheet({
 
   if (!location) return null
 
+  // Non-modal sheet (Lene, 2026-07-05): no backdrop — the map stays pannable
+  // while the detail sheet is open, and the selected marker stays put.
+  // Close via drag-down or Escape; tapping another POI switches selection.
   return (
-    <div className={styles.backdrop} onClick={onClose} role="presentation">
+    <>
       <div
         ref={sheetRef}
-        className={`${styles.sheet} ${expanded ? styles.sheetExpanded : ''}`}
-        onClick={(e) => e.stopPropagation()}
+        className={`${styles.sheet} ${size === 'half' ? styles.sheetHalf : ''} ${size === 'expanded' ? styles.sheetExpanded : ''}`}
         role="dialog"
-        aria-modal="true"
         aria-label={location.name}
       >
         <div
@@ -152,6 +153,6 @@ export default function POIDetailSheet({
           )}
         </div>
       </div>
-    </div>
+    </>
   )
 }

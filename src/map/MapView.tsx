@@ -214,7 +214,9 @@ function addOverlays(
 }
 
 export type MapHandle = {
-  flyTo: (lng: number, lat: number, zoom?: number) => void
+  /** offsetY (px, negative = up): shifts the target above centre so it stays
+      visible when a bottom sheet covers the lower part of the screen */
+  flyTo: (lng: number, lat: number, zoom?: number, offsetY?: number) => void
   /** Current visible map bounds — used for "download this area" */
   getBounds: () => { west: number; south: number; east: number; north: number } | null
 }
@@ -276,8 +278,8 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
   const mapModeRef = useRef(mapMode)
   useEffect(() => { mapModeRef.current = mapMode }, [mapMode])
 
-  const flyTo = useCallback((lng: number, lat: number, zoom = 13) => {
-    mapRef.current?.flyTo({ center: [lng, lat], zoom, duration: 700 })
+  const flyTo = useCallback((lng: number, lat: number, zoom = 13, offsetY = 0) => {
+    mapRef.current?.flyTo({ center: [lng, lat], zoom, duration: 700, offset: [0, offsetY] })
   }, [])
   const getBounds = useCallback(() => {
     const b = mapRef.current?.getBounds()

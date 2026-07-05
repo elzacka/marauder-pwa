@@ -62,13 +62,17 @@ html, body, #root {
    Container is 44px wide for a WCAG-size touch target; the visual pin is
    drawn with ::before (teardrop) and ::after (inner dot). Marker anchor is
    'bottom', so the tip of the teardrop marks the location. */
+/* NB: never animate `transform` on a .maplibregl-marker element — MapLibre
+   positions markers via inline transform, and an animation with fill-mode
+   both/forwards overrides it permanently, leaving the pin stuck at the top-left
+   corner and detached from map panning (diagnosed live 2026-07-05).
+   Animate opacity here; the visual pop runs on ::before. */
 .geocode-marker {
   width: 44px;
   height: 44px;
   position: relative;
   cursor: pointer;
-  animation: geocode-pop 300ms var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
-  transform-origin: bottom center;
+  animation: geocode-fade 200ms var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 .geocode-marker::before {
@@ -98,9 +102,9 @@ html, body, #root {
   background: var(--color-cream, #F5ECD7);
 }
 
-@keyframes geocode-pop {
-  from { transform: scale(0); opacity: 0; }
-  to   { transform: scale(1); opacity: 1; }
+@keyframes geocode-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 /* Hide MapLibre attribution (credits in Om-section) */

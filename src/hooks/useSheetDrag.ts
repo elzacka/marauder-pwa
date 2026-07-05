@@ -2,22 +2,33 @@ import { useRef, useCallback, useState } from 'react'
 
 const DISMISS_THRESHOLD = 72
 
+export type SheetSize = 'default' | 'half' | 'expanded'
+
+/** Snap points as fraction of viewport height — keep in sync with the
+ *  --sheet-*-height tokens in tokens.css */
+const SNAP_FRACTIONS: Array<{ size: SheetSize; fraction: number }> = [
+  { size: 'default', fraction: 0.33 },
+  { size: 'half', fraction: 0.5 },
+  { size: 'expanded', fraction: 0.85 },
+]
+
 type Options = {
-  /** Drag up/down resizes the sheet between default and expanded height.
+  /** Drag up/down resizes the sheet between the snap points.
       When false, only drag-down-to-close is available (e.g. form sheets). */
   resizable?: boolean
 }
 
 /**
  * Shared drag behaviour for bottom sheets (Lene, 2026-07-05):
- * drag up → expanded (85svh), drag down → default (33svh), drag far down → close.
- * During the drag the sheet height follows the finger; on release it snaps.
+ * three snap points — 33 % (default), 50 % (half), 85 % (expanded) — plus
+ * drag far down to close. During the drag the sheet height follows the
+ * finger; on release it snaps to the nearest point.
  */
 export function useSheetDrag(onClose: () => void, { resizable = true }: Options = {}) {
   const sheetRef = useRef<HTMLDivElement>(null)
   const dragStartY = useRef(0)
   const startHeight = useRef(0)
-  const [expanded, setExpanded] = useState(false)
+  const [size, setSize] = useState<SheetSize>('default')
 
   const onDragStart = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return
@@ -58,13 +69,22 @@ export function useSheetDrag(onClose: () => void, { resizable = true }: Options 
     const endHeight = startHeight.current - dy
     const vh = window.innerHeight
     if (endHeight < vh * 0.18) {
-      setExpanded(false)
+      setSize('default')
       onClose()
       return
     }
-    // Snap: above the midpoint between the two states → expanded
-    setExpanded(endHeight > vh * 0.55)
+    // Snap to the nearest of the three points
+    let nearest: SheetSize = 'default'
+    let best = Number.POSITIVE_INFINITY
+    for (const { size: s, fraction } of SNAP_FRACTIONS) {
+      const d = Math.abs(endHeight - vh * fraction)
+      if (d < best) {
+        best = d
+        nearest = s
+      }
+    }
+    setSize(nearest)
   }, [onClose, resizable])
 
-  return { sheetRef, expanded, setExpanded, onDragStart, onDragMove, onDragEnd }
+  return { sheetRef, size, setSize, onDragStart, onDragMove, onDragEnd }
 }

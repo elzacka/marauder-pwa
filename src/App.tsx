@@ -88,7 +88,9 @@ export default function App() {
   }
 
   const handleLocationSelect = useCallback((loc: HPLocation) => {
-    mapRef.current?.flyTo(loc.lng, loc.lat)
+    // Offset upwards so the marker sits in the visible upper part while the
+    // detail sheet (33 % height) covers the bottom
+    mapRef.current?.flyTo(loc.lng, loc.lat, 13, -Math.round(window.innerHeight * 0.16))
     setSelectedLocation(loc)
     setSelectedIsCustom(false)
   }, [])

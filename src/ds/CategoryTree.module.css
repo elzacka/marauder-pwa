@@ -81,8 +81,8 @@
 }
 
 .checkboxOn {
-  background: var(--color-burgundy);
-  border-color: var(--color-burgundy);
+  background: var(--checkbox-color, var(--color-burgundy));
+  border-color: var(--checkbox-color, var(--color-burgundy));
 }
 
 .subRow .checkbox {

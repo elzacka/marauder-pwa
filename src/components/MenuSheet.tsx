@@ -3,7 +3,7 @@ import marauderIcon from '../assets/marauder-icon.png'
 import { CategoryTree } from '../ds/CategoryTree'
 import { type FilterState, CATEGORY_META, locationMatchesFilter } from '../ds/filterMeta'
 import { haversineKm, formatDistance } from '../utils/distance'
-import { useNominatim, formatNominatimName } from '../hooks/useNominatim'
+import { useGeocoder } from '../hooks/useGeocoder'
 import { useSheetDrag } from '../hooks/useSheetDrag'
 import { formatBytes, estimateBytes, type OfflineArea } from '../offline/OfflineAreaManager'
 import { Badge } from '../ds/Badge'
@@ -26,6 +26,19 @@ function withDistAndSort(locs: HPLocation[], position: Position | null): HPLocat
 
 function normalize(s: string): string {
   return s.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '')
+}
+
+/**
+ * Token-based prefix matching: every query token must prefix-match a word in
+ * the haystack (name, description, city, country). "king cro" finds
+ * "King's Cross", "edin" finds every Edinburgh place.
+ */
+function matchesTokens(loc: HPLocation, tokens: string[]): boolean {
+  const haystack = normalize(
+    [loc.name, loc.description ?? '', loc.city ?? '', loc.country ?? ''].join(' '),
+  )
+  const words = haystack.split(/[^a-z0-9]+/)
+  return tokens.every((t) => words.some((w) => w.startsWith(t)) || haystack.includes(t))
 }
 
 function FavHeart() {
@@ -138,10 +151,10 @@ export default function MenuSheet({
   const searchId = useId()
 
   const closeSheet = useCallback(() => setIsOpen(false), [])
-  const { sheetRef, expanded, setExpanded, onDragStart, onDragMove, onDragEnd } =
+  const { sheetRef, size, setSize, onDragStart, onDragMove, onDragEnd } =
     useSheetDrag(closeSheet)
 
-  const { results: geoResults, loading: geoLoading } = useNominatim(query)
+  const { results: geoResults, loading: geoLoading } = useGeocoder(query)
 
   const q = normalize(query.trim())
 
@@ -150,11 +163,11 @@ export default function MenuSheet({
   // Search scope: selected categories if any are checked, otherwise everything.
   const filteredHP = useMemo<HPLocationWithDist[]>(() => {
     if (!q) return []
+    const tokens = q.split(/\s+/).filter(Boolean)
     return withDistAndSort(
       hpLocations.filter((loc) => {
         if (!locationMatchesFilter(loc.categories, loc.location_type, activeFilter)) return false
-        if (!normalize(loc.name).includes(q) && !normalize(loc.description ?? '').includes(q)) return false
-        return true
+        return matchesTokens(loc, tokens)
       }),
       position,
     )
@@ -188,10 +201,10 @@ export default function MenuSheet({
   // and looked "broken" (diagnosed live 2026-07-05).
   useEffect(() => {
     if (q) {
-      setExpanded(true)
+      setSize('expanded')
       setActiveTag(null)
     }
-  }, [q, setExpanded])
+  }, [q, setSize])
 
   // Chips toggle (Lene, 2026-07-05): tapping the active chip clears the filter
   const toggleTag = useCallback((tag: string) => {
@@ -270,7 +283,7 @@ export default function MenuSheet({
       {/* Sheet */}
       <div
         ref={sheetRef}
-        className={`${styles.sheet} ${expanded ? styles.sheetExpanded : ''} ${isOpen ? styles.sheetOpen : styles.sheetClosed}`}
+        className={`${styles.sheet} ${size === 'half' ? styles.sheetHalf : ''} ${size === 'expanded' ? styles.sheetExpanded : ''} ${isOpen ? styles.sheetOpen : styles.sheetClosed}`}
         role="dialog"
         aria-modal={isOpen}
         aria-label="Meny"
@@ -363,32 +376,25 @@ export default function MenuSheet({
                   </div>
                 )}
 
-                {/* Geo results — shown when nominatim returns results for the query */}
+                {/* Geo results — search-as-you-type via Photon */}
                 {hasGeoResults && (
                   <div>
                     <p className={styles.sectionHeader}>Adresser og steder</p>
                     <ul className={styles.list} role="list">
-                      {geoResults.map((r) => {
-                        const { name, detail } = formatNominatimName(r)
-                        return (
-                          <li key={r.place_id}>
-                            <button
-                              type="button"
-                              className={styles.item}
-                              onClick={() => {
-                                const lng = parseFloat(r.lon)
-                                const lat = parseFloat(r.lat)
-                                if (!Number.isNaN(lng) && !Number.isNaN(lat)) handleGeoClick(lng, lat, name, detail)
-                              }}
-                            >
-                              <div className={styles.itemMain}>
-                                <span className={styles.itemName}>{name}</span>
-                                <span className={styles.itemSub}>{detail}</span>
-                              </div>
-                            </button>
-                          </li>
-                        )
-                      })}
+                      {geoResults.map((r) => (
+                        <li key={r.id}>
+                          <button
+                            type="button"
+                            className={styles.item}
+                            onClick={() => handleGeoClick(r.lng, r.lat, r.name, r.detail)}
+                          >
+                            <div className={styles.itemMain}>
+                              <span className={styles.itemName}>{r.name}</span>
+                              {r.detail && <span className={styles.itemSub}>{r.detail}</span>}
+                            </div>
+                          </button>
+                        </li>
+                      ))}
                     </ul>
                   </div>
                 )}
@@ -532,7 +538,10 @@ export default function MenuSheet({
 
                 {!q && !activeTag && hasCustom && (
                   <div>
-                    <p className={styles.sectionHeader}>Mine steder</p>
+                    <p className={styles.sectionHeader}>
+                      <span className={styles.sectionDot} aria-hidden="true" />
+                      Mine steder
+                    </p>
                     <ul className={styles.list} role="list">
                       {customWithDist.map((p) => (
                         <li key={p.id}>

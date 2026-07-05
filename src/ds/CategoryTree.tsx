@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { CATEGORY_META, ALL_CATEGORY_KEYS, LOCATION_TYPES } from './filterMeta'
+import type { CSSProperties } from 'react'
+import { CATEGORY_META, ALL_CATEGORY_KEYS, LOCATION_TYPES, LOCATION_TYPE_COLORS } from './filterMeta'
 import type { FilterState } from './filterMeta'
 import styles from './CategoryTree.module.css'
 
@@ -14,9 +15,15 @@ type Props = {
   onChange: (f: FilterState) => void
 }
 
-function CheckBox({ checked }: { checked: boolean }) {
+/** Checkbox tinted with the category/type colour, so the menu doubles as a
+ *  colour legend (Lene, 2026-07-05). Default: burgundy. */
+function CheckBox({ checked, color }: { checked: boolean; color?: string }) {
   return (
-    <span className={`${styles.checkbox} ${checked ? styles.checkboxOn : ''}`} aria-hidden="true">
+    <span
+      className={`${styles.checkbox} ${checked ? styles.checkboxOn : ''}`}
+      style={color ? ({ '--checkbox-color': color } as CSSProperties) : undefined}
+      aria-hidden="true"
+    >
       {checked && (
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
           <path d="M2 6.5L4.8 9.2L10 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -110,7 +117,7 @@ export function CategoryTree({ value, onChange }: Props) {
                 onClick={() => toggleCategory(cat.key)}
                 aria-pressed={isSelected}
               >
-                <CheckBox checked={isSelected} />
+                <CheckBox checked={isSelected} color={cat.color} />
                 <span className={styles.rowLabel}>{cat.label}</span>
               </button>
               {hasSubTypes && (
@@ -142,7 +149,7 @@ export function CategoryTree({ value, onChange }: Props) {
                       onClick={() => toggleType(t)}
                       aria-pressed={typeChecked}
                     >
-                      <CheckBox checked={typeChecked} />
+                      <CheckBox checked={typeChecked} color={LOCATION_TYPE_COLORS[t]} />
                       {TYPE_LABELS[t] ?? t}
                     </button>
                   )

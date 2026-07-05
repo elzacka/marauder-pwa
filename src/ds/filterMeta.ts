@@ -8,18 +8,27 @@ export type FilterState = {
   locationTypes: string[]
 }
 
-export type CategoryMeta = { key: string; label: string; types: string[] }
+export type CategoryMeta = { key: string; label: string; types: string[]; color: string }
 
 export const LOCATION_TYPES = ['filming', 'canonical', 'interpreted']
 
+/** Same colors as the map's POI dots (HP_PAINT in MapView) — keep in sync */
+export const LOCATION_TYPE_COLORS: Record<string, string> = {
+  filming:     '#5C1010',
+  canonical:   '#9E6B1A',
+  interpreted: '#4A3B6B',
+}
+
+/** Category palette — shared with Badge dots. Colours the checkboxes so the
+ *  menu shows which colour belongs to which category (Lene, 2026-07-05). */
 export const CATEGORY_META: CategoryMeta[] = [
-  { key: 'atmosphere',   label: 'Atmosphere',   types: [] },
-  { key: 'attractions',  label: 'Attractions',  types: [] },
-  { key: 'eat_and_drink', label: 'Eat and drink', types: [] },
-  { key: 'inspiration',  label: 'Inspiration',  types: [] },
-  { key: 'locations',    label: 'Locations',    types: LOCATION_TYPES },
-  { key: 'sleep',        label: 'Sleep',        types: [] },
-  { key: 'transport',    label: 'Transport',    types: [] },
+  { key: 'atmosphere',   label: 'Atmosphere',   types: [], color: '#2A5070' },
+  { key: 'attractions',  label: 'Attractions',  types: [], color: '#5C1010' },
+  { key: 'eat_and_drink', label: 'Eat and drink', types: [], color: '#6B3E1A' },
+  { key: 'inspiration',  label: 'Inspiration',  types: [], color: '#4A3B6B' },
+  { key: 'locations',    label: 'Locations',    types: LOCATION_TYPES, color: '#3E1F6B' },
+  { key: 'sleep',        label: 'Sleep',        types: [], color: '#2E6B3E' },
+  { key: 'transport',    label: 'Transport',    types: [], color: '#1A4A1A' },
 ]
 
 export const ALL_CATEGORY_KEYS = CATEGORY_META.map((c) => c.key)
