@@ -1,7 +1,8 @@
 import type { CSSProperties } from 'react'
 
 const NEUTRAL_BG = 'rgba(26,10,0,0.07)'
-const NEUTRAL_COLOR = 'rgba(26,10,0,0.6)'
+// 0.75 ink for WCAG AA on parchment cards; 0.6 measured 4.24:1 and failed for 10-12px text
+const NEUTRAL_COLOR = 'rgba(26,10,0,0.75)'
 
 const VARIANT_DOT_COLORS: Record<string, string> = {
   filming:       '#3E1F6B',

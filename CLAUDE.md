@@ -4,8 +4,16 @@ Stack-specific rules. Global rules live in ~/.claude/CLAUDE.md and apply here to
 
 ## Project context
 
-Harry Potter PWA for Storbritannia/Irland. Deadline: trip 24. juli 2026.
-Repo: https://github.com/elzacka/marauder-pwa. Deploy: Cloudflare Pages.
+Harry Potter PWA for Great Britain and Irland.
+Repo: https://github.com/elzacka/marauder-pwa. Deploy: GitHub Pages (Actions workflow).
+
+## CI / deployment
+
+Pipeline: `tsc -b && vite build` → upload artifact → `actions/deploy-pages@v4`.
+
+When a deployment fails, check the build job first before assuming a code bug:
+- Build job passes (green) + deploy job fails with "Deployment failed, try again later" → transient GitHub Pages infra error → `gh run rerun <id> --failed`
+- Build job fails → look for tsc/vite errors in the build step log
 
 Primary users: Lene + her 14-year old daughter, on iPhones, often offline (Scottish trains).
 
@@ -35,6 +43,8 @@ Always use: `tsc --noEmit -p tsconfig.app.json`
 ## Conventions
 
 - All code, identifiers, types, and tab values in English. Norwegian is for user-facing text only.
+  - **Exception (Lene, 2026-07-05):** category/type filter labels, badges, and HP book titles stay in English — use established Harry Potter-universe terminology (e.g. "Filming", "Canonical", "Eat and drink"). Do not translate these to Norwegian.
+- Layout debugging: never estimate pixel positions or layout metrics from screenshots. For layout bugs that only reproduce on device, add a temporary debug overlay (viewport/safe-area/display-mode values) or request Safari Web Inspector readings, and ask whether the app runs in Safari or as installed PWA before theorizing.
 - No emojis — not in code, strings, or any source file. Use SVG or CSS for icon-like symbols.
 - No JSON bundle imports from `src/data/`. Data belongs in `public/` and is fetched, not bundled.
 - Props declared in a component's `Props` type must be destructured and used. Prefix with `_` only when an interface forces inclusion but the value is genuinely unused.

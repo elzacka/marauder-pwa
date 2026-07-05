@@ -5,7 +5,8 @@ import { layers, namedFlavor } from '@protomaps/basemaps'
 import type { FeatureCollection, Feature, Polygon } from 'geojson'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import type { Position } from '../hooks/useGeolocation'
-import type { HPLocation, LocationType, LocationCategory } from '../types/hp-location'
+import type { HPLocation } from '../types/hp-location'
+import { propsToLocation } from '../utils/featureToLocation'
 import type { CustomPlace } from '../types/custom-place'
 import type { FilterState } from '../ds/filterMeta'
 import styles from './MapView.module.css'
@@ -93,14 +94,16 @@ function addOverlays(
     paint: { 'fill-color': '#EAD8AE', 'fill-opacity': 0.72 },
   })
 
-  // HP locations — hidden by default, only the selected one is shown via selected-hp-dot
+  // HP locations — visible by default (matches App's initial 'all' filter).
+  // The activeFilter effect may run before this layer exists and will then no-op,
+  // so the initial layout here must agree with App's initial filter state.
   map.addSource('hp-locations', { type: 'geojson', data: EMPTY_FC })
   map.addLayer({
     id: 'hp-dots',
     type: 'circle',
     source: 'hp-locations',
     paint: HP_PAINT,
-    layout: { visibility: 'none' },
+    layout: { visibility: 'visible' },
   })
 
   // Selected HP location (single marker)
@@ -110,24 +113,12 @@ function addOverlays(
   map.on('click', 'hp-dots', (e) => {
     if (!e.features?.length || !onLocationSelectRef.current) return
     const feat = e.features[0]
-    const props = feat.properties
     const geom = feat.geometry
     if (geom.type !== 'Point') return
-    const refs = typeof props.hp_references === 'string'
-      ? (JSON.parse(props.hp_references) as string[])
-      : (props.hp_references as string[])
-    onLocationSelectRef.current({
-      id: props.id as string,
-      name: props.name as string,
-      location_type: props.location_type as LocationType,
-      categories: (typeof props.categories === 'string' ? JSON.parse(props.categories) : props.categories) as LocationCategory[],
-      hp_references: refs,
-      description: props.description as string,
-      source: props.source as string,
-      external_url: props.external_url as string | null,
-      lat: geom.coordinates[1],
-      lng: geom.coordinates[0],
-    })
+    // Single conversion point — do not rebuild HPLocation by hand here (CLAUDE.md)
+    onLocationSelectRef.current(
+      propsToLocation(feat.properties, geom.coordinates[0], geom.coordinates[1]),
+    )
   })
   map.on('mouseenter', 'hp-dots', () => { map.getCanvas().style.cursor = 'pointer' })
   map.on('mouseleave', 'hp-dots', () => { map.getCanvas().style.cursor = '' })

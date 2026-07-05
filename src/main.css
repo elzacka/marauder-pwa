@@ -19,9 +19,11 @@ html, body, #root {
   background: var(--surface-base);
 }
 
-/* Zoom controls sit 6px above the FAB top edge (FAB: 6px + 56px = 62px from safe-area bottom, +6px gap = 68px) */
+/* Zoom controls sit clear of the FAB (FAB: 6px + 56px = 62px from safe-area
+   bottom). 80px + MapLibre's internal 10px control margin gives ~28px clearance,
+   so minor viewport drift on iOS cannot collide the two. */
 .maplibregl-ctrl-bottom-right {
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 68px) !important;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 80px) !important;
   right: 12px !important;
 }
 

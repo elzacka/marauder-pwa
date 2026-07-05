@@ -58,7 +58,9 @@ export default function App() {
   const [measurePoints, setMeasurePoints] = useState<Array<[number, number]>>([])
   const [geocodeMarker, setGeocodeMarker] = useState<{ lng: number; lat: number } | null>(null)
   const [pendingLongPress, setPendingLongPress] = useState<{ lng: number; lat: number } | null>(null)
-  const [activeFilter, setActiveFilter] = useState<FilterState | null>(null)
+  // Default: show all HP dots on first paint — the map's whole purpose is showing them.
+  // The filter narrows the view; it is not a gate for seeing anything at all.
+  const [activeFilter, setActiveFilter] = useState<FilterState | null>({ category: 'all', locationType: 'all' })
   const mapRef = useRef<MapHandle>(null)
   const geocodeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 

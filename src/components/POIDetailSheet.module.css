@@ -186,11 +186,12 @@
   gap: 5px;
   font-family: var(--font-body);
   font-size: var(--text-base);
-  color: var(--color-gold);
+  /* gold-muted for text: #9E6B1A on cream measured 3.91:1 (WCAG fail); gold stays for graphics */
+  color: var(--color-gold-muted);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .externalLink:hover {
-  color: var(--color-gold-muted);
+  color: var(--color-burgundy);
 }

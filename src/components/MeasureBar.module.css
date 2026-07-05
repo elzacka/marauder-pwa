@@ -30,7 +30,8 @@
   font-family: var(--font-body);
   font-size: var(--text-base);
   font-weight: var(--weight-semibold);
-  color: var(--color-gold);
+  /* gold-muted for text contrast (WCAG AA); plain gold measured 3.91:1 on cream */
+  color: var(--color-gold-muted);
   min-width: 60px;
 }
 

@@ -18,23 +18,40 @@ export default defineConfig({
         name: 'Marauder',
         short_name: 'Marauder',
         description: 'Utforsk Harry Potter-universet i Storbritannia',
+        lang: 'no',
         theme_color: '#1A0A00',
         background_color: '#E8D5AA',
         display: 'standalone',
         start_url: '/marauder-pwa/',
         orientation: 'portrait-primary',
+        // Relative paths: vite-plugin-pwa does not rewrite absolute icon paths
+        // with the `base` prefix, so '/assets/...' 404s on GitHub Pages.
+        // Separate entries per purpose: combined 'any maskable' renders zoomed
+        // icons on some launchers.
         icons: [
           {
-            src: '/assets/icon-192.png',
+            src: 'assets/icon-192.png',
             sizes: '192x192',
             type: 'image/png',
-            purpose: 'any maskable',
+            purpose: 'any',
           },
           {
-            src: '/assets/icon-512.png',
+            src: 'assets/icon-192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
+          {
+            src: 'assets/icon-512.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'any maskable',
+            purpose: 'any',
+          },
+          {
+            src: 'assets/icon-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
           },
         ],
       },

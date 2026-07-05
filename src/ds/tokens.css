@@ -25,7 +25,8 @@
   /* ── Text tokens ── */
   --text-primary:        var(--color-ink);
   --text-secondary:      var(--color-ink-soft);
-  --text-muted:          color-mix(in srgb, var(--color-ink) 50%, var(--color-parchment));
+  /* 62% ink gives ~5.5:1 on cream (WCAG AA); 50% measured 4.08:1 and failed */
+  --text-muted:          color-mix(in srgb, var(--color-ink) 62%, var(--color-parchment));
   --text-on-dark:        var(--color-cream);
   --text-on-interactive: var(--color-cream);
   --text-accent:         var(--color-gold);
