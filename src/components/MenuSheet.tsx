@@ -1,12 +1,12 @@
 import { useState, useMemo, useId, useRef, useCallback, useEffect } from 'react'
 import marauderIcon from '../assets/marauder-icon.png'
 import { CategoryTree } from '../ds/CategoryTree'
-import { type FilterState, CATEGORY_META } from '../ds/filterMeta'
+import { type FilterState, CATEGORY_META, locationMatchesFilter } from '../ds/filterMeta'
 import { haversineKm, formatDistance } from '../utils/distance'
 import { useNominatim, formatNominatimName } from '../hooks/useNominatim'
 import { formatBytes } from '../offline/OfflineMapManager'
 import { Badge } from '../ds/Badge'
-import type { HPLocation, LocationCategory } from '../types/hp-location'
+import type { HPLocation } from '../types/hp-location'
 import type { OfflineStatus } from '../hooks/useOfflineTiles'
 import type { Position } from '../hooks/useGeolocation'
 import type { CustomPlace } from '../types/custom-place'
@@ -75,8 +75,11 @@ type Props = {
   hpLocations: HPLocation[]
   customPlaces: CustomPlace[]
   onCustomPlaceClick: (id: string) => void
-  activeFilter: FilterState | null
-  onFilterChange: (f: FilterState | null) => void
+  activeFilter: FilterState
+  onFilterChange: (f: FilterState) => void
+  /** "Alle" checkbox over favourites: show all favourites as map markers */
+  favouritesOnMap: boolean
+  onToggleFavouritesOnMap: () => void
   showZoomControls: boolean
   onToggleZoomControls: (v: boolean) => void
   pmtilesEnabled: boolean
@@ -95,6 +98,7 @@ export default function MenuSheet({
   measureMode, onToggleMeasure, onAddressSelect, onLocationSelect,
   favouriteIds, hpLocations, customPlaces, onCustomPlaceClick,
   activeFilter, onFilterChange,
+  favouritesOnMap, onToggleFavouritesOnMap,
   showZoomControls, onToggleZoomControls,
   pmtilesEnabled, offlineStatus, downloaded, total, offlineError,
   onDownload, onCancel, onDelete,
@@ -102,8 +106,11 @@ export default function MenuSheet({
 }: Props) {
   const [isOpen, setIsOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<MenuTab>('home')
-  const [filter, setFilter] = useState<FilterState>({ category: 'all', locationType: 'all' })
   const [query, setQuery] = useState('')
+  // Collapsible sections (Lene, 2026-07-05): both Kategorier and Favoritter
+  // start collapsed
+  const [showCategories, setShowCategories] = useState(false)
+  const [showFavouritesList, setShowFavouritesList] = useState(false)
   const [placeholderIdx, setPlaceholderIdx] = useState(0)
   const searchId = useId()
 
@@ -115,45 +122,42 @@ export default function MenuSheet({
 
   const q = normalize(query.trim())
 
-  // Sync filter reset when parent clears activeFilter (e.g. future map-level "clear all")
-  useEffect(() => {
-    if (activeFilter === null) setFilter({ category: 'all', locationType: 'all' })
-  }, [activeFilter])
-
-  // List results are search-driven only. Picking a category filters the map
+  // List results are search-driven only. Category checkboxes filter the map
   // markers (via activeFilter in App) and must NOT render a list in the menu.
+  // Search scope: selected categories if any are checked, otherwise everything.
   const filteredHP = useMemo<HPLocationWithDist[]>(() => {
     if (!q) return []
     return withDistAndSort(
       hpLocations.filter((loc) => {
-        if (filter.category !== 'all' && !loc.categories.includes(filter.category as LocationCategory)) return false
-        if (filter.category === 'locations' && filter.locationType !== 'all' && loc.location_type !== filter.locationType) return false
-        if (q && !normalize(loc.name).includes(q) && !normalize(loc.description ?? '').includes(q)) return false
+        if (!locationMatchesFilter(loc.categories, loc.location_type, activeFilter)) return false
+        if (!normalize(loc.name).includes(q) && !normalize(loc.description ?? '').includes(q)) return false
         return true
       }),
       position,
     )
-  }, [q, filter, position, hpLocations])
+  }, [q, activeFilter, position, hpLocations])
 
   // Favourites are always listed regardless of category filter (Lene, 2026-07-05);
   // they yield only to active search, like everything else below the search field.
   const favouriteLocations = useMemo<HPLocationWithDist[]>(() => {
     if (q) return []
     return withDistAndSort(hpLocations.filter((loc) => favouriteIds.has(loc.id)), position)
-  }, [q, filter.category, favouriteIds, position, hpLocations])
+  }, [q, favouriteIds, position, hpLocations])
+
+  const singleCategory = activeFilter.categories.length === 1 ? activeFilter.categories[0] : null
 
   useEffect(() => {
-    if (q || filter.category !== 'all') return
+    if (q || singleCategory) return
     const id = setInterval(() => {
       setPlaceholderIdx((i) => (i + 1) % SEARCH_PLACEHOLDERS.length)
     }, 3000)
     return () => clearInterval(id)
-  }, [q, filter.category])
+  }, [q, singleCategory])
 
   const placeholder = q
     ? ''
-    : filter.category !== 'all'
-      ? `Søk i ${CATEGORY_META.find((c) => c.key === filter.category)?.label ?? 'steder'}…`
+    : singleCategory
+      ? `Søk i ${CATEGORY_META.find((c) => c.key === singleCategory)?.label ?? 'steder'}…`
       : SEARCH_PLACEHOLDERS[placeholderIdx]
 
   const onDragStart = useCallback((e: React.PointerEvent) => {
@@ -196,10 +200,6 @@ export default function MenuSheet({
     setQuery('')
   }
 
-  function handleFilterChange(f: FilterState) {
-    setFilter(f)
-    onFilterChange(f)
-  }
 
   const customWithDist = customPlaces.map((p) => ({
     ...p,
@@ -301,10 +301,6 @@ export default function MenuSheet({
                 </div>
               </div>
 
-              {/* Categories yield to search results while typing (Tråkke pattern):
-                  one job at a time — searching means "find this place", not "browse". */}
-              {!q && <CategoryTree value={filter} onChange={handleFilterChange} />}
-
               <div className={styles.scrollArea}>
                 {/* HP location search results — shown only while searching */}
                 {q && (
@@ -381,15 +377,61 @@ export default function MenuSheet({
                   <p className={styles.searchingText}>Søker…</p>
                 )}
 
-                {/* Favourites — always shown except during active search */}
+                {/* Collapsible sections — yield to search results while typing
+                    (Tråkke pattern): one job at a time */}
                 {!q && (
                   <div>
-                    <p className={styles.sectionHeader}>Favoritter</p>
-                    {favouriteLocations.length === 0 ? (
+                    <button
+                      type="button"
+                      className={styles.sectionToggle}
+                      onClick={() => setShowCategories((v) => !v)}
+                      aria-expanded={showCategories}
+                    >
+                      Kategorier
+                      <svg
+                        className={`${styles.sectionChevron} ${showCategories ? styles.sectionChevronOpen : ''}`}
+                        width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"
+                      >
+                        <path d="M5 7l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
+                    {showCategories && <CategoryTree value={activeFilter} onChange={onFilterChange} />}
+
+                    <button
+                      type="button"
+                      className={styles.sectionToggle}
+                      onClick={() => setShowFavouritesList((v) => !v)}
+                      aria-expanded={showFavouritesList}
+                    >
+                      Favoritter
+                      <svg
+                        className={`${styles.sectionChevron} ${showFavouritesList ? styles.sectionChevronOpen : ''}`}
+                        width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"
+                      >
+                        <path d="M5 7l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
+                    {showFavouritesList && (favouriteLocations.length === 0 ? (
                       <p className={styles.empty}>
                         Ingen favoritter ennå. Trykk hjerteikonet på et sted for å lagre det.
                       </p>
                     ) : (
+                      <>
+                        <button
+                          type="button"
+                          className={`${styles.favAllRow} ${favouritesOnMap ? styles.favAllRowActive : ''}`}
+                          onClick={onToggleFavouritesOnMap}
+                          aria-pressed={favouritesOnMap}
+                        >
+                          <span className={`${styles.toggleBox} ${favouritesOnMap ? styles.toggleBoxOn : ''}`} aria-hidden="true">
+                            {favouritesOnMap && (
+                              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                <path d="M2 6.5L4.8 9.2L10 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            )}
+                          </span>
+                          Alle
+                        </button>
                       <ul className={styles.list} role="list">
                         {favouriteLocations.map((loc) => (
                           <li key={loc.id}>
@@ -416,7 +458,8 @@ export default function MenuSheet({
                           </li>
                         ))}
                       </ul>
-                    )}
+                      </>
+                    ))}
                   </div>
                 )}
 
@@ -454,9 +497,9 @@ export default function MenuSheet({
                 <div className={styles.section}>
                   <p className={styles.sectionTitle}>Avstandsmåling</p>
                   <div className={styles.card}>
-                    <p className={styles.actionDesc} style={{ padding: '10px 14px 4px' }}>
+                    <p className={styles.actionDesc}>
                       {measureMode
-                        ? 'Aktiv. Lukk menyen og klikk på kartet for å legge til punkter.'
+                        ? 'Aktiv. Lukk menyen og trykk på kartet for å legge til punkter.'
                         : 'Mål avstand langs en rute med ubegrenset antall punkter.'}
                     </p>
                     <div className={styles.actionRow}>
@@ -477,14 +520,7 @@ export default function MenuSheet({
                     <div className={styles.card}>
                       <div className={styles.statusRow}>
                         <span className={styles.statusLabel}>Storbritannia + Irland</span>
-                        <span className={`${styles.statusChip} ${
-                          offlineStatus === 'ready'       ? styles.chipReady :
-                          offlineStatus === 'downloading' ? styles.chipDownloading :
-                          offlineStatus === 'error'       ? styles.chipError : styles.chipNone
-                        }`}>
-                          <span className={styles.chipDot} />
-                          {OFFLINE_STATUS_LABEL[offlineStatus]}
-                        </span>
+                        <span className={styles.infoValue}>{OFFLINE_STATUS_LABEL[offlineStatus]}</span>
                       </div>
 
                       {offlineStatus === 'downloading' && (
@@ -544,17 +580,10 @@ export default function MenuSheet({
                   <div className={styles.card}>
                     <div className={styles.statusRow}>
                       <span className={styles.statusLabel}>Nettverk</span>
-                      <span className={`${styles.statusChip} ${online ? styles.chipOnline : styles.chipOffline}`}>
-                        <span className={styles.chipDot} />
-                        {online ? 'Online' : 'Offline'}
+                      <span className={styles.infoValue}>
+                        {online ? `Tilkoblet (${connectionType()})` : 'Frakoblet'}
                       </span>
                     </div>
-                    {online && (
-                      <div className={`${styles.statusRow} ${styles.statusRowBorder}`}>
-                        <span className={styles.statusLabel}>Type</span>
-                        <span className={styles.infoValue}>{connectionType()}</span>
-                      </div>
-                    )}
                   </div>
                 </div>
 
@@ -573,38 +602,19 @@ export default function MenuSheet({
                 <div className={styles.section}>
                   <p className={styles.sectionTitle}>GPS</p>
                   <div className={styles.card}>
-                    <div className={styles.statusRow}>
-                      <span className={styles.statusLabel}>Posisjon</span>
-                      <span className={`${styles.statusChip} ${active ? styles.chipOnline : styles.chipNone}`}>
-                        <span className={styles.chipDot} />
-                        {active ? 'Aktiv' : 'Av'}
-                      </span>
-                    </div>
-                    {error && (
-                      <div className={`${styles.statusRow} ${styles.statusRowBorder}`}>
-                        <span className={styles.statusLabel}>Feil</span>
-                        <span className={styles.infoValue}>{error}</span>
-                      </div>
-                    )}
+                    <ToggleRow
+                      label="GPS"
+                      description="Vis posisjonen din på kartet"
+                      checked={active}
+                      onChange={() => onToggle()}
+                    />
                     {active && position && position.accuracy != null && (
                       <div className={`${styles.statusRow} ${styles.statusRowBorder}`}>
                         <span className={styles.statusLabel}>Nøyaktighet</span>
                         <span className={styles.infoValue}>±{Math.round(position.accuracy)} m</span>
                       </div>
                     )}
-                    <div className={`${styles.statusRow} ${styles.statusRowBorder}`}>
-                      <span className={styles.statusLabel}>{active ? 'Slå av GPS' : 'Slå på GPS'}</span>
-                      <button
-                        type="button"
-                        role="switch"
-                        aria-checked={active}
-                        className={`${styles.toggle} ${active ? styles.toggleOn : ''}`}
-                        onClick={onToggle}
-                        aria-label="GPS"
-                      >
-                        <span className={styles.toggleThumb} />
-                      </button>
-                    </div>
+                    {error && <p className={styles.errorText}>{error}</p>}
                   </div>
                 </div>
 

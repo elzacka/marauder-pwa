@@ -80,6 +80,36 @@ function buildStyle(tilesUrl: string): maplibregl.StyleSpecification {
 
 const EMPTY_FC: FeatureCollection = { type: 'FeatureCollection', features: [] }
 
+/**
+ * Heart icon for favourite markers, drawn on a canvas (no innerHTML).
+ * Burgundy fill with cream outline — matches the POI marker palette but the
+ * shape alone distinguishes favourites.
+ */
+function makeHeartImage(size = 56): ImageData {
+  const canvas = document.createElement('canvas')
+  canvas.width = size
+  canvas.height = size
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return new ImageData(size, size)
+  const s = size / 32
+  ctx.translate(size / 2, size / 2 + 1 * s)
+  ctx.beginPath()
+  ctx.moveTo(0, 10 * s)
+  ctx.bezierCurveTo(-2 * s, 8 * s, -12 * s, 2 * s, -12 * s, -4 * s)
+  ctx.bezierCurveTo(-12 * s, -9 * s, -8.5 * s, -11.5 * s, -5.5 * s, -11.5 * s)
+  ctx.bezierCurveTo(-3 * s, -11.5 * s, -1 * s, -10 * s, 0, -7.5 * s)
+  ctx.bezierCurveTo(1 * s, -10 * s, 3 * s, -11.5 * s, 5.5 * s, -11.5 * s)
+  ctx.bezierCurveTo(8.5 * s, -11.5 * s, 12 * s, -9 * s, 12 * s, -4 * s)
+  ctx.bezierCurveTo(12 * s, 2 * s, 2 * s, 8 * s, 0, 10 * s)
+  ctx.closePath()
+  ctx.fillStyle = '#5C1010'
+  ctx.strokeStyle = '#F5ECD7'
+  ctx.lineWidth = 2 * s
+  ctx.fill()
+  ctx.stroke()
+  return ctx.getImageData(0, 0, size, size)
+}
+
 function addOverlays(
   map: maplibregl.Map,
   onLocationSelectRef: React.MutableRefObject<((loc: HPLocation) => void) | undefined>,
@@ -94,16 +124,31 @@ function addOverlays(
     paint: { 'fill-color': '#EAD8AE', 'fill-opacity': 0.72 },
   })
 
-  // HP locations — visible by default (matches App's initial 'all' filter).
-  // The activeFilter effect may run before this layer exists and will then no-op,
-  // so the initial layout here must agree with App's initial filter state.
+  // HP locations — hidden by default: the map starts empty and markers appear
+  // only when a category is chosen (product decision, Lene 2026-07-05). This
+  // initial visibility must agree with App's initial activeFilter (null).
   map.addSource('hp-locations', { type: 'geojson', data: EMPTY_FC })
   map.addLayer({
     id: 'hp-dots',
     type: 'circle',
     source: 'hp-locations',
     paint: HP_PAINT,
-    layout: { visibility: 'visible' },
+    layout: { visibility: 'none' },
+  })
+
+  // Favourite hearts — heart-shaped markers for favourites ("Alle" toggle).
+  // Rendered above hp-dots; filter/visibility managed by the filter effect.
+  map.addImage('heart-marker', makeHeartImage(), { pixelRatio: 2 })
+  map.addLayer({
+    id: 'favourite-hearts',
+    type: 'symbol',
+    source: 'hp-locations',
+    layout: {
+      'icon-image': 'heart-marker',
+      'icon-size': ['interpolate', ['linear'], ['zoom'], 5, 0.7, 12, 1.0],
+      'icon-allow-overlap': true,
+      visibility: 'none',
+    },
   })
 
   // Selected HP location (single marker)
@@ -122,6 +167,19 @@ function addOverlays(
   })
   map.on('mouseenter', 'hp-dots', () => { map.getCanvas().style.cursor = 'pointer' })
   map.on('mouseleave', 'hp-dots', () => { map.getCanvas().style.cursor = '' })
+
+  // Favourite hearts open the same POI detail as regular dots
+  map.on('click', 'favourite-hearts', (e) => {
+    if (!e.features?.length || !onLocationSelectRef.current) return
+    const feat = e.features[0]
+    const geom = feat.geometry
+    if (geom.type !== 'Point') return
+    onLocationSelectRef.current(
+      propsToLocation(feat.properties, geom.coordinates[0], geom.coordinates[1]),
+    )
+  })
+  map.on('mouseenter', 'favourite-hearts', () => { map.getCanvas().style.cursor = 'pointer' })
+  map.on('mouseleave', 'favourite-hearts', () => { map.getCanvas().style.cursor = '' })
 
   // Custom places
   map.addSource('custom-places', { type: 'geojson', data: EMPTY_FC })
@@ -193,7 +251,9 @@ type Props = {
   geocodeMarker?: { lng: number; lat: number } | null
   onGeocodeMarkerClick?: () => void
   selectedLocation?: HPLocation | null
-  activeFilter?: FilterState | null
+  activeFilter?: FilterState
+  /** Favourite POI ids to force-show as markers regardless of category filter */
+  favouriteMarkerIds?: string[]
   hpLocations?: FeatureCollection | null
 }
 
@@ -203,7 +263,7 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
     mapMode = 'browse', measurePoints = [], onMeasurePoint,
     customPlaces = [], onCustomPlaceClick,
     onLongPress, geocodeMarker, onGeocodeMarkerClick,
-    selectedLocation = null, activeFilter = null,
+    selectedLocation = null, activeFilter, favouriteMarkerIds = [],
     hpLocations = null,
   } = props
 
@@ -419,6 +479,8 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
   }, [selectedLocation])
 
   // Active category filter → hp-dots visibility and filter expression.
+  // Multi-select: each checked category contributes an OR-branch; no checked
+  // categories = layer hidden (map starts empty — product decision).
   // mapReady in deps: a filter chosen before the map finished loading must be
   // applied once the layer exists.
   useEffect(() => {
@@ -426,29 +488,45 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
     if (!mapReady || !map) return
     if (!map.getLayer('hp-dots')) return
 
-    if (!activeFilter) {
+    const cats = activeFilter?.categories ?? []
+    const parts: unknown[] = []
+
+    for (const cat of cats) {
+      const catExpr = ['in', cat, ['get', 'categories']]
+      if (cat === 'locations') {
+        const types = activeFilter?.locationTypes ?? []
+        if (types.length > 0 && types.length < 3) {
+          parts.push(['all', catExpr, ['match', ['get', 'location_type'], types, true, false]])
+        } else {
+          parts.push(catExpr)
+        }
+      } else {
+        parts.push(catExpr)
+      }
+    }
+
+    // Favourites ("Alle" toggle) render as hearts in their own layer; the same
+    // POIs are excluded from hp-dots so a favourite never shows dot + heart.
+    const hasFavs = favouriteMarkerIds.length > 0
+    if (map.getLayer('favourite-hearts')) {
+      map.setLayoutProperty('favourite-hearts', 'visibility', hasFavs ? 'visible' : 'none')
+      if (hasFavs) {
+        map.setFilter('favourite-hearts', ['match', ['get', 'id'], favouriteMarkerIds, true, false] as unknown as maplibregl.FilterSpecification)
+      }
+    }
+
+    if (parts.length === 0) {
       map.setLayoutProperty('hp-dots', 'visibility', 'none')
       return
     }
 
     map.setLayoutProperty('hp-dots', 'visibility', 'visible')
-
-    if (activeFilter.category === 'all') {
-      map.setFilter('hp-dots', null)
-      return
+    let expr: unknown = parts.length === 1 ? parts[0] : ['any', ...parts]
+    if (hasFavs) {
+      expr = ['all', expr, ['!', ['match', ['get', 'id'], favouriteMarkerIds, true, false]]]
     }
-
-    const catExpr = ['in', activeFilter.category, ['get', 'categories']] as unknown as maplibregl.FilterSpecification
-
-    if (activeFilter.locationType !== 'all') {
-      map.setFilter('hp-dots', ['all',
-        catExpr,
-        ['==', ['get', 'location_type'], activeFilter.locationType],
-      ] as unknown as maplibregl.FilterSpecification)
-    } else {
-      map.setFilter('hp-dots', catExpr)
-    }
-  }, [activeFilter, mapReady])
+    map.setFilter('hp-dots', expr as maplibregl.FilterSpecification)
+  }, [activeFilter, favouriteMarkerIds, mapReady])
 
   // HP locations data — set when the fetched FeatureCollection arrives OR when
   // the map becomes ready, whichever happens last (see mapReady comment above)

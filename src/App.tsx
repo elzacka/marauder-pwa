@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useGeolocation } from './hooks/useGeolocation'
 import { useWakeLock } from './hooks/useWakeLock'
 import { useOfflineTiles } from './hooks/useOfflineTiles'
@@ -16,7 +16,7 @@ import InstallBanner from './components/InstallBanner'
 import GeocodeCard from './components/GeocodeCard'
 import type { HPLocation } from './types/hp-location'
 import type { CustomPlace } from './types/custom-place'
-import type { FilterState } from './ds/filterMeta'
+import { emptyFilter, type FilterState } from './ds/filterMeta'
 
 const PMTILES_URL = import.meta.env.VITE_PMTILES_URL as string | undefined
 
@@ -63,10 +63,19 @@ export default function App() {
   // Card is shown on pin tap only (Lene, 2026-07-05) — selection drops just the pin.
   const [showGeocodeCard, setShowGeocodeCard] = useState(false)
   const [pendingLongPress, setPendingLongPress] = useState<{ lng: number; lat: number; name?: string } | null>(null)
-  // Default: show all HP dots on first paint — the map's whole purpose is showing them.
-  // The filter narrows the view; it is not a gate for seeing anything at all.
-  const [activeFilter, setActiveFilter] = useState<FilterState | null>({ category: 'all', locationType: 'all' })
+  // PRODUCT DECISION (Lene, 2026-07-05): the map starts EMPTY. POI markers
+  // appear only for categories the user has CHECKED in the menu; unchecking
+  // removes them. No checked categories = no markers. Do not change this.
+  const [activeFilter, setActiveFilter] = useState<FilterState>(emptyFilter)
+  // "Alle" over favourites: show every favourite as a map marker in one tap
+  const [favouritesOnMap, setFavouritesOnMap] = useState(false)
   const mapRef = useRef<MapHandle>(null)
+
+  // Stable id list for the map filter; empty when the toggle is off
+  const favouriteMarkerIds = useMemo(
+    () => (favouritesOnMap ? [...favouriteIds] : []),
+    [favouritesOnMap, favouriteIds],
+  )
 
   useEffect(() => {
     if (status === 'ready') {
@@ -172,6 +181,7 @@ export default function App() {
         onGeocodeMarkerClick={() => setShowGeocodeCard((v) => !v)}
         selectedLocation={selectedLocation}
         activeFilter={activeFilter}
+        favouriteMarkerIds={favouriteMarkerIds}
         hpLocations={hpLocations}
       />
       {measureMode && (
@@ -197,6 +207,8 @@ export default function App() {
         onCustomPlaceClick={handleCustomPlaceClick}
         activeFilter={activeFilter}
         onFilterChange={setActiveFilter}
+        favouritesOnMap={favouritesOnMap}
+        onToggleFavouritesOnMap={() => setFavouritesOnMap((v) => !v)}
         showZoomControls={showZoomControls}
         onToggleZoomControls={handleToggleZoomControls}
         pmtilesEnabled={!!PMTILES_URL}

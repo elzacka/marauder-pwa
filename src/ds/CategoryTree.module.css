@@ -65,6 +65,32 @@
   text-align: left;
 }
 
+.checkbox {
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid rgba(26, 10, 0, 0.35);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--color-cream);
+  background: transparent;
+  transition: background var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out);
+}
+
+.checkboxOn {
+  background: var(--color-burgundy);
+  border-color: var(--color-burgundy);
+}
+
+.subRow .checkbox {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+}
+
 .rowLabel {
   font-family: var(--font-body);
   font-size: var(--text-base);

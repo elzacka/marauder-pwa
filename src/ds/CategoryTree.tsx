@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { CATEGORY_META } from './filterMeta'
+import { CATEGORY_META, ALL_CATEGORY_KEYS, LOCATION_TYPES } from './filterMeta'
 import type { FilterState } from './filterMeta'
 import styles from './CategoryTree.module.css'
 
@@ -10,12 +10,33 @@ const TYPE_LABELS: Record<string, string> = {
 }
 
 type Props = {
-  value: FilterState | null
+  value: FilterState
   onChange: (f: FilterState) => void
 }
 
+function CheckBox({ checked }: { checked: boolean }) {
+  return (
+    <span className={`${styles.checkbox} ${checked ? styles.checkboxOn : ''}`} aria-hidden="true">
+      {checked && (
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6.5L4.8 9.2L10 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )}
+    </span>
+  )
+}
+
+/**
+ * Multi-select category tree with explicit checkboxes (Lene, 2026-07-05).
+ * Checking adds that category's markers to the map; unchecking removes them.
+ * "All places" is a master toggle. No checked categories = empty map.
+ */
 export function CategoryTree({ value, onChange }: Props) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
+
+  const selected = new Set(value.categories)
+  const selectedTypes = new Set(value.locationTypes)
+  const allSelected = ALL_CATEGORY_KEYS.every((k) => selected.has(k))
 
   function toggleExpand(e: React.MouseEvent, key: string) {
     e.stopPropagation()
@@ -27,29 +48,56 @@ export function CategoryTree({ value, onChange }: Props) {
     })
   }
 
-  function selectCategory(key: string) {
-    onChange({ category: key, locationType: 'all' })
+  function toggleAll() {
+    if (allSelected) {
+      onChange({ categories: [], locationTypes: [] })
+    } else {
+      onChange({ categories: [...ALL_CATEGORY_KEYS], locationTypes: [...LOCATION_TYPES] })
+    }
   }
 
-  function selectType(category: string, type: string) {
-    onChange({ category, locationType: type })
+  function toggleCategory(key: string) {
+    const next = new Set(selected)
+    let nextTypes = [...selectedTypes]
+    if (next.has(key)) {
+      next.delete(key)
+      if (key === 'locations') nextTypes = []
+    } else {
+      next.add(key)
+      if (key === 'locations') nextTypes = [...LOCATION_TYPES]
+    }
+    onChange({ categories: [...next], locationTypes: nextTypes })
   }
 
-  const isAllActive = value?.category === 'all'
-  const categories = CATEGORY_META.filter((c) => c.key !== 'all')
+  function toggleType(type: string) {
+    const nextTypes = new Set(selectedTypes)
+    if (nextTypes.has(type)) nextTypes.delete(type)
+    else nextTypes.add(type)
+
+    const next = new Set(selected)
+    if (nextTypes.size === 0) {
+      // No sub-types left: the whole Locations category is unchecked
+      next.delete('locations')
+    } else {
+      next.add('locations')
+    }
+    onChange({ categories: [...next], locationTypes: [...nextTypes] })
+  }
 
   return (
     <div className={styles.tree}>
       <button
         type="button"
-        className={`${styles.row} ${isAllActive ? styles.rowActive : ''}`}
-        onClick={() => selectCategory('all')}
+        className={`${styles.row} ${allSelected ? styles.rowActive : ''}`}
+        onClick={toggleAll}
+        aria-pressed={allSelected}
       >
-        <span className={styles.rowLabel}>All places</span>
+        <CheckBox checked={allSelected} />
+        <span className={styles.rowLabel}>Alle</span>
       </button>
 
-      {categories.map((cat) => {
-        const isSelected = value?.category === cat.key
+      {CATEGORY_META.map((cat) => {
+        const isSelected = selected.has(cat.key)
         const isExpanded = expanded.has(cat.key)
         const hasSubTypes = cat.types.length > 1
 
@@ -59,8 +107,10 @@ export function CategoryTree({ value, onChange }: Props) {
               <button
                 type="button"
                 className={styles.rowMain}
-                onClick={() => selectCategory(cat.key)}
+                onClick={() => toggleCategory(cat.key)}
+                aria-pressed={isSelected}
               >
+                <CheckBox checked={isSelected} />
                 <span className={styles.rowLabel}>{cat.label}</span>
               </button>
               {hasSubTypes && (
@@ -82,23 +132,21 @@ export function CategoryTree({ value, onChange }: Props) {
 
             {hasSubTypes && isExpanded && (
               <div className={styles.subTree}>
-                <button
-                  type="button"
-                  className={`${styles.subRow} ${isSelected && value?.locationType === 'all' ? styles.subRowActive : ''}`}
-                  onClick={() => selectType(cat.key, 'all')}
-                >
-                  All types
-                </button>
-                {cat.types.map((t) => (
-                  <button
-                    key={t}
-                    type="button"
-                    className={`${styles.subRow} ${isSelected && value?.locationType === t ? styles.subRowActive : ''}`}
-                    onClick={() => selectType(cat.key, t)}
-                  >
-                    {TYPE_LABELS[t] ?? t}
-                  </button>
-                ))}
+                {cat.types.map((t) => {
+                  const typeChecked = isSelected && selectedTypes.has(t)
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      className={`${styles.subRow} ${typeChecked ? styles.subRowActive : ''}`}
+                      onClick={() => toggleType(t)}
+                      aria-pressed={typeChecked}
+                    >
+                      <CheckBox checked={typeChecked} />
+                      {TYPE_LABELS[t] ?? t}
+                    </button>
+                  )
+                })}
               </div>
             )}
           </div>

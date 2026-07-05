@@ -41,7 +41,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 72svh;
+  height: var(--sheet-default-height);
   background: var(--surface-card, #F5ECD7);
   border-radius: 20px 20px 0 0;
   box-shadow: 0 -4px 32px rgba(26, 10, 0, 0.18);
@@ -230,6 +230,7 @@
 }
 
 .actionDesc {
+  padding: 10px 14px 4px;
   font-family: var(--font-body);
   font-size: var(--text-base);
   color: var(--text-secondary);
@@ -339,6 +340,84 @@
   margin-top: 0;
 }
 
+/* Collapsible section header (Kategorier / Favoritter) */
+.sectionToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: var(--touch-min);
+  padding: 10px 16px 4px;
+  background: none;
+  border: none;
+  border-top: 1px solid rgba(26, 10, 0, 0.07);
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.sectionToggle:first-child {
+  border-top: none;
+}
+
+.sectionChevron {
+  transition: transform var(--duration-fast) var(--ease-out);
+  flex-shrink: 0;
+}
+
+.sectionChevronOpen {
+  transform: rotate(180deg);
+}
+
+/* Checkbox row ("Alle" over favourites).
+   NB: named favAllRow, NOT toggleRow — .toggleRow is the settings switch row. */
+.favAllRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 16px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(26, 10, 0, 0.07);
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--text-primary);
+}
+
+.favAllRowActive {
+  background: rgba(92, 16, 16, 0.06);
+  color: var(--color-burgundy);
+  font-weight: var(--weight-semibold);
+}
+
+.toggleBox {
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid rgba(26, 10, 0, 0.35);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--color-cream);
+  transition: background var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out);
+}
+
+.toggleBoxOn {
+  background: var(--color-burgundy);
+  border-color: var(--color-burgundy);
+}
+
 .empty {
   padding: 28px 16px;
   font-family: var(--font-body);
@@ -430,7 +509,9 @@
 }
 
 .card {
-  background: var(--surface-base);
+  /* Transparent on the cream sheet — a hairline is enough separation;
+     a second surface colour added visual noise (2026-07-05) */
+  background: transparent;
   border-radius: var(--radius-card);
   border: 1px solid rgba(26, 10, 0, 0.1);
   overflow: hidden;
@@ -454,46 +535,9 @@
   color: var(--text-primary);
 }
 
-.statusChip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  padding: 3px 10px;
-  border-radius: var(--radius-full);
-}
-
-.chipDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.chipOnline { background: rgba(158, 107, 26, 0.10); color: var(--color-gold-muted); }
-.chipOnline .chipDot { background: var(--color-gold); }
-
-.chipOffline { background: rgba(139, 94, 10, 0.12); color: var(--color-warning); }
-.chipOffline .chipDot { background: var(--color-warning); }
-
-.chipReady { background: rgba(158, 107, 26, 0.10); color: var(--color-gold-muted); }
-.chipReady .chipDot { background: var(--color-gold); }
-
-.chipDownloading { background: rgba(158, 107, 26, 0.12); color: var(--color-gold-muted); animation: chipPulse 1.4s ease-in-out infinite; }
-.chipDownloading .chipDot { background: var(--color-gold); }
-
-.chipError { background: rgba(92, 16, 16, 0.1); color: var(--color-burgundy); }
-.chipError .chipDot { background: var(--color-burgundy); }
-
-.chipNone { background: rgba(26, 10, 0, 0.06); color: var(--text-muted); }
-.chipNone .chipDot { background: var(--text-muted); }
-
-@keyframes chipPulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.6; }
-}
+/* Status values are plain right-aligned text (.infoValue) — the coloured
+   chip/dot system was removed 2026-07-05: words carry the state, not colour
+   (design simplification, Lene). */
 
 /* Progress bar (offline download) */
 .progressWrap {
@@ -510,7 +554,7 @@
 
 .progressFill {
   height: 100%;
-  background: var(--color-gold);
+  background: var(--color-burgundy);
   border-radius: 2px;
   transition: width 200ms var(--ease-out);
 }
@@ -550,37 +594,26 @@
 
 .btnPrimary:hover { background: var(--color-burgundy-dark); }
 
-.btnSecondary {
-  width: 100%;
-  padding: 10px;
-  background: none;
-  color: var(--color-burgundy);
-  border: var(--border-width-base) solid var(--color-burgundy);
-  border-radius: var(--radius-btn);
-  font-family: var(--font-body);
-  font-size: var(--text-base);
-  font-weight: var(--weight-medium);
-  cursor: pointer;
-  transition: background var(--duration-fast) var(--ease-out);
-}
-
-.btnSecondary:hover { background: rgba(92, 16, 16, 0.06); }
-
+/* Quiet text buttons — one accent (btnPrimary); everything else is calm text.
+   btnSecondary and btnDanger are intentionally identical: the words carry the
+   meaning, not competing borders/colours (design simplification 2026-07-05). */
+.btnSecondary,
 .btnDanger {
   width: 100%;
   padding: 10px;
   background: none;
-  color: var(--color-gold-muted);
-  border: var(--border-width-base) solid var(--color-gold-muted);
+  color: var(--color-burgundy);
+  border: none;
   border-radius: var(--radius-btn);
   font-family: var(--font-body);
   font-size: var(--text-base);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-semibold);
   cursor: pointer;
   transition: background var(--duration-fast) var(--ease-out);
 }
 
-.btnDanger:hover { background: rgba(122, 82, 20, 0.08); }
+.btnSecondary:hover,
+.btnDanger:hover { background: rgba(92, 16, 16, 0.06); }
 
 /* Toggle row */
 .toggleRow {

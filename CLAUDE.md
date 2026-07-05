@@ -19,12 +19,9 @@ Primary users: Lene + her 14-year old daughter, on iPhones, often offline (Scott
 
 ## Data files
 
-Two copies of location data exist — keep them in sync or remove the stale one:
-- `public/data/hp-locations.json` — canonical, 30 features, fetched at runtime (served by Workbox)
-- `src/data/hp-locations.json` — stale 14-feature snapshot; do NOT import this file in source code
-
-**Never import `src/data/hp-locations.json` directly into any component or module.**
-The correct path is to use `useHPLocations()` which fetches from `public/data/`.
+- `public/data/hp-locations.json` — canonical, fetched at runtime (served by Workbox).
+  The stale `src/data/` copy was deleted 2026-07-05; never reintroduce bundled JSON
+  under `src/data/`. Use `useHPLocations()` which fetches from `public/data/`.
 
 To update POI data: `npm run fetch-data` (runs `scripts/fetch-hp-data.mjs`).
 
@@ -51,12 +48,25 @@ Always use: `tsc --noEmit -p tsconfig.app.json`
 
 ## Dead code
 
-`NearbySheet.tsx` is not imported anywhere (replaced by MenuSheet). It is kept intentionally for now; do not extract logic from it — it will be deleted.
+`NearbySheet.tsx`, `NearbySheet.module.css`, `ds/CategoryFilter.tsx` and the stale
+`src/data/hp-locations.json` were deleted 2026-07-05 (multi-select FilterState made
+them uncompilable). Remaining known-unused files: `OfflineDownload.tsx`,
+`AppHeader.tsx`, `ds/Button.tsx`, `ds/BottomSheet.tsx` — delete when convenient.
 
 ## Offline-first priorities
 
 P1: Offline Skottland-tiles (togreisen). P1: iPhone optimisation. P2+ everything else.
 When adding features, verify PWA offline behaviour manually on iPhone or via DevTools offline mode.
+
+## Map POI markers — product decision
+
+The map starts EMPTY (Lene, 2026-07-05). Categories are MULTI-SELECT checkboxes:
+each checked category/sub-type adds its POI markers to the map, unchecking
+removes them, and no checked categories = no markers (`activeFilter` starts as
+`emptyFilter()`, `hp-dots` layer starts `visibility: 'none'`). "All places" is a
+master toggle. Do not "fix" this by showing markers on startup, and do not
+revert FilterState to single-select. Search pins, custom-place markers and the
+selected-location marker are unaffected.
 
 ## Map flyTo
 
