@@ -109,7 +109,7 @@
 .searchRow {
   flex-shrink: 0;
   padding: 10px 12px;
-  border-bottom: 1px solid rgba(26, 10, 0, 0.07);
+  border-bottom: 1px solid var(--border-hairline);
 }
 
 .searchWrap {
@@ -156,29 +156,31 @@
   display: none;
 }
 
+/* 40px hit area (D8/WCAG); the visual 22px circle is drawn by background-clip */
 .clearBtn {
   position: absolute;
-  right: 6px;
-  width: 22px;
-  height: 22px;
+  right: 0;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(26, 10, 0, 0.1);
+  background: var(--border-card);
+  background-clip: content-box;
+  padding: 9px;
   border: none;
   border-radius: var(--radius-full);
   font-size: 16px;
   line-height: 1;
   color: var(--text-muted);
   cursor: pointer;
-  padding: 0;
 }
 
 /* Favourites chip row (Hjem tab) */
 .chipRow {
   flex-shrink: 0;
   padding: 8px 12px;
-  border-bottom: 1px solid rgba(26, 10, 0, 0.07);
+  border-bottom: 1px solid var(--border-hairline);
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
@@ -261,7 +263,7 @@
   padding: 11px 16px;
   background: none;
   border: none;
-  border-bottom: 1px solid rgba(26, 10, 0, 0.07);
+  border-bottom: 1px solid var(--border-hairline);
   cursor: pointer;
   text-align: left;
   gap: 10px;
@@ -274,7 +276,7 @@
 
 .item:hover,
 .item:focus-visible {
-  background: rgba(26, 10, 0, 0.04);
+  background: var(--bg-hover);
   outline: none;
 }
 
@@ -336,7 +338,7 @@
   letter-spacing: var(--tracking-widest);
   text-transform: uppercase;
   color: var(--text-muted);
-  border-top: 1px solid rgba(26, 10, 0, 0.07);
+  border-top: 1px solid var(--border-hairline);
   margin-top: 4px;
 }
 
@@ -355,7 +357,7 @@
   padding: 10px 16px 4px;
   background: none;
   border: none;
-  border-top: 1px solid rgba(26, 10, 0, 0.07);
+  border-top: 1px solid var(--border-hairline);
   cursor: pointer;
   text-align: left;
   font-family: var(--font-body);
@@ -390,7 +392,7 @@
   padding: 0 16px;
   background: none;
   border: none;
-  border-bottom: 1px solid rgba(26, 10, 0, 0.07);
+  border-bottom: 1px solid var(--border-hairline);
   cursor: pointer;
   text-align: left;
   font-family: var(--font-body);
@@ -449,7 +451,7 @@
 .tabBar {
   flex-shrink: 0;
   display: flex;
-  border-top: 1px solid rgba(26, 10, 0, 0.1);
+  border-top: 1px solid var(--border-card);
   background: var(--surface-card);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
@@ -518,7 +520,7 @@
      a second surface colour added visual noise (2026-07-05) */
   background: transparent;
   border-radius: var(--radius-card);
-  border: 1px solid rgba(26, 10, 0, 0.1);
+  border: 1px solid var(--border-card);
   overflow: hidden;
 }
 
@@ -531,7 +533,7 @@
 }
 
 .statusRowBorder {
-  border-top: 1px solid rgba(26, 10, 0, 0.07);
+  border-top: 1px solid var(--border-hairline);
 }
 
 .statusLabel {
@@ -598,6 +600,25 @@
 }
 
 .btnPrimary:hover { background: var(--color-burgundy-dark); }
+
+/* Delete button in the offline area list */
+.areaDeleteBtn {
+  width: var(--touch-min);
+  height: var(--touch-min);
+  margin: -12px -8px -12px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.areaDeleteBtn:hover {
+  color: var(--color-burgundy);
+}
 
 /* Quiet text buttons — one accent (btnPrimary); everything else is calm text.
    btnSecondary and btnDanger are intentionally identical: the words carry the
@@ -691,7 +712,7 @@
 }
 
 .infoRowBorder {
-  border-top: 1px solid rgba(26, 10, 0, 0.07);
+  border-top: 1px solid var(--border-hairline);
 }
 
 .infoValue {
@@ -708,7 +729,7 @@
   font-size: var(--text-sm);
   color: var(--text-muted);
   line-height: var(--leading-normal);
-  border-top: 1px solid rgba(26, 10, 0, 0.07);
+  border-top: 1px solid var(--border-hairline);
 }
 
 .omLink {

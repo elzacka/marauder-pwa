@@ -5,10 +5,10 @@ import { type FilterState, CATEGORY_META, locationMatchesFilter } from '../ds/fi
 import { haversineKm, formatDistance } from '../utils/distance'
 import { useNominatim, formatNominatimName } from '../hooks/useNominatim'
 import { useSheetDrag } from '../hooks/useSheetDrag'
-import { formatBytes } from '../offline/OfflineMapManager'
+import { formatBytes, estimateBytes, type OfflineArea } from '../offline/OfflineAreaManager'
 import { Badge } from '../ds/Badge'
 import type { HPLocation } from '../types/hp-location'
-import type { OfflineStatus } from '../hooks/useOfflineTiles'
+import type { OfflineAreaStatus } from '../hooks/useOfflineAreas'
 import type { Position } from '../hooks/useGeolocation'
 import type { CustomPlace } from '../types/custom-place'
 import styles from './MenuSheet.module.css'
@@ -44,14 +44,6 @@ const SEARCH_PLACEHOLDERS = [
   'Søk etter The Leaky Cauldron…',
 ]
 
-const OFFLINE_STATUS_LABEL: Record<OfflineStatus, string> = {
-  none:        'Ikke lastet ned',
-  checking:    'Sjekker…',
-  downloading: 'Laster ned',
-  ready:       'Kart lagret',
-  error:       'Nedlastingsfeil',
-}
-
 function connectionType(): string {
   const conn = (navigator as unknown as { connection?: { type?: string; effectiveType?: string } }).connection
   if (!conn) return 'Ukjent'
@@ -83,15 +75,17 @@ type Props = {
   onToggleFavouritesOnMap: () => void
   showZoomControls: boolean
   onToggleZoomControls: (v: boolean) => void
-  pmtilesEnabled: boolean
-  offlineStatus: OfflineStatus
-  downloaded: number
-  total: number
+  offlineAreas: OfflineArea[]
+  offlineStatus: OfflineAreaStatus
+  offlineDone: number
+  offlineTotal: number
   offlineError: string | null
-  onDownload: () => void
-  onCancel: () => void
-  onDelete: () => void
+  onDownloadVisibleArea: () => void
+  onCancelDownload: () => void
+  onDeleteArea: (id: string) => void
   online: boolean
+  /** Data load error from useHPLocations — shown instead of silent emptiness (K5) */
+  dataError?: string | null
 }
 
 export default function MenuSheet({
@@ -101,9 +95,9 @@ export default function MenuSheet({
   activeFilter, onFilterChange,
   favouritesOnMap, onToggleFavouritesOnMap,
   showZoomControls, onToggleZoomControls,
-  pmtilesEnabled, offlineStatus, downloaded, total, offlineError,
-  onDownload, onCancel, onDelete,
-  online,
+  offlineAreas, offlineStatus, offlineDone, offlineTotal, offlineError,
+  onDownloadVisibleArea, onCancelDownload, onDeleteArea,
+  online, dataError = null,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<MenuTab>('home')
@@ -188,7 +182,7 @@ export default function MenuSheet({
 
   const hasGeoResults = geoResults.length > 0
   const hasCustom = customPlaces.length > 0
-  const progress = total > 0 ? downloaded / total : 0
+  const progress = offlineTotal > 0 ? offlineDone / offlineTotal : 0
 
   return (
     <>
@@ -236,6 +230,7 @@ export default function MenuSheet({
         role="dialog"
         aria-modal={isOpen}
         aria-label="Meny"
+        inert={!isOpen}
       >
         {/* Drag zone */}
         <div
@@ -282,6 +277,10 @@ export default function MenuSheet({
               </div>
 
               <div className={styles.scrollArea}>
+                {dataError && (
+                  <p className={styles.errorText} role="alert">{dataError}</p>
+                )}
+
                 {/* HP location search results — only when there ARE hits; an
                     empty section must not push address results below the fold */}
                 {q && filteredHP.length > 0 && (
@@ -354,8 +353,15 @@ export default function MenuSheet({
                   <p className={styles.searchingText}>Søker…</p>
                 )}
 
+                {/* Offline: say WHY there are no address hits (D3) */}
+                {q && !online && (
+                  <p className={styles.empty}>
+                    Adressesøk krever internett. Harry Potter-steder kan du fortsatt søke i.
+                  </p>
+                )}
+
                 {/* Combined empty state — nothing matched in either source */}
-                {q && filteredHP.length === 0 && !hasGeoResults && !geoLoading && (
+                {q && online && filteredHP.length === 0 && !hasGeoResults && !geoLoading && (
                   <p className={styles.empty}>{`Ingen treff for «${query}»`}</p>
                 )}
 
@@ -496,57 +502,69 @@ export default function MenuSheet({
                   </div>
                 </div>
 
-                {pmtilesEnabled && (
-                  <div className={styles.section}>
-                    <p className={styles.sectionTitle}>Offline kart</p>
-                    <div className={styles.card}>
-                      <div className={styles.statusRow}>
-                        <span className={styles.statusLabel}>Storbritannia + Irland</span>
-                        <span className={styles.infoValue}>{OFFLINE_STATUS_LABEL[offlineStatus]}</span>
-                      </div>
+                <div className={styles.section}>
+                  <p className={styles.sectionTitle}>Offline kart</p>
+                  <div className={styles.card}>
+                    <p className={styles.actionDesc}>
+                      Naviger kartet til området du vil ha uten nett, og last det ned her.
+                      Nedlastede områder virker i flymodus.
+                      {connectionType().startsWith('Mobil') && ' Du er på mobildata nå.'}
+                    </p>
 
-                      {offlineStatus === 'downloading' && (
-                        <div className={styles.progressWrap}>
-                          <div className={styles.progressBar}>
-                            <div className={styles.progressFill} style={{ width: `${Math.round(progress * 100)}%` }} />
-                          </div>
-                          <span className={styles.progressLabel}>
-                            {total > 0
-                              ? `${formatBytes(downloaded)} av ${formatBytes(total)}`
-                              : `${formatBytes(downloaded)} lastet ned`}
-                          </span>
+                    {offlineStatus === 'downloading' && (
+                      <div className={styles.progressWrap}>
+                        <div className={styles.progressBar}>
+                          <div className={styles.progressFill} style={{ width: `${Math.round(progress * 100)}%` }} />
                         </div>
-                      )}
-
-                      {offlineError && offlineStatus === 'error' && (
-                        <p className={styles.errorText}>{offlineError}</p>
-                      )}
-
-                      <div className={styles.actionRow}>
-                        {offlineStatus === 'none' && (
-                          <button className={styles.btnPrimary} type="button" onClick={onDownload}>
-                            Last ned kart
-                          </button>
-                        )}
-                        {offlineStatus === 'error' && (
-                          <button className={styles.btnPrimary} type="button" onClick={onDownload}>
-                            Prøv igjen
-                          </button>
-                        )}
-                        {offlineStatus === 'downloading' && (
-                          <button className={styles.btnSecondary} type="button" onClick={onCancel}>
-                            Avbryt nedlasting
-                          </button>
-                        )}
-                        {offlineStatus === 'ready' && (
-                          <button className={styles.btnDanger} type="button" onClick={onDelete}>
-                            Slett lagret kart
-                          </button>
-                        )}
+                        <span className={styles.progressLabel}>
+                          {offlineTotal > 0
+                            ? `${offlineDone} av ${offlineTotal} kartfliser (ca. ${formatBytes(estimateBytes(offlineTotal))})`
+                            : 'Forbereder…'}
+                        </span>
                       </div>
+                    )}
+
+                    {offlineError && offlineStatus === 'error' && (
+                      <p className={styles.errorText}>{offlineError}</p>
+                    )}
+
+                    <div className={styles.actionRow}>
+                      {offlineStatus === 'downloading' ? (
+                        <button className={styles.btnSecondary} type="button" onClick={onCancelDownload}>
+                          Avbryt nedlasting
+                        </button>
+                      ) : (
+                        <button className={styles.btnPrimary} type="button" onClick={onDownloadVisibleArea}>
+                          Last ned området på skjermen
+                        </button>
+                      )}
                     </div>
                   </div>
-                )}
+
+                  {offlineAreas.length > 0 && (
+                    <div className={styles.card} style={{ marginTop: 12 }}>
+                      {offlineAreas.map((area, i) => (
+                        <div
+                          key={area.id}
+                          className={`${styles.statusRow} ${i > 0 ? styles.statusRowBorder : ''}`}
+                        >
+                          <span className={styles.statusLabel}>{area.name}</span>
+                          <span className={styles.infoValue}>{formatBytes(area.bytes)}</span>
+                          <button
+                            type="button"
+                            className={styles.areaDeleteBtn}
+                            onClick={() => onDeleteArea(area.id)}
+                            aria-label={`Slett ${area.name}`}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                              <path d="M3 5h12M7 5V3.5h4V5M6 5v9.5h6V5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
               </div>
             </div>

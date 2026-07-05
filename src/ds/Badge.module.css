@@ -1,0 +1,27 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-body);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  line-height: 1;
+  border-radius: var(--radius-full);
+  background: rgba(26, 10, 0, 0.07);
+  /* 0.75 ink for WCAG AA on parchment cards; 0.6 measured 4.24:1 and failed */
+  color: rgba(26, 10, 0, 0.75);
+  white-space: nowrap;
+}
+
+.sm { font-size: 10px; padding: 2px 7px;  gap: 4px; }
+.md { font-size: 11px; padding: 3px 9px;  gap: 5px; }
+.lg { font-size: 12px; padding: 4px 11px; gap: 5px; }
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  /* Colour set per category via inline custom property (dynamic mapping) */
+  background: var(--badge-dot-color, rgba(26, 10, 0, 0.4));
+}

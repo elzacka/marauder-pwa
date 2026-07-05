@@ -13,6 +13,20 @@ export default defineConfig({
       registerType: 'autoUpdate',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}', 'data/*.json'],
+        runtimeCaching: [
+          {
+            // Map tiles, style, TileJSON, glyphs and sprites. CacheFirst against
+            // the SAME cache that OfflineAreaManager writes downloaded areas
+            // into — that is what makes downloaded areas work offline. Tiles
+            // viewed online also accumulate here (ambient cache, like Tråkke).
+            urlPattern: /^https:\/\/tiles\.openfreemap\.org\//,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'map-tiles',
+              cacheableResponse: { statuses: [200] },
+            },
+          },
+        ],
       },
       manifest: {
         name: 'Marauder',

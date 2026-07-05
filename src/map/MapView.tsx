@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState, forwardRef, useImperativeHandle, useCallback } from 'react'
 import maplibregl from 'maplibre-gl'
-import { Protocol, PMTiles, FileSource } from 'pmtiles'
-import { layers, namedFlavor } from '@protomaps/basemaps'
 import type { FeatureCollection, Feature, Polygon } from 'geojson'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import type { Position } from '../hooks/useGeolocation'
@@ -31,8 +29,9 @@ const worldMask: Feature<Polygon> = {
   },
 }
 
-const pmtilesProtocol = new Protocol()
-maplibregl.addProtocol('pmtiles', pmtilesProtocol.tile)
+// Online style; offline is handled by area downloads + the service worker
+// serving tiles CacheFirst (see src/offline/OfflineAreaManager.ts)
+const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty'
 
 const HP_PAINT: maplibregl.CircleLayerSpecification['paint'] = {
   'circle-radius': ['interpolate', ['linear'], ['zoom'], 5, 7, 12, 12],
@@ -60,22 +59,6 @@ const SELECTED_HP_PAINT: maplibregl.CircleLayerSpecification['paint'] = {
   'circle-stroke-width': 3,
   'circle-stroke-color': '#FFFFFF',
   'circle-opacity': 1,
-}
-
-function buildStyle(tilesUrl: string): maplibregl.StyleSpecification {
-  return {
-    version: 8,
-    glyphs: 'https://protomaps.github.io/basemaps-assets/fonts/{fontstack}/{range}.pbf',
-    sprite: 'https://protomaps.github.io/basemaps-assets/sprites/v4/light',
-    sources: {
-      protomaps: {
-        type: 'vector',
-        url: `pmtiles://${tilesUrl}`,
-        attribution: '',
-      },
-    },
-    layers: layers('protomaps', namedFlavor('light'), { lang: 'en' }) as maplibregl.LayerSpecification[],
-  }
 }
 
 const EMPTY_FC: FeatureCollection = { type: 'FeatureCollection', features: [] }
@@ -232,14 +215,14 @@ function addOverlays(
 
 export type MapHandle = {
   flyTo: (lng: number, lat: number, zoom?: number) => void
+  /** Current visible map bounds — used for "download this area" */
+  getBounds: () => { west: number; south: number; east: number; north: number } | null
 }
 
 export type MapMode = 'browse' | 'measure'
 
 type Props = {
   position: Position | null
-  offlineFile?: File | null
-  pmtilesUrl?: string
   onLocationSelect?: (loc: HPLocation) => void
   showZoomControls?: boolean
   mapMode?: MapMode
@@ -259,7 +242,7 @@ type Props = {
 
 const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
   const {
-    position, offlineFile, pmtilesUrl, onLocationSelect, showZoomControls = true,
+    position, onLocationSelect, showZoomControls = true,
     mapMode = 'browse', measurePoints = [], onMeasurePoint,
     customPlaces = [], onCustomPlaceClick,
     onLongPress, geocodeMarker, onGeocodeMarkerClick,
@@ -279,7 +262,6 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
   const geocodeMarkerRef = useRef<maplibregl.Marker | null>(null)
   const navControlRef = useRef<maplibregl.NavigationControl | null>(null)
   const firstPositionRef = useRef(false)
-  const offlineRegisteredRef = useRef(false)
 
   const onLocationSelectRef = useRef(onLocationSelect)
   useEffect(() => { onLocationSelectRef.current = onLocationSelect }, [onLocationSelect])
@@ -297,7 +279,12 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
   const flyTo = useCallback((lng: number, lat: number, zoom = 13) => {
     mapRef.current?.flyTo({ center: [lng, lat], zoom, duration: 700 })
   }, [])
-  useImperativeHandle(ref, () => ({ flyTo }), [flyTo])
+  const getBounds = useCallback(() => {
+    const b = mapRef.current?.getBounds()
+    if (!b) return null
+    return { west: b.getWest(), south: b.getSouth(), east: b.getEast(), north: b.getNorth() }
+  }, [])
+  useImperativeHandle(ref, () => ({ flyTo, getBounds }), [flyTo, getBounds])
 
   const showZoomControlsRef = useRef(showZoomControls)
   useEffect(() => {
@@ -316,13 +303,9 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
   useEffect(() => {
     if (!containerRef.current) return
 
-    const style = pmtilesUrl
-      ? buildStyle(pmtilesUrl)
-      : 'https://tiles.openfreemap.org/styles/liberty'
-
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style,
+      style: MAP_STYLE,
       center: [-3.5, 55.5],
       zoom: 5,
       minZoom: 4,
@@ -378,9 +361,8 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
       geocodeMarkerRef.current = null
       navControlRef.current = null
       firstPositionRef.current = false
-      offlineRegisteredRef.current = false
     }
-  }, [pmtilesUrl])
+  }, [])
 
   // Cursor style for map mode
   useEffect(() => {
@@ -536,20 +518,6 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
     const src = map.getSource('hp-locations') as maplibregl.GeoJSONSource | undefined
     src?.setData(hpLocations)
   }, [hpLocations, mapReady])
-
-  // Offline PMTiles file registration
-  useEffect(() => {
-    if (!offlineFile) {
-      offlineRegisteredRef.current = false
-      return
-    }
-    if (!pmtilesUrl || offlineRegisteredRef.current) return
-    const source = new FileSource(offlineFile)
-    ;(source as unknown as { getKey: () => string }).getKey = () => pmtilesUrl
-    const p = new PMTiles(source)
-    pmtilesProtocol.add(p)
-    offlineRegisteredRef.current = true
-  }, [offlineFile, pmtilesUrl])
 
   // User position marker
   useEffect(() => {

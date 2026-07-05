@@ -48,15 +48,32 @@ Always use: `tsc --noEmit -p tsconfig.app.json`
 
 ## Dead code
 
-`NearbySheet.tsx`, `NearbySheet.module.css`, `ds/CategoryFilter.tsx` and the stale
-`src/data/hp-locations.json` were deleted 2026-07-05 (multi-select FilterState made
-them uncompilable). Remaining known-unused files: `OfflineDownload.tsx`,
-`AppHeader.tsx`, `ds/Button.tsx`, `ds/BottomSheet.tsx` — delete when convenient.
+All previously known-unused files were deleted 2026-07-05: `NearbySheet.tsx`,
+`ds/CategoryFilter.tsx`, `OfflineDownload.tsx`, `ds/Button.tsx`,
+`ds/BottomSheet.tsx` (+ their .module.css) and the stale `src/data/hp-locations.json`.
+`AppHeader.tsx` is back IN USE (the "Marauder" wordmark — reinstated 2026-07-05
+after being removed by mistake during PWA layout debugging). Do not delete it.
 
 ## Offline-first priorities
 
 P1: Offline Skottland-tiles (togreisen). P1: iPhone optimisation. P2+ everything else.
 When adding features, verify PWA offline behaviour manually on iPhone or via DevTools offline mode.
+
+## Offline map model — product decision (Lene, 2026-07-05)
+
+Area-based downloads, the Tråkke iOS model: the user downloads selected areas
+(current map view) locally on the device. NO external storage service, no
+pmtiles/OPFS — that path was removed 2026-07-05.
+
+- `src/offline/OfflineAreaManager.ts` computes the XYZ tile pyramid (z4–14) for
+  an area, fetches every openfreemap vector tile into the Cache API cache
+  `map-tiles`, and prefetches style/TileJSON/sprites/latin glyphs.
+- The service worker serves `tiles.openfreemap.org` CacheFirst from the SAME
+  cache (`runtimeCaching` in vite.config.ts) — this is what makes downloaded
+  areas render offline. Keep the cacheName `map-tiles` in sync between the two.
+- Area metadata lives in localStorage (`marauder-offline-areas`). Deleting an
+  area keeps tiles that other overlapping areas still need.
+- Do not reintroduce a single-file (pmtiles) download or external hosting.
 
 ## Map POI markers — product decision
 

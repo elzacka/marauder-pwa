@@ -1,8 +1,5 @@
 import type { CSSProperties } from 'react'
-
-const NEUTRAL_BG = 'rgba(26,10,0,0.07)'
-// 0.75 ink for WCAG AA on parchment cards; 0.6 measured 4.24:1 and failed for 10-12px text
-const NEUTRAL_COLOR = 'rgba(26,10,0,0.75)'
+import styles from './Badge.module.css'
 
 const VARIANT_DOT_COLORS: Record<string, string> = {
   filming:       '#3E1F6B',
@@ -45,16 +42,9 @@ type Props = {
   style?: CSSProperties
 }
 
-const SIZES: Record<BadgeSize, { fontSize: string; padding: string; gap: string }> = {
-  sm: { fontSize: '10px', padding: '2px 7px',  gap: '4px' },
-  md: { fontSize: '11px', padding: '3px 9px',  gap: '5px' },
-  lg: { fontSize: '12px', padding: '4px 11px', gap: '5px' },
-}
-
 export function Badge({ type, category, label, size = 'md', dot = false, style: extraStyle = {} }: Props) {
   const key = type ?? category ?? 'default'
   const dotColor = VARIANT_DOT_COLORS[key] ?? VARIANT_DOT_COLORS.default
-  const s = SIZES[size]
 
   const displayLabel =
     label ??
@@ -63,34 +53,11 @@ export function Badge({ type, category, label, size = 'md', dot = false, style: 
     key
 
   return (
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: s.gap,
-        fontSize: s.fontSize,
-        fontFamily: 'var(--font-body)',
-        fontWeight: 600,
-        letterSpacing: '0.06em',
-        textTransform: 'uppercase',
-        lineHeight: 1,
-        padding: s.padding,
-        borderRadius: 'var(--radius-full)',
-        background: NEUTRAL_BG,
-        color: NEUTRAL_COLOR,
-        whiteSpace: 'nowrap',
-        ...extraStyle,
-      }}
-    >
+    <span className={`${styles.badge} ${styles[size]}`} style={extraStyle}>
       {dot && (
         <span
-          style={{
-            width: 6,
-            height: 6,
-            borderRadius: '50%',
-            background: dotColor,
-            flexShrink: 0,
-          }}
+          className={styles.dot}
+          style={{ '--badge-dot-color': dotColor } as CSSProperties}
         />
       )}
       {displayLabel}

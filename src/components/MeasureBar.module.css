@@ -1,6 +1,8 @@
 .bar {
   position: fixed;
-  bottom: calc(var(--bottom-panel-peek, 128px) + env(safe-area-inset-bottom, 0px) + 12px);
+  /* Clear of the FAB row; the old --bottom-panel-peek token referenced a peek
+     state that never existed and was removed (D16, 2026-07-05) */
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
   left: 50%;
   transform: translateX(-50%);
   z-index: 45;
@@ -49,7 +51,7 @@
 }
 
 .btnPrimary {
-  padding: 5px 12px;
+  padding: 10px 14px;
   background: var(--color-burgundy);
   color: var(--color-cream);
   border: none;
@@ -61,7 +63,7 @@
 }
 
 .btnSecondary {
-  padding: 5px 12px;
+  padding: 10px 14px;
   background: none;
   color: var(--text-muted);
   border: var(--border-width-thin) solid rgba(26, 10, 0, 0.2);

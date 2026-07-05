@@ -22,6 +22,13 @@ function parseStringArray(v: unknown): string[] {
  * do not duplicate this conversion in components). Handles both raw GeoJSON
  * properties and MapLibre-serialised properties from queried features.
  */
+/** Only http(s) URLs are allowed into href attributes — the data pipeline
+ *  pulls from external sources (Wikidata/WikiVoyage), so never trust it (K9). */
+function safeExternalUrl(v: unknown): string | null {
+  if (typeof v !== 'string' || v === '') return null
+  return /^https?:\/\//i.test(v) ? v : null
+}
+
 export function propsToLocation(
   p: Record<string, unknown>,
   lng: number,
@@ -35,7 +42,7 @@ export function propsToLocation(
     hp_references: parseStringArray(p.hp_references),
     description: (p.description ?? '') as string,
     source: p.source as string,
-    external_url: (p.external_url ?? null) as string | null,
+    external_url: safeExternalUrl(p.external_url),
     lat,
     lng,
   }

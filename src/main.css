@@ -112,3 +112,28 @@ html, body, #root {
 *::-webkit-scrollbar {
   display: none;
 }
+
+/* Uniform keyboard focus indicator (D13) — one rule for the whole app */
+:where(button, a, input, select, textarea, [role='switch']):focus-visible {
+  outline: 2px solid var(--color-burgundy);
+  outline-offset: 2px;
+}
+
+/* Quiet offline indicator on the map surface (D12) */
+.offline-chip {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  right: 12px;
+  z-index: 20;
+  padding: 4px 12px;
+  background: var(--surface-overlay);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: var(--border-width-thin) solid var(--border-card);
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  pointer-events: none;
+  user-select: none;
+}

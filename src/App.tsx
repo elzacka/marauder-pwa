@@ -1,12 +1,11 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { useState, useRef, useCallback, useMemo } from 'react'
 import { useGeolocation } from './hooks/useGeolocation'
 import { useWakeLock } from './hooks/useWakeLock'
-import { useOfflineTiles } from './hooks/useOfflineTiles'
+import { useOfflineAreas } from './hooks/useOfflineAreas'
 import { useNetworkStatus } from './hooks/useNetworkStatus'
 import { useFavourites } from './hooks/useFavourites'
 import { useCustomPlaces } from './hooks/useCustomPlaces'
 import { useHPLocations } from './hooks/useHPLocations'
-import { getOfflineFile } from './offline/OfflineMapManager'
 import MapView, { type MapHandle } from './map/MapView'
 import MenuSheet from './components/MenuSheet'
 import POIDetailSheet from './components/POIDetailSheet'
@@ -18,8 +17,6 @@ import AppHeader from './components/AppHeader'
 import type { HPLocation } from './types/hp-location'
 import type { CustomPlace } from './types/custom-place'
 import { emptyFilter, type FilterState } from './ds/filterMeta'
-
-const PMTILES_URL = import.meta.env.VITE_PMTILES_URL as string | undefined
 
 function getInitialZoomControls(): boolean {
   return localStorage.getItem('showZoomControls') !== 'false'
@@ -45,14 +42,16 @@ export default function App() {
   useWakeLock(active)
   const online = useNetworkStatus()
 
-  const { status, downloaded, total, error: dlError, download, cancel, remove } =
-    useOfflineTiles(PMTILES_URL ?? '')
+  const {
+    areas: offlineAreas, status: offlineStatus, done: offlineDone,
+    total: offlineTotal, error: offlineError,
+    download: downloadOfflineArea, cancel: cancelOfflineDownload, remove: removeOfflineArea,
+  } = useOfflineAreas()
 
   const { favouriteIds, toggleFavourite } = useFavourites()
   const { customPlaces, addCustomPlace, updateCustomPlace, removeCustomPlace } = useCustomPlaces()
-  const { data: hpLocations, locations: hpLocationList } = useHPLocations()
+  const { data: hpLocations, locations: hpLocationList, error: dataError } = useHPLocations()
 
-  const [offlineFile, setOfflineFile] = useState<File | null>(null)
   const [selectedLocation, setSelectedLocation] = useState<HPLocation | null>(null)
   const [selectedIsCustom, setSelectedIsCustom] = useState(false)
   const [showZoomControls, setShowZoomControls] = useState(getInitialZoomControls)
@@ -79,13 +78,12 @@ export default function App() {
     [favouritesOnMap, favouriteIds],
   )
 
-  useEffect(() => {
-    if (status === 'ready') {
-      getOfflineFile().then((f) => setOfflineFile(f ?? null))
-    } else if (status === 'none') {
-      setOfflineFile(null)
-    }
-  }, [status])
+  function handleDownloadVisibleArea() {
+    const bounds = mapRef.current?.getBounds()
+    if (!bounds) return
+    const name = `Område ${offlineAreas.length + 1}`
+    void downloadOfflineArea(name, bounds)
+  }
 
   const handleLocationSelect = useCallback((loc: HPLocation) => {
     mapRef.current?.flyTo(loc.lng, loc.lat)
@@ -179,12 +177,16 @@ export default function App() {
   return (
     <>
       <AppHeader />
+      {/* Quiet offline indicator on the map surface — being offline is the
+          normal state on the train, the user should not have to open Settings
+          to know it (D12) */}
+      {!online && (
+        <div className="offline-chip" role="status">Frakoblet</div>
+      )}
       <InstallBanner />
       <MapView
         ref={mapRef}
         position={position}
-        offlineFile={offlineFile}
-        pmtilesUrl={PMTILES_URL}
         onLocationSelect={handleLocationSelect}
         showZoomControls={showZoomControls}
         mapMode={measureMode ? 'measure' : 'browse'}
@@ -227,15 +229,16 @@ export default function App() {
         onToggleFavouritesOnMap={() => setFavouritesOnMap((v) => !v)}
         showZoomControls={showZoomControls}
         onToggleZoomControls={handleToggleZoomControls}
-        pmtilesEnabled={!!PMTILES_URL}
-        offlineStatus={status}
-        downloaded={downloaded}
-        total={total}
-        offlineError={dlError}
-        onDownload={download}
-        onCancel={cancel}
-        onDelete={remove}
+        offlineAreas={offlineAreas}
+        offlineStatus={offlineStatus}
+        offlineDone={offlineDone}
+        offlineTotal={offlineTotal}
+        offlineError={offlineError}
+        onDownloadVisibleArea={handleDownloadVisibleArea}
+        onCancelDownload={cancelOfflineDownload}
+        onDeleteArea={removeOfflineArea}
         online={online}
+        dataError={dataError}
       />
       <POIDetailSheet
         location={selectedLocation}
