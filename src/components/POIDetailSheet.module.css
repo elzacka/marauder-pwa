@@ -86,13 +86,13 @@
 
 .favBtn {
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
+  width: var(--touch-min);
+  height: var(--touch-min);
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-full);
-  border: 1px solid rgba(26, 10, 0, 0.15);
+  border: var(--border-width-thin) solid rgba(26, 10, 0, 0.15);
   background: var(--surface-base);
   color: var(--text-muted);
   cursor: pointer;
@@ -114,13 +114,13 @@
 
 .deleteBtn {
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
+  width: var(--touch-min);
+  height: var(--touch-min);
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-full);
-  border: 1px solid rgba(26, 10, 0, 0.15);
+  border: var(--border-width-thin) solid rgba(26, 10, 0, 0.15);
   background: var(--surface-base);
   color: var(--text-muted);
   cursor: pointer;

@@ -9,7 +9,6 @@ import { getOfflineFile } from './offline/OfflineMapManager'
 import MapView, { type MapHandle } from './map/MapView'
 import MenuSheet from './components/MenuSheet'
 import POIDetailSheet from './components/POIDetailSheet'
-import SettingsSheet from './components/SettingsSheet'
 import MeasureBar from './components/MeasureBar'
 import AddPlaceSheet from './components/AddPlaceSheet'
 import InstallBanner from './components/InstallBanner'
@@ -53,7 +52,6 @@ export default function App() {
   const [offlineFile, setOfflineFile] = useState<File | null>(null)
   const [selectedLocation, setSelectedLocation] = useState<HPLocation | null>(null)
   const [selectedIsCustom, setSelectedIsCustom] = useState(false)
-  const [settingsOpen, setSettingsOpen] = useState(false)
   const [showZoomControls, setShowZoomControls] = useState(getInitialZoomControls)
   const [measureMode, setMeasureMode] = useState(false)
   const [measurePoints, setMeasurePoints] = useState<Array<[number, number]>>([])
@@ -101,10 +99,11 @@ export default function App() {
   }
 
   function handleMeasurePoint(lng: number, lat: number) {
-    setMeasurePoints((pts) => {
-      if (pts.length >= 2) return [[lng, lat]]
-      return [...pts, [lng, lat]]
-    })
+    setMeasurePoints((pts) => [...pts, [lng, lat]])
+  }
+
+  function handleUndoMeasurePoint() {
+    setMeasurePoints((pts) => pts.slice(0, -1))
   }
 
   function handleAddressSelect(lng: number, lat: number) {
@@ -158,6 +157,7 @@ export default function App() {
         <MeasureBar
           points={measurePoints}
           onClear={() => setMeasurePoints([])}
+          onUndo={handleUndoMeasurePoint}
           onClose={handleToggleMeasure}
         />
       )}
@@ -166,16 +166,24 @@ export default function App() {
         active={active}
         error={error}
         onToggle={() => setActive((a) => !a)}
-        onLocationSelect={handleLocationSelect}
-        onSettingsClick={() => setSettingsOpen(true)}
         measureMode={measureMode}
         onToggleMeasure={handleToggleMeasure}
         onAddressSelect={handleAddressSelect}
-        favouriteIds={favouriteIds}
         customPlaces={customPlaces}
         onCustomPlaceClick={handleCustomPlaceClick}
         activeFilter={activeFilter}
         onFilterChange={setActiveFilter}
+        showZoomControls={showZoomControls}
+        onToggleZoomControls={handleToggleZoomControls}
+        pmtilesEnabled={!!PMTILES_URL}
+        offlineStatus={status}
+        downloaded={downloaded}
+        total={total}
+        offlineError={dlError}
+        onDownload={download}
+        onCancel={cancel}
+        onDelete={remove}
+        online={online}
       />
       <POIDetailSheet
         location={selectedLocation}
@@ -189,21 +197,6 @@ export default function App() {
         coords={pendingLongPress}
         onSave={handleSaveCustomPlace}
         onClose={() => setPendingLongPress(null)}
-      />
-      <SettingsSheet
-        open={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-        showZoomControls={showZoomControls}
-        onToggleZoomControls={handleToggleZoomControls}
-        pmtilesEnabled={!!PMTILES_URL}
-        offlineStatus={status}
-        downloaded={downloaded}
-        total={total}
-        offlineError={dlError}
-        onDownload={download}
-        onCancel={cancel}
-        onDelete={remove}
-        online={online}
       />
     </>
   )

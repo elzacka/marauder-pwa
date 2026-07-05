@@ -1,10 +1,10 @@
 # Personvernerklæring — Marauder
 
-Sist oppdatert: juli 2026
+Sist oppdatert: 05/07-26
 
 ## Hva samles inn
 
-Marauder samler ikke inn persondata. Appen har ingen brukerkontoer, ingen sporing og sender ikke data til egne servere.
+Marauder samler ikke inn personopplysninger. Appen har ingen brukerkontoer, ingen sporing og sender ikke data til egne servere.
 
 ## Data som behandles lokalt på enheten
 
@@ -21,10 +21,10 @@ Marauder samler ikke inn persondata. Appen har ingen brukerkontoer, ingen sporin
 
 **Protomaps / openfreemap.org** — kartfliser ved online-bruk. Nettverksforespørsler sendes til tjenesteleverandøren for å laste inn kartdata. Ingen brukeridentifikator overføres.
 
-## Dine rettigheter
+## Dine rettigheter: Sletting
 
 All data lagret lokalt kan du slette ved å tømme nettleserens lagringsdata for dette nettstedet. Offline-kartfiler slettes via innstillingsmenyen i appen.
 
-## Kontakt
+## Kontaktinfo
 
-Spørsmål kan rettes til prosjektsiden på [github.com/elzacka/marauder-pwa](https://github.com/elzacka/marauder-pwa).
+https://github.com/elzacka

@@ -1,8 +1,10 @@
 # Marauder
 
-Kartbasert PWA for å utforske Harry Potter-universet i Storbritannia.
+Kartbasert app* for å utforske Harry Potter-universet i Storbritannia og Irland.
 
-Live: [elzacka.github.io/marauder-pwa](https://elzacka.github.io/marauder-pwa/)
+Finn den her: [elzacka.github.io/marauder-pwa](https://elzacka.github.io/marauder-pwa/)
+
+*En app type "PWA" (Progressive Web App)
 
 ## Utvikling
 

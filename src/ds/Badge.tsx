@@ -1,17 +1,20 @@
 import type { CSSProperties } from 'react'
 
-const VARIANT_STYLES: Record<string, { bg: string; color: string }> = {
-  filming:       { bg: '#3E1F6B', color: '#F5ECD7' },
-  canonical:     { bg: '#5C1010', color: '#F5ECD7' },
-  interpreted:   { bg: '#9E6B1A', color: '#F5ECD7' },
-  atmosphere:    { bg: '#2A5070', color: '#F5ECD7' },
-  attractions:   { bg: '#5C1010', color: '#F5ECD7' },
-  eat_and_drink: { bg: '#6B3E1A', color: '#F5ECD7' },
-  inspiration:   { bg: '#4A3B6B', color: '#F5ECD7' },
-  sleep:         { bg: '#2E6B3E', color: '#F5ECD7' },
-  locations:     { bg: '#3E1F6B', color: '#F5ECD7' },
-  transport:     { bg: '#1A4A1A', color: '#F5ECD7' },
-  default:       { bg: '#2E1505', color: '#F5ECD7' },
+const NEUTRAL_BG = 'rgba(26,10,0,0.07)'
+const NEUTRAL_COLOR = 'rgba(26,10,0,0.6)'
+
+const VARIANT_DOT_COLORS: Record<string, string> = {
+  filming:       '#3E1F6B',
+  canonical:     '#5C1010',
+  interpreted:   '#9E6B1A',
+  atmosphere:    '#2A5070',
+  attractions:   '#5C1010',
+  eat_and_drink: '#6B3E1A',
+  inspiration:   '#4A3B6B',
+  sleep:         '#2E6B3E',
+  locations:     '#3E1F6B',
+  transport:     '#1A4A1A',
+  default:       'rgba(26,10,0,0.4)',
 }
 
 const LOCATION_TYPE_LABELS: Record<string, string> = {
@@ -49,7 +52,7 @@ const SIZES: Record<BadgeSize, { fontSize: string; padding: string; gap: string 
 
 export function Badge({ type, category, label, size = 'md', dot = false, style: extraStyle = {} }: Props) {
   const key = type ?? category ?? 'default'
-  const colors = VARIANT_STYLES[key] ?? VARIANT_STYLES.default
+  const dotColor = VARIANT_DOT_COLORS[key] ?? VARIANT_DOT_COLORS.default
   const s = SIZES[size]
 
   const displayLabel =
@@ -72,8 +75,8 @@ export function Badge({ type, category, label, size = 'md', dot = false, style: 
         lineHeight: 1,
         padding: s.padding,
         borderRadius: 'var(--radius-full)',
-        background: colors.bg,
-        color: colors.color,
+        background: NEUTRAL_BG,
+        color: NEUTRAL_COLOR,
         whiteSpace: 'nowrap',
         ...extraStyle,
       }}
@@ -81,11 +84,10 @@ export function Badge({ type, category, label, size = 'md', dot = false, style: 
       {dot && (
         <span
           style={{
-            width: 5,
-            height: 5,
+            width: 6,
+            height: 6,
             borderRadius: '50%',
-            background: colors.color,
-            opacity: 0.75,
+            background: dotColor,
             flexShrink: 0,
           }}
         />
