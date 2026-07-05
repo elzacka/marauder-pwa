@@ -118,6 +118,7 @@
   /* Layout */
   /* Default sheet height ~1/3 of screen (Lene, 2026-07-05) — content scrolls within */
   --sheet-default-height: 33svh;
+  --sheet-expanded-height: 85svh;
   --bottom-panel-peek:  128px;
   --bottom-panel-mid:   360px;
   --map-control-offset: 56px;

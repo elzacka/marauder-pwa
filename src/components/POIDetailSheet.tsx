@@ -12,14 +12,15 @@ type Props = {
   onToggleFavourite?: (id: string) => void
   isCustomPlace?: boolean
   onDeleteCustomPlace?: (id: string) => void
+  onEditCustomPlace?: (id: string) => void
 }
 
 export default function POIDetailSheet({
   location, onClose,
   isFavourite = false, onToggleFavourite,
-  isCustomPlace = false, onDeleteCustomPlace,
+  isCustomPlace = false, onDeleteCustomPlace, onEditCustomPlace,
 }: Props) {
-  const { sheetRef, onDragStart, onDragMove, onDragEnd } = useSheetDrag(onClose)
+  const { sheetRef, expanded, onDragStart, onDragMove, onDragEnd } = useSheetDrag(onClose)
 
   useEffect(() => {
     if (!location) return
@@ -36,7 +37,7 @@ export default function POIDetailSheet({
     <div className={styles.backdrop} onClick={onClose} role="presentation">
       <div
         ref={sheetRef}
-        className={styles.sheet}
+        className={`${styles.sheet} ${expanded ? styles.sheetExpanded : ''}`}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -86,6 +87,20 @@ export default function POIDetailSheet({
                     strokeLinejoin="round"
                     fill={isFavourite ? 'currentColor' : 'none'}
                   />
+                </svg>
+              </button>
+            )}
+
+            {/* Edit button for custom places */}
+            {isCustomPlace && onEditCustomPlace && (
+              <button
+                type="button"
+                className={styles.deleteBtn}
+                onClick={() => onEditCustomPlace(location.id)}
+                aria-label="Rediger sted"
+              >
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                  <path d="M3 15h3l8-8-3-3-8 8v3ZM10 5l3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </button>
             )}

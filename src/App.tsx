@@ -14,6 +14,7 @@ import MeasureBar from './components/MeasureBar'
 import AddPlaceSheet from './components/AddPlaceSheet'
 import InstallBanner from './components/InstallBanner'
 import GeocodeCard from './components/GeocodeCard'
+import AppHeader from './components/AppHeader'
 import type { HPLocation } from './types/hp-location'
 import type { CustomPlace } from './types/custom-place'
 import { emptyFilter, type FilterState } from './ds/filterMeta'
@@ -48,7 +49,7 @@ export default function App() {
     useOfflineTiles(PMTILES_URL ?? '')
 
   const { favouriteIds, toggleFavourite } = useFavourites()
-  const { customPlaces, addCustomPlace, removeCustomPlace } = useCustomPlaces()
+  const { customPlaces, addCustomPlace, updateCustomPlace, removeCustomPlace } = useCustomPlaces()
   const { data: hpLocations, locations: hpLocationList } = useHPLocations()
 
   const [offlineFile, setOfflineFile] = useState<File | null>(null)
@@ -63,6 +64,7 @@ export default function App() {
   // Card is shown on pin tap only (Lene, 2026-07-05) — selection drops just the pin.
   const [showGeocodeCard, setShowGeocodeCard] = useState(false)
   const [pendingLongPress, setPendingLongPress] = useState<{ lng: number; lat: number; name?: string } | null>(null)
+  const [editingPlace, setEditingPlace] = useState<CustomPlace | null>(null)
   // PRODUCT DECISION (Lene, 2026-07-05): the map starts EMPTY. POI markers
   // appear only for categories the user has CHECKED in the menu; unchecking
   // removes them. No checked categories = no markers. Do not change this.
@@ -147,6 +149,11 @@ export default function App() {
   }
 
   function handleSaveCustomPlace(name: string, description: string) {
+    if (editingPlace) {
+      updateCustomPlace(editingPlace.id, { name, description })
+      setEditingPlace(null)
+      return
+    }
     if (!pendingLongPress) return
     const p = addCustomPlace({
       name,
@@ -161,8 +168,17 @@ export default function App() {
     mapRef.current?.flyTo(p.lng, p.lat)
   }
 
+  function handleEditCustomPlace(id: string) {
+    const p = customPlaces.find((cp) => cp.id === id)
+    if (!p) return
+    setSelectedLocation(null)
+    setSelectedIsCustom(false)
+    setEditingPlace(p)
+  }
+
   return (
     <>
+      <AppHeader />
       <InstallBanner />
       <MapView
         ref={mapRef}
@@ -228,6 +244,7 @@ export default function App() {
         onToggleFavourite={toggleFavourite}
         isCustomPlace={selectedIsCustom}
         onDeleteCustomPlace={removeCustomPlace}
+        onEditCustomPlace={handleEditCustomPlace}
       />
       {geocodeMarker && showGeocodeCard && (
         <GeocodeCard
@@ -239,10 +256,12 @@ export default function App() {
         />
       )}
       <AddPlaceSheet
-        coords={pendingLongPress}
-        initialName={pendingLongPress?.name}
+        coords={editingPlace ? { lng: editingPlace.lng, lat: editingPlace.lat } : pendingLongPress}
+        initialName={editingPlace ? editingPlace.name : pendingLongPress?.name}
+        initialDescription={editingPlace?.description}
+        title={editingPlace ? 'Rediger sted' : 'Legg til sted'}
         onSave={handleSaveCustomPlace}
-        onClose={() => setPendingLongPress(null)}
+        onClose={() => { setPendingLongPress(null); setEditingPlace(null) }}
       />
     </>
   )

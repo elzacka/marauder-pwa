@@ -30,6 +30,17 @@ export function useCustomPlaces() {
     [],
   )
 
+  const updateCustomPlace = useCallback(
+    (id: string, data: { name: string; description: string }) => {
+      setPlaces((prev) => {
+        const next = prev.map((p) => (p.id === id ? { ...p, ...data } : p))
+        localStorage.setItem(KEY, JSON.stringify(next))
+        return next
+      })
+    },
+    [],
+  )
+
   const removeCustomPlace = useCallback((id: string) => {
     setPlaces((prev) => {
       const next = prev.filter((p) => p.id !== id)
@@ -38,5 +49,5 @@ export function useCustomPlaces() {
     })
   }, [])
 
-  return { customPlaces: places, addCustomPlace, removeCustomPlace }
+  return { customPlaces: places, addCustomPlace, updateCustomPlace, removeCustomPlace }
 }

@@ -4,25 +4,32 @@ import styles from './AddPlaceSheet.module.css'
 
 type Props = {
   coords: { lng: number; lat: number } | null
-  /** Prefilled name, e.g. from a saved geocode result */
+  /** Prefilled name, e.g. from a saved geocode result or when editing */
   initialName?: string
+  /** Prefilled description — used when editing an existing place */
+  initialDescription?: string
+  /** Sheet heading; defaults to "Legg til sted" */
+  title?: string
   onSave: (name: string, description: string) => void
   onClose: () => void
 }
 
-export default function AddPlaceSheet({ coords, initialName, onSave, onClose }: Props) {
+export default function AddPlaceSheet({
+  coords, initialName, initialDescription, title = 'Legg til sted', onSave, onClose,
+}: Props) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
 
-  // Reset the form each time the sheet opens; prefill name when provided
-  // (saving a geocode search hit passes the hit's name).
+  // Reset the form each time the sheet opens; prefill when provided
+  // (geocode hits pass a name; editing passes name + description).
   useEffect(() => {
     if (coords) {
       setName(initialName ?? '')
-      setDescription('')
+      setDescription(initialDescription ?? '')
     }
-  }, [coords, initialName])
-  const { sheetRef, onDragStart, onDragMove, onDragEnd } = useSheetDrag(onClose)
+  }, [coords, initialName, initialDescription])
+  // Form sheet: content-sized, not resizable — drag only closes
+  const { sheetRef, onDragStart, onDragMove, onDragEnd } = useSheetDrag(onClose, { resizable: false })
   const nameId = useId()
   const descId = useId()
 
@@ -44,7 +51,7 @@ export default function AddPlaceSheet({ coords, initialName, onSave, onClose }: 
         className={styles.sheet}
         role="dialog"
         aria-modal="true"
-        aria-label="Legg til sted"
+        aria-label={title}
         onClick={(e) => e.stopPropagation()}
       >
         <div
@@ -59,7 +66,7 @@ export default function AddPlaceSheet({ coords, initialName, onSave, onClose }: 
         </div>
 
         <div className={styles.content}>
-          <h2 className={styles.title}>Legg til sted</h2>
+          <h2 className={styles.title}>{title}</h2>
           <p className={styles.coords}>
             {coords.lat.toFixed(5)}° N, {Math.abs(coords.lng).toFixed(5)}° {coords.lng < 0 ? 'V' : 'Ø'}
           </p>

@@ -1,9 +1,10 @@
-import { useState, useMemo, useId, useRef, useCallback, useEffect } from 'react'
+import { useState, useMemo, useId, useCallback, useEffect } from 'react'
 import marauderIcon from '../assets/marauder-icon.png'
 import { CategoryTree } from '../ds/CategoryTree'
 import { type FilterState, CATEGORY_META, locationMatchesFilter } from '../ds/filterMeta'
 import { haversineKm, formatDistance } from '../utils/distance'
 import { useNominatim, formatNominatimName } from '../hooks/useNominatim'
+import { useSheetDrag } from '../hooks/useSheetDrag'
 import { formatBytes } from '../offline/OfflineMapManager'
 import { Badge } from '../ds/Badge'
 import type { HPLocation } from '../types/hp-location'
@@ -114,9 +115,9 @@ export default function MenuSheet({
   const [placeholderIdx, setPlaceholderIdx] = useState(0)
   const searchId = useId()
 
-  const sheetRef = useRef<HTMLDivElement>(null)
-  const startY = useRef(0)
-  const dragging = useRef(false)
+  const closeSheet = useCallback(() => setIsOpen(false), [])
+  const { sheetRef, expanded, setExpanded, onDragStart, onDragMove, onDragEnd } =
+    useSheetDrag(closeSheet)
 
   const { results: geoResults, loading: geoLoading } = useNominatim(query)
 
@@ -160,33 +161,12 @@ export default function MenuSheet({
       ? `Søk i ${CATEGORY_META.find((c) => c.key === singleCategory)?.label ?? 'steder'}…`
       : SEARCH_PLACEHOLDERS[placeholderIdx]
 
-  const onDragStart = useCallback((e: React.PointerEvent) => {
-    if (e.pointerType === 'mouse' && e.button !== 0) return
-    e.currentTarget.setPointerCapture(e.pointerId)
-    startY.current = e.clientY
-    dragging.current = true
-    const sheet = sheetRef.current
-    if (sheet) sheet.style.transition = 'none'
-  }, [])
-
-  const onDragMove = useCallback((e: React.PointerEvent) => {
-    if (!dragging.current || !(e.buttons & 1)) return
-    const dy = Math.max(0, e.clientY - startY.current)
-    const sheet = sheetRef.current
-    if (sheet) sheet.style.transform = `translateY(${dy}px)`
-  }, [])
-
-  const onDragEnd = useCallback((e: React.PointerEvent) => {
-    if (!dragging.current) return
-    dragging.current = false
-    const dy = e.clientY - startY.current
-    const sheet = sheetRef.current
-    if (sheet) {
-      sheet.style.transition = ''
-      sheet.style.transform = ''
-    }
-    if (dy > 80) setIsOpen(false)
-  }, [])
+  // Searching needs room for results: auto-expand the sheet while a query is
+  // active — at default 33svh height the address results sat below the fold
+  // and looked "broken" (diagnosed live 2026-07-05).
+  useEffect(() => {
+    if (q) setExpanded(true)
+  }, [q, setExpanded])
 
   function handleGeoClick(lng: number, lat: number, name: string, detail: string) {
     onAddressSelect(lng, lat, name, detail)
@@ -252,7 +232,7 @@ export default function MenuSheet({
       {/* Sheet */}
       <div
         ref={sheetRef}
-        className={`${styles.sheet} ${isOpen ? styles.sheetOpen : styles.sheetClosed}`}
+        className={`${styles.sheet} ${expanded ? styles.sheetExpanded : ''} ${isOpen ? styles.sheetOpen : styles.sheetClosed}`}
         role="dialog"
         aria-modal={isOpen}
         aria-label="Meny"
@@ -302,15 +282,12 @@ export default function MenuSheet({
               </div>
 
               <div className={styles.scrollArea}>
-                {/* HP location search results — shown only while searching */}
-                {q && (
+                {/* HP location search results — only when there ARE hits; an
+                    empty section must not push address results below the fold */}
+                {q && filteredHP.length > 0 && (
                   <div>
                     <p className={styles.sectionHeader}>Harry Potter-steder</p>
-                    {filteredHP.length === 0 ? (
-                      <p className={styles.empty}>
-                        {`Ingen treff for «${query}»`}
-                      </p>
-                    ) : (
+                    {(
                       <ul className={styles.list} role="list">
                         {filteredHP.map((loc) => (
                           <li key={loc.id}>
@@ -375,6 +352,11 @@ export default function MenuSheet({
 
                 {geoLoading && query.trim().length >= 2 && geoResults.length === 0 && (
                   <p className={styles.searchingText}>Søker…</p>
+                )}
+
+                {/* Combined empty state — nothing matched in either source */}
+                {q && filteredHP.length === 0 && !hasGeoResults && !geoLoading && (
+                  <p className={styles.empty}>{`Ingen treff for «${query}»`}</p>
                 )}
 
                 {/* Collapsible sections — yield to search results while typing
