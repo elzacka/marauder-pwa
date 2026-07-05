@@ -13,6 +13,8 @@ import POIDetailSheet from './components/POIDetailSheet'
 import MeasureBar from './components/MeasureBar'
 import AddPlaceSheet from './components/AddPlaceSheet'
 import InstallBanner from './components/InstallBanner'
+// TEMPORARY: viewport diagnosis — remove together with DebugOverlay.tsx
+import DebugOverlay from './components/DebugOverlay'
 import type { HPLocation } from './types/hp-location'
 import type { CustomPlace } from './types/custom-place'
 import type { FilterState } from './ds/filterMeta'
@@ -138,6 +140,7 @@ export default function App() {
 
   return (
     <>
+      <DebugOverlay />
       <InstallBanner />
       <MapView
         ref={mapRef}

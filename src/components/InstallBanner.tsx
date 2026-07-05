@@ -31,11 +31,8 @@ export default function InstallBanner() {
   return (
     <div className={styles.banner} role="status">
       <span className={styles.text}>
-        Legg til på hjemskjerm: trykk{' '}
-        <span className={styles.shareIcon} aria-label="Del-knappen">
-          &#xE001;
-        </span>{' '}
-        og velg <strong>«Legg til på Hjem-skjermen»</strong>
+        Installer som app: Trykk på ..., Del
+        og velg <strong>«Legg til på Hjem-skjerm»</strong>
       </span>
       <button className={styles.dismiss} onClick={dismiss} type="button" aria-label="Lukk banner">
         ×
