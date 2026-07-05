@@ -5,6 +5,7 @@ import { useOfflineTiles } from './hooks/useOfflineTiles'
 import { useNetworkStatus } from './hooks/useNetworkStatus'
 import { useFavourites } from './hooks/useFavourites'
 import { useCustomPlaces } from './hooks/useCustomPlaces'
+import { useHPLocations } from './hooks/useHPLocations'
 import { getOfflineFile } from './offline/OfflineMapManager'
 import MapView, { type MapHandle } from './map/MapView'
 import MenuSheet from './components/MenuSheet'
@@ -47,6 +48,7 @@ export default function App() {
 
   const { favouriteIds, toggleFavourite } = useFavourites()
   const { customPlaces, addCustomPlace, removeCustomPlace } = useCustomPlaces()
+  const { data: hpLocations, locations: hpLocationList } = useHPLocations()
 
   const [offlineFile, setOfflineFile] = useState<File | null>(null)
   const [selectedLocation, setSelectedLocation] = useState<HPLocation | null>(null)
@@ -69,6 +71,7 @@ export default function App() {
   }, [status])
 
   const handleLocationSelect = useCallback((loc: HPLocation) => {
+    mapRef.current?.flyTo(loc.lng, loc.lat)
     setSelectedLocation(loc)
     setSelectedIsCustom(false)
   }, [])
@@ -168,6 +171,9 @@ export default function App() {
         measureMode={measureMode}
         onToggleMeasure={handleToggleMeasure}
         onAddressSelect={handleAddressSelect}
+        onLocationSelect={handleLocationSelect}
+        favouriteIds={favouriteIds}
+        hpLocations={hpLocationList ?? []}
         customPlaces={customPlaces}
         onCustomPlaceClick={handleCustomPlaceClick}
         activeFilter={activeFilter}

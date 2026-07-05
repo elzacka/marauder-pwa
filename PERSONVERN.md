@@ -1,4 +1,4 @@
-# Personvernerklæring — Marauder
+# Personvernerklæring – Marauder
 
 Sist oppdatert: 05/07-26
 

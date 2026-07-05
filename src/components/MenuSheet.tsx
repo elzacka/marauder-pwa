@@ -1,17 +1,38 @@
-import { useState, useId, useRef, useCallback, useEffect } from 'react'
+import { useState, useMemo, useId, useRef, useCallback, useEffect } from 'react'
 import marauderIcon from '../assets/marauder-icon.png'
 import { CategoryTree } from '../ds/CategoryTree'
 import { type FilterState, CATEGORY_META } from '../ds/filterMeta'
 import { haversineKm, formatDistance } from '../utils/distance'
 import { useNominatim, formatNominatimName } from '../hooks/useNominatim'
 import { formatBytes } from '../offline/OfflineMapManager'
+import { Badge } from '../ds/Badge'
+import type { HPLocation, LocationCategory } from '../types/hp-location'
 import type { OfflineStatus } from '../hooks/useOfflineTiles'
 import type { Position } from '../hooks/useGeolocation'
 import type { CustomPlace } from '../types/custom-place'
 import styles from './MenuSheet.module.css'
 
-function normalize(s: string) {
+type HPLocationWithDist = HPLocation & { km: number | null }
+
+function withDistAndSort(locs: HPLocation[], position: Position | null): HPLocationWithDist[] {
+  return locs
+    .map((loc) => ({
+      ...loc,
+      km: position ? haversineKm(position.lat, position.lng, loc.lat, loc.lng) : null,
+    }))
+    .sort((a, b) => a.km !== null && b.km !== null ? a.km - b.km : a.name.localeCompare(b.name, 'en'))
+}
+
+function normalize(s: string): string {
   return s.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '')
+}
+
+function FavHeart() {
+  return (
+    <svg width="11" height="10" viewBox="0 0 11 10" fill="currentColor" style={{ display: 'inline', verticalAlign: '-0.1em' }} aria-hidden="true">
+      <path d="M5.5 9C5.5 9 1 6.1 1 3.2a2.5 2.5 0 0 1 4.5-1.5A2.5 2.5 0 0 1 10 3.2C10 6.1 5.5 9 5.5 9Z" />
+    </svg>
+  )
 }
 
 const SEARCH_PLACEHOLDERS = [
@@ -39,7 +60,7 @@ function connectionType(): string {
   return 'Ukjent'
 }
 
-type MenuTab = 'hjem' | 'verktoy' | 'innstillinger'
+type MenuTab = 'home' | 'tools' | 'settings'
 
 type Props = {
   position: Position | null
@@ -48,7 +69,10 @@ type Props = {
   onToggle: () => void
   measureMode: boolean
   onToggleMeasure: () => void
-  onAddressSelect: (lng: number, lat: number, label: string) => void
+  onAddressSelect: (lng: number, lat: number) => void
+  onLocationSelect: (loc: HPLocation) => void
+  favouriteIds: Set<string>
+  hpLocations: HPLocation[]
   customPlaces: CustomPlace[]
   onCustomPlaceClick: (id: string) => void
   activeFilter: FilterState | null
@@ -68,16 +92,16 @@ type Props = {
 
 export default function MenuSheet({
   position, active, error, onToggle,
-  measureMode, onToggleMeasure, onAddressSelect,
-  customPlaces, onCustomPlaceClick,
-  onFilterChange,
+  measureMode, onToggleMeasure, onAddressSelect, onLocationSelect,
+  favouriteIds, hpLocations, customPlaces, onCustomPlaceClick,
+  activeFilter, onFilterChange,
   showZoomControls, onToggleZoomControls,
   pmtilesEnabled, offlineStatus, downloaded, total, offlineError,
   onDownload, onCancel, onDelete,
   online,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState<MenuTab>('hjem')
+  const [activeTab, setActiveTab] = useState<MenuTab>('home')
   const [filter, setFilter] = useState<FilterState>({ category: 'all', locationType: 'all' })
   const [query, setQuery] = useState('')
   const [placeholderIdx, setPlaceholderIdx] = useState(0)
@@ -90,6 +114,29 @@ export default function MenuSheet({
   const { results: geoResults, loading: geoLoading } = useNominatim(query)
 
   const q = normalize(query.trim())
+
+  // Sync filter reset when parent clears activeFilter (e.g. future map-level "clear all")
+  useEffect(() => {
+    if (activeFilter === null) setFilter({ category: 'all', locationType: 'all' })
+  }, [activeFilter])
+
+  const filteredHP = useMemo<HPLocationWithDist[]>(() => {
+    if (!q && filter.category === 'all') return []
+    return withDistAndSort(
+      hpLocations.filter((loc) => {
+        if (filter.category !== 'all' && !loc.categories.includes(filter.category as LocationCategory)) return false
+        if (filter.category === 'locations' && filter.locationType !== 'all' && loc.location_type !== filter.locationType) return false
+        if (q && !normalize(loc.name).includes(q) && !normalize(loc.description ?? '').includes(q)) return false
+        return true
+      }),
+      position,
+    )
+  }, [q, filter, position, hpLocations])
+
+  const favouriteLocations = useMemo<HPLocationWithDist[]>(() => {
+    if (q || filter.category !== 'all') return []
+    return withDistAndSort(hpLocations.filter((loc) => favouriteIds.has(loc.id)), position)
+  }, [q, filter.category, favouriteIds, position, hpLocations])
 
   useEffect(() => {
     if (q || filter.category !== 'all') return
@@ -133,8 +180,14 @@ export default function MenuSheet({
     if (dy > 80) setIsOpen(false)
   }, [])
 
-  function handleGeoClick(lng: number, lat: number, label: string) {
-    onAddressSelect(lng, lat, label)
+  function handleGeoClick(lng: number, lat: number) {
+    onAddressSelect(lng, lat)
+    setIsOpen(false)
+    setQuery('')
+  }
+
+  function handleHPClick(loc: HPLocation) {
+    onLocationSelect(loc)
     setIsOpen(false)
     setQuery('')
   }
@@ -215,8 +268,8 @@ export default function MenuSheet({
         {/* Content */}
         <div className={styles.content}>
 
-          {/* Hjem tab */}
-          {activeTab === 'hjem' && (
+          {/* Home tab */}
+          {activeTab === 'home' && (
             <div className={styles.tabContent}>
               <div className={styles.searchRow}>
                 <label htmlFor={searchId} className={styles.srOnly}>Søk etter sted</label>
@@ -247,6 +300,48 @@ export default function MenuSheet({
               <CategoryTree value={filter} onChange={handleFilterChange} />
 
               <div className={styles.scrollArea}>
+                {/* HP location search results — shown when query or category filter active */}
+                {(q || filter.category !== 'all') && (
+                  <div>
+                    <p className={styles.sectionHeader}>Harry Potter-steder</p>
+                    {filteredHP.length === 0 ? (
+                      <p className={styles.empty}>
+                        {q ? `Ingen treff for «${query}»` : 'Ingen steder for dette filteret.'}
+                      </p>
+                    ) : (
+                      <ul className={styles.list} role="list">
+                        {filteredHP.map((loc) => (
+                          <li key={loc.id}>
+                            <button
+                              type="button"
+                              className={styles.item}
+                              onClick={() => handleHPClick(loc)}
+                            >
+                              <div className={styles.itemMain}>
+                                <span className={styles.itemName}>
+                                  {favouriteIds.has(loc.id) && (
+                                    <span className={styles.favStar} aria-label="Favoritt"><FavHeart /> </span>
+                                  )}
+                                  {loc.name}
+                                </span>
+                                <div className={styles.itemBadges}>
+                                  {loc.categories.slice(0, 2).map((cat) => (
+                                    <Badge key={cat} category={cat} size="sm" />
+                                  ))}
+                                </div>
+                              </div>
+                              {loc.km !== null && (
+                                <span className={styles.itemDistance}>{formatDistance(loc.km)}</span>
+                              )}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+
+                {/* Geo results — shown when nominatim returns results for the query */}
                 {hasGeoResults && (
                   <div>
                     <p className={styles.sectionHeader}>Adresser og steder</p>
@@ -261,7 +356,7 @@ export default function MenuSheet({
                               onClick={() => {
                                 const lng = parseFloat(r.lon)
                                 const lat = parseFloat(r.lat)
-                                if (!Number.isNaN(lng) && !Number.isNaN(lat)) handleGeoClick(lng, lat, name)
+                                if (!Number.isNaN(lng) && !Number.isNaN(lat)) handleGeoClick(lng, lat)
                               }}
                             >
                               <div className={styles.itemMain}>
@@ -278,6 +373,45 @@ export default function MenuSheet({
 
                 {geoLoading && query.trim().length >= 2 && geoResults.length === 0 && (
                   <p className={styles.searchingText}>Søker…</p>
+                )}
+
+                {/* Favourites — shown when not searching and no category filter */}
+                {!q && filter.category === 'all' && (
+                  <div>
+                    <p className={styles.sectionHeader}>Favoritter</p>
+                    {favouriteLocations.length === 0 ? (
+                      <p className={styles.empty}>
+                        Ingen favoritter ennå. Trykk hjerteikonet på et sted for å lagre det.
+                      </p>
+                    ) : (
+                      <ul className={styles.list} role="list">
+                        {favouriteLocations.map((loc) => (
+                          <li key={loc.id}>
+                            <button
+                              type="button"
+                              className={styles.item}
+                              onClick={() => handleHPClick(loc)}
+                            >
+                              <div className={styles.itemMain}>
+                                <span className={styles.itemName}>
+                                  <span className={styles.favStar} aria-hidden="true"><FavHeart /> </span>
+                                  {loc.name}
+                                </span>
+                                <div className={styles.itemBadges}>
+                                  {loc.categories.slice(0, 2).map((cat) => (
+                                    <Badge key={cat} category={cat} size="sm" />
+                                  ))}
+                                </div>
+                              </div>
+                              {loc.km !== null && (
+                                <span className={styles.itemDistance}>{formatDistance(loc.km)}</span>
+                              )}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 )}
 
                 {hasCustom && (
@@ -306,8 +440,8 @@ export default function MenuSheet({
             </div>
           )}
 
-          {/* Verktøy tab */}
-          {activeTab === 'verktoy' && (
+          {/* Tools tab */}
+          {activeTab === 'tools' && (
             <div className={styles.tabContent}>
               <div className={styles.scrollAreaPadded}>
 
@@ -394,8 +528,8 @@ export default function MenuSheet({
             </div>
           )}
 
-          {/* Innstillinger tab */}
-          {activeTab === 'innstillinger' && (
+          {/* Settings tab */}
+          {activeTab === 'settings' && (
             <div className={styles.tabContent}>
               <div className={styles.scrollAreaPadded}>
 
@@ -491,17 +625,17 @@ export default function MenuSheet({
 
         {/* Tab bar */}
         <nav className={styles.tabBar} aria-label="Menynavigasjon">
-          <TabBtn active={activeTab === 'hjem'} label="Hjem" onClick={() => setActiveTab('hjem')}>
+          <TabBtn active={activeTab === 'home'} label="Hjem" onClick={() => setActiveTab('home')}>
             {/* House */}
             <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
               <path
                 d="M3 11L11 4L19 11V19H14V14H8V19H3V11Z"
                 stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"
-                fill={activeTab === 'hjem' ? 'currentColor' : 'none'} fillOpacity="0.15"
+                fill={activeTab === 'home' ? 'currentColor' : 'none'} fillOpacity="0.15"
               />
             </svg>
           </TabBtn>
-          <TabBtn active={activeTab === 'verktoy'} label="Verktøy" onClick={() => setActiveTab('verktoy')}>
+          <TabBtn active={activeTab === 'tools'} label="Verktøy" onClick={() => setActiveTab('tools')}>
             {/* Wrench */}
             <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
               <path
@@ -510,12 +644,12 @@ export default function MenuSheet({
               />
             </svg>
           </TabBtn>
-<TabBtn active={activeTab === 'innstillinger'} label="Innstillinger" onClick={() => setActiveTab('innstillinger')}>
+          <TabBtn active={activeTab === 'settings'} label="Innstillinger" onClick={() => setActiveTab('settings')}>
             {/* Gear */}
             <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
               <path d="M9 2h4l.55 2.2a6 6 0 0 1 1.85 1.07l2.14-.67L19.5 8l-1.73 1.47c.07.34.1.7.1 1.03s-.03.7-.1 1.03L19.5 13l-1.96 3.4-2.14-.67a6 6 0 0 1-1.85 1.07L13 19H9l-.55-2.2A6 6 0 0 1 6.6 15.73l-2.14.67L2.5 13l1.73-1.47a6.5 6.5 0 0 1 0-2.06L2.5 8l1.96-3.4 2.14.67A6 6 0 0 1 8.45 4.2L9 2Z"
                 stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" strokeLinecap="round"
-                fill={activeTab === 'innstillinger' ? 'currentColor' : 'none'} fillOpacity="0.15"
+                fill={activeTab === 'settings' ? 'currentColor' : 'none'} fillOpacity="0.15"
               />
               <circle cx="11" cy="11" r="2.5" stroke="currentColor" strokeWidth="1.3"/>
             </svg>
