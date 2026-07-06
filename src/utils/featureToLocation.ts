@@ -45,6 +45,7 @@ export function propsToLocation(
     external_url: safeExternalUrl(p.external_url),
     country: (p.country ?? null) as string | null,
     city: (p.city ?? null) as string | null,
+    fun_fact: (p.fun_fact ?? null) as string | null,
     lat,
     lng,
   }

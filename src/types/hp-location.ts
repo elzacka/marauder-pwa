@@ -22,6 +22,8 @@ export type HPLocation = {
   city: string | null
   /** User-defined tags — only set for custom places */
   tags?: string[]
+  /** "Visste du?"-fakta (Norwegian, hand-curated in the data file) */
+  fun_fact?: string | null
   lat: number
   lng: number
 }

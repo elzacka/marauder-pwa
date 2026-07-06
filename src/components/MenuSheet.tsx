@@ -149,6 +149,13 @@ type Props = {
   onToggleLocateBtn: (v: boolean) => void
   baseLayer: 'standard' | 'satellite'
   onBaseLayerChange: (layer: 'standard' | 'satellite') => void
+  /** Marauder pass progress */
+  visitedCount: number
+  totalPlaces: number
+  /** House choice (theming accent) */
+  house: 'none' | 'gryffindor' | 'hufflepuff' | 'ravenclaw' | 'slytherin'
+  onHouseChange: (h: 'none' | 'gryffindor' | 'hufflepuff' | 'ravenclaw' | 'slytherin') => void
+  onOpenQuiz: () => void
   offlineAreas: OfflineArea[]
   offlineStatus: OfflineAreaStatus
   offlineDone: number
@@ -172,6 +179,7 @@ export default function MenuSheet({
   showZoomControls, onToggleZoomControls,
   showLocateBtn, onToggleLocateBtn,
   baseLayer, onBaseLayerChange,
+  visitedCount, totalPlaces, house, onHouseChange, onOpenQuiz,
   offlineAreas, offlineStatus, offlineDone, offlineTotal, offlineError,
   onDownloadVisibleArea, onCancelDownload, onDeleteArea,
   online, dataError = null,
@@ -538,6 +546,22 @@ export default function MenuSheet({
                   <p className={styles.empty}>{`Ingen treff for «${query}»`}</p>
                 )}
 
+                {/* Marauder pass progress */}
+                {!q && !activeTag && totalPlaces > 0 && (
+                  <div className={styles.passRow}>
+                    <div className={styles.passHeader}>
+                      <span className={styles.passTitle}>Marauder-passet</span>
+                      <span className={styles.passCount}>{visitedCount} av {totalPlaces}</span>
+                    </div>
+                    <div className={styles.passBar}>
+                      <div
+                        className={styles.passFill}
+                        style={{ width: `${Math.round((visitedCount / totalPlaces) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+
                 {/* Geo tag view — tapping a country/city chip filters here */}
                 {!q && activeTag && (
                   <div>
@@ -847,6 +871,24 @@ export default function MenuSheet({
                   )}
                 </div>
 
+                <div className={styles.section}>
+                  <p className={styles.sectionTitle}>HP-quiz</p>
+                  <div className={styles.card}>
+                    <p className={styles.actionDesc}>
+                      Ti spørsmål fra bøkene og filmene. Fungerer uten nett – perfekt på toget.
+                    </p>
+                    <div className={styles.actionRow}>
+                      <button
+                        className={styles.btnPrimary}
+                        type="button"
+                        onClick={() => { onOpenQuiz(); setIsOpen(false) }}
+                      >
+                        Start quiz
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             </div>
           )}
@@ -920,6 +962,34 @@ export default function MenuSheet({
                       </div>
                     )}
                     {error && <p className={styles.errorText}>{error}</p>}
+                  </div>
+                </div>
+
+                <div className={styles.section}>
+                  <p className={styles.sectionTitle}>Hus</p>
+                  <div className={styles.card} role="radiogroup" aria-label="Velg hus">
+                    {([
+                      ['none', 'Ingen', ''],
+                      ['gryffindor', 'Gryffindor', '#7F0909'],
+                      ['hufflepuff', 'Hufflepuff', '#8C6B00'],
+                      ['ravenclaw', 'Ravenclaw', '#222F5B'],
+                      ['slytherin', 'Slytherin', '#1A472A'],
+                    ] as const).map(([key, label, color]) => (
+                      <button
+                        key={key}
+                        type="button"
+                        role="radio"
+                        aria-checked={house === key}
+                        className={`${styles.favAllRow} ${house === key ? styles.favAllRowActive : ''}`}
+                        onClick={() => onHouseChange(key)}
+                        style={color ? ({ '--checkbox-color': color } as React.CSSProperties) : undefined}
+                      >
+                        <span className={`${styles.toggleBox} ${styles.roundBox} ${house === key ? styles.toggleBoxOn : ''}`} aria-hidden="true">
+                          {house === key && <span className={styles.radioDot} />}
+                        </span>
+                        {label}
+                      </button>
+                    ))}
                   </div>
                 </div>
 

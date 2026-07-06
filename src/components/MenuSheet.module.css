@@ -436,8 +436,48 @@
 }
 
 .toggleBoxOn {
-  background: var(--color-burgundy);
-  border-color: var(--color-burgundy);
+  background: var(--checkbox-color, var(--color-burgundy));
+  border-color: var(--checkbox-color, var(--color-burgundy));
+}
+
+/* Marauder pass progress (Hjem) */
+.passRow {
+  padding: 10px 16px 8px;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.passHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+
+.passTitle {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wider);
+  color: var(--house-accent, var(--color-burgundy));
+}
+
+.passCount {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.passBar {
+  height: 4px;
+  background: rgba(26, 10, 0, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.passFill {
+  height: 100%;
+  background: var(--house-accent, var(--color-burgundy));
+  border-radius: 2px;
+  transition: width 400ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .empty {

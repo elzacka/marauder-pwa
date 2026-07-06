@@ -608,6 +608,24 @@ async function main() {
     features: merged.map(toFeature),
   }
 
+  // Preserve hand-curated fields from the existing file (edited directly in
+  // public/data/hp-locations.json). The English canon-term texts (name,
+  // description, fun_fact) live in the JSON, not in CURATED — never let a
+  // regeneration overwrite them with the old Norwegian drafts.
+  try {
+    const existing = JSON.parse(readFileSync(OUT, 'utf8'))
+    const byId = new Map(existing.features.map((f) => [f.properties.id, f.properties]))
+    for (const feat of fc.features) {
+      const prev = byId.get(feat.properties.id)
+      if (!prev) continue
+      for (const field of ['name', 'description', 'fun_fact']) {
+        if (prev[field]) feat.properties[field] = prev[field]
+      }
+    }
+  } catch {
+    console.warn('  Could not preserve curated text fields (no existing file?)')
+  }
+
   writeFileSync(OUT, JSON.stringify(fc, null, 2), 'utf8')
   console.log(`\nWrote ${fc.features.length} features to ${OUT}`)
 }

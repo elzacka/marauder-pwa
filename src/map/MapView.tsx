@@ -116,6 +116,26 @@ const ICON_ZOOM_IN =
 const ICON_ZOOM_OUT =
   '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'
 
+/** A single footprint (sole + heel), burgundy — drawn on canvas like the heart */
+function makeFootprintImage(size = 20): ImageData {
+  const canvas = document.createElement('canvas')
+  canvas.width = size
+  canvas.height = size
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return new ImageData(size, size)
+  const s = size / 20
+  ctx.fillStyle = 'rgba(92, 16, 16, 0.85)'
+  // Sole
+  ctx.beginPath()
+  ctx.ellipse(10 * s, 8 * s, 3.4 * s, 5.2 * s, 0, 0, Math.PI * 2)
+  ctx.fill()
+  // Heel
+  ctx.beginPath()
+  ctx.ellipse(10 * s, 16 * s, 2.4 * s, 2.6 * s, 0, 0, Math.PI * 2)
+  ctx.fill()
+  return ctx.getImageData(0, 0, size, size)
+}
+
 type MapButtonsOptions = {
   showLocate: boolean
   showZoom: boolean
@@ -211,6 +231,27 @@ function addOverlays(map: maplibregl.Map) {
     source: 'hp-locations',
     paint: HP_PAINT,
     layout: { visibility: 'none' },
+  })
+
+  // Footprints — the Marauder's Map signature: your position leaves a fading
+  // trail of footprints (Julia-godkjent design krav, 2026-07-05)
+  map.addImage('footprint', makeFootprintImage(), { pixelRatio: 2 })
+  map.addSource('footprints', { type: 'geojson', data: EMPTY_FC })
+  map.addLayer({
+    id: 'footprints',
+    type: 'symbol',
+    source: 'footprints',
+    layout: {
+      'icon-image': 'footprint',
+      'icon-size': 0.9,
+      'icon-rotate': ['get', 'bearing'],
+      'icon-rotation-alignment': 'map',
+      'icon-allow-overlap': true,
+      'icon-offset': ['case', ['get', 'left'], ['literal', [-4, 0]], ['literal', [4, 0]]],
+    },
+    paint: {
+      'icon-opacity': ['get', 'opacity'],
+    },
   })
 
   // Favourite hearts — heart-shaped markers for favourites ("Alle" toggle).
@@ -708,6 +749,46 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
     const src = map.getSource('hp-locations') as maplibregl.GeoJSONSource | undefined
     src?.setData(hpLocations)
   }, [hpLocations, mapReady])
+
+  // Footprint trail: add a print when we have moved far enough; older prints
+  // fade progressively and the oldest disappear
+  const footprintsRef = useRef<Array<{ lng: number; lat: number; bearing: number; left: boolean }>>([])
+  useEffect(() => {
+    const map = mapRef.current
+    if (!mapReady || !map) return
+    const src = map.getSource('footprints') as maplibregl.GeoJSONSource | undefined
+    if (!src) return
+    if (!position) {
+      footprintsRef.current = []
+      src.setData(EMPTY_FC)
+      return
+    }
+    const prints = footprintsRef.current
+    const last = prints[prints.length - 1]
+    if (last) {
+      const dLng = position.lng - last.lng
+      const dLat = position.lat - last.lat
+      const meters = Math.hypot(dLat * 111_320, dLng * 111_320 * Math.cos((position.lat * Math.PI) / 180))
+      if (meters < 12) return
+      const bearing = (Math.atan2(dLng, dLat) * 180) / Math.PI
+      prints.push({ lng: position.lng, lat: position.lat, bearing, left: !last.left })
+    } else {
+      prints.push({ lng: position.lng, lat: position.lat, bearing: 0, left: false })
+    }
+    if (prints.length > 14) prints.splice(0, prints.length - 14)
+    src.setData({
+      type: 'FeatureCollection',
+      features: prints.map((p, i) => ({
+        type: 'Feature' as const,
+        properties: {
+          bearing: p.bearing,
+          left: p.left,
+          opacity: Math.max(0.12, ((i + 1) / prints.length) * 0.85),
+        },
+        geometry: { type: 'Point' as const, coordinates: [p.lng, p.lat] },
+      })),
+    })
+  }, [position, mapReady])
 
   // User position marker
   useEffect(() => {

@@ -13,12 +13,16 @@ type Props = {
   isCustomPlace?: boolean
   onDeleteCustomPlace?: (id: string) => void
   onEditCustomPlace?: (id: string) => void
+  /** Marauder pass: visited stamp */
+  isVisited?: boolean
+  onToggleVisited?: (id: string) => void
 }
 
 export default function POIDetailSheet({
   location, onClose,
   isFavourite = false, onToggleFavourite,
   isCustomPlace = false, onDeleteCustomPlace, onEditCustomPlace,
+  isVisited = false, onToggleVisited,
 }: Props) {
   const { sheetRef, size, onDragStart, onDragMove, onDragEnd } = useSheetDrag(onClose)
 
@@ -123,8 +127,27 @@ export default function POIDetailSheet({
 
           <h2 className={styles.name}>{location.name}</h2>
 
+          {/* Marauder pass stamp (HP places only) */}
+          {!isCustomPlace && onToggleVisited && (
+            <button
+              type="button"
+              className={`${styles.stamp} ${isVisited ? styles.stampOn : ''}`}
+              onClick={() => onToggleVisited(location.id)}
+              aria-pressed={isVisited}
+            >
+              {isVisited ? 'Besøkt' : 'Merk som besøkt'}
+            </button>
+          )}
+
           {location.description && (
             <p className={styles.description}>{location.description}</p>
+          )}
+
+          {location.fun_fact && (
+            <div className={styles.funFact}>
+              <span className={styles.funFactTitle}>Visste du?</span>
+              <p className={styles.funFactText}>{location.fun_fact}</p>
+            </div>
           )}
 
           {location.hp_references.length > 0 && (

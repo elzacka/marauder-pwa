@@ -14,6 +14,10 @@ import AddPlaceSheet from './components/AddPlaceSheet'
 import InstallBanner from './components/InstallBanner'
 import GeocodeCard from './components/GeocodeCard'
 import AppHeader from './components/AppHeader'
+import SpellOverlay from './components/SpellOverlay'
+import QuizSheet from './components/QuizSheet'
+import { useVisited } from './hooks/useVisited'
+import { haversineKm } from './utils/distance'
 import type { HPLocation } from './types/hp-location'
 import type { CustomPlace } from './types/custom-place'
 import { emptyFilter, type FilterState } from './ds/filterMeta'
@@ -29,6 +33,24 @@ function getInitialLocateBtn(): boolean {
 function getInitialBaseLayer(): BaseLayer {
   return localStorage.getItem('baseLayer') === 'satellite' ? 'satellite' : 'standard'
 }
+
+export type House = 'none' | 'gryffindor' | 'hufflepuff' | 'ravenclaw' | 'slytherin'
+
+/** House accents chosen for contrast on the parchment palette */
+export const HOUSE_COLORS: Record<Exclude<House, 'none'>, string> = {
+  gryffindor: '#7F0909',
+  hufflepuff: '#8C6B00',
+  ravenclaw: '#222F5B',
+  slytherin: '#1A472A',
+}
+
+function getInitialHouse(): House {
+  const h = localStorage.getItem('house')
+  return h === 'gryffindor' || h === 'hufflepuff' || h === 'ravenclaw' || h === 'slytherin' ? h : 'none'
+}
+
+/** Auto-stamp radius for the Marauder pass (km) */
+const DISCOVERY_RADIUS_KM = 0.12
 
 function customPlaceToHPLocation(p: CustomPlace): HPLocation {
   return {
@@ -69,6 +91,29 @@ export default function App() {
   // Long-press on the FAB temporarily hides/shows the map button group
   // (whatever is toggled on in Settings) — a quick declutter gesture
   const [mapButtonsHidden, setMapButtonsHidden] = useState(false)
+  const [house, setHouse] = useState<House>(getInitialHouse)
+  const [spell, setSpell] = useState<string | null>(null)
+  const [quizOpen, setQuizOpen] = useState(false)
+  const { visitedIds, toggleVisited, markVisited } = useVisited()
+
+  // The oath — once per launch (the whole point of a Marauder's Map)
+  useEffect(() => {
+    setSpell('I solemnly swear that I am up to no good')
+  }, [])
+
+  // House accent as a CSS variable (spell text, pass progress, stamps)
+  useEffect(() => {
+    if (house === 'none') {
+      document.documentElement.style.removeProperty('--house-accent')
+    } else {
+      document.documentElement.style.setProperty('--house-accent', HOUSE_COLORS[house])
+    }
+  }, [house])
+
+  function handleHouseChange(h: House) {
+    setHouse(h)
+    localStorage.setItem('house', h)
+  }
   const [baseLayer, setBaseLayer] = useState<BaseLayer>(getInitialBaseLayer)
   // Locate requested before the first GPS fix arrived — fly when it does
   const [pendingLocate, setPendingLocate] = useState(false)
@@ -197,6 +242,27 @@ export default function App() {
     }
   }, [pendingLocate, position])
 
+  // Marauder pass auto-discovery: walking within ~120 m of an unvisited HP
+  // place stamps it and casts a small notice
+  useEffect(() => {
+    if (!position || !hpLocationList) return
+    for (const loc of hpLocationList) {
+      if (visitedIds.has(loc.id)) continue
+      if (haversineKm(position.lat, position.lng, loc.lat, loc.lng) <= DISCOVERY_RADIUS_KM) {
+        markVisited(loc.id)
+        setSpell(`Oppdaget: ${loc.name}`)
+        break // one stamp per fix — no message spam
+      }
+    }
+  }, [position, hpLocationList, visitedIds, markVisited])
+
+  const handleToggleGps = useCallback(() => {
+    setActive((a) => {
+      if (a) setSpell('Mischief managed')
+      return !a
+    })
+  }, [setActive])
+
   function handleToggleMeasure() {
     setMeasureMode((m) => {
       if (m) setMeasurePoints([])
@@ -308,7 +374,12 @@ export default function App() {
         position={position}
         active={active}
         error={error}
-        onToggle={() => setActive((a) => !a)}
+        onToggle={handleToggleGps}
+        visitedCount={visitedIds.size}
+        totalPlaces={hpLocationList?.length ?? 0}
+        house={house}
+        onHouseChange={handleHouseChange}
+        onOpenQuiz={() => setQuizOpen(true)}
         measureMode={measureMode}
         onToggleMeasure={handleToggleMeasure}
         onAddressSelect={handleAddressSelect}
@@ -351,6 +422,8 @@ export default function App() {
         isCustomPlace={selectedIsCustom}
         onDeleteCustomPlace={removeCustomPlace}
         onEditCustomPlace={handleEditCustomPlace}
+        isVisited={selectedLocation ? visitedIds.has(selectedLocation.id) : false}
+        onToggleVisited={toggleVisited}
       />
       {geocodeMarker && showGeocodeCard && (
         <GeocodeCard
@@ -371,6 +444,8 @@ export default function App() {
         onSave={handleSaveCustomPlace}
         onClose={() => { setPendingLongPress(null); setEditingPlace(null) }}
       />
+      <QuizSheet open={quizOpen} onClose={() => setQuizOpen(false)} />
+      <SpellOverlay message={spell} onDone={() => setSpell(null)} />
     </>
   )
 }
