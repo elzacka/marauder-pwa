@@ -62,6 +62,10 @@
   height: var(--sheet-expanded-height);
 }
 
+.sheetFull {
+  height: var(--sheet-full-height);
+}
+
 .sheetOpen {
   transform: translateY(0);
 }

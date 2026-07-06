@@ -2,15 +2,22 @@ import { useRef, useCallback, useState } from 'react'
 
 const DISMISS_THRESHOLD = 72
 
-export type SheetSize = 'default' | 'half' | 'expanded'
+export type SheetSize = 'default' | 'half' | 'expanded' | 'full'
 
-/** Snap points as fraction of viewport height — keep in sync with the
+/** Space reserved at the top for the Marauder wordmark — the sheet's upper
+ *  edge never travels past this. Keep in sync with --sheet-full-height. */
+const TOP_RESERVED_PX = 64
+
+/** Snap heights in px for the current viewport — keep in sync with the
  *  --sheet-*-height tokens in tokens.css */
-const SNAP_FRACTIONS: Array<{ size: SheetSize; fraction: number }> = [
-  { size: 'default', fraction: 0.33 },
-  { size: 'half', fraction: 0.5 },
-  { size: 'expanded', fraction: 0.7 },
-]
+function snapHeights(vh: number): Array<{ size: SheetSize; height: number }> {
+  return [
+    { size: 'default', height: vh * 0.33 },
+    { size: 'half', height: vh * 0.5 },
+    { size: 'expanded', height: vh * 0.7 },
+    { size: 'full', height: vh - TOP_RESERVED_PX },
+  ]
+}
 
 type Options = {
   /** Drag up/down resizes the sheet between the snap points.
@@ -47,7 +54,9 @@ export function useSheetDrag(onClose: () => void, { resizable = true }: Options 
     const sheet = sheetRef.current
     if (!sheet) return
     if (resizable) {
-      const h = Math.min(window.innerHeight * 0.92, Math.max(64, startHeight.current - dy))
+      // Clamp: never past the reserved top strip, never below a sliver
+      const max = window.innerHeight - TOP_RESERVED_PX
+      const h = Math.min(max, Math.max(64, startHeight.current - dy))
       sheet.style.height = `${h}px`
     } else {
       sheet.style.transform = `translateY(${Math.max(0, dy)}px)`
@@ -73,11 +82,11 @@ export function useSheetDrag(onClose: () => void, { resizable = true }: Options 
       onClose()
       return
     }
-    // Snap to the nearest of the three points
+    // Snap to the nearest point (default / half / expanded / full)
     let nearest: SheetSize = 'default'
     let best = Number.POSITIVE_INFINITY
-    for (const { size: s, fraction } of SNAP_FRACTIONS) {
-      const d = Math.abs(endHeight - vh * fraction)
+    for (const { size: s, height } of snapHeights(vh)) {
+      const d = Math.abs(endHeight - height)
       if (d < best) {
         best = d
         nearest = s

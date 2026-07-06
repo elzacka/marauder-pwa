@@ -44,7 +44,7 @@ export default function POIDetailSheet({
     <>
       <div
         ref={sheetRef}
-        className={`${styles.sheet} ${size === 'half' ? styles.sheetHalf : ''} ${size === 'expanded' ? styles.sheetExpanded : ''}`}
+        className={`${styles.sheet} ${size === 'half' ? styles.sheetHalf : ''} ${size === 'expanded' ? styles.sheetExpanded : ''} ${size === 'full' ? styles.sheetFull : ''}`}
         role="dialog"
         aria-label={location.name}
       >

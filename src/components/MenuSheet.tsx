@@ -414,7 +414,7 @@ export default function MenuSheet({
       {/* Sheet */}
       <div
         ref={sheetRef}
-        className={`${styles.sheet} ${size === 'half' ? styles.sheetHalf : ''} ${size === 'expanded' ? styles.sheetExpanded : ''} ${isOpen ? styles.sheetOpen : styles.sheetClosed}`}
+        className={`${styles.sheet} ${size === 'half' ? styles.sheetHalf : ''} ${size === 'expanded' ? styles.sheetExpanded : ''} ${size === 'full' ? styles.sheetFull : ''} ${isOpen ? styles.sheetOpen : styles.sheetClosed}`}
         role="dialog"
         aria-modal={isOpen}
         aria-label="Meny"

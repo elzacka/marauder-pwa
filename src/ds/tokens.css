@@ -129,6 +129,9 @@
   --sheet-default-height: 33svh;
   --sheet-half-height: 50svh;
   --sheet-expanded-height: 70svh;
+  /* Full = everything except the strip under the Marauder wordmark (64px —
+     keep in sync with TOP_RESERVED_PX in useSheetDrag.ts) */
+  --sheet-full-height: calc(100svh - 64px);
   --map-control-offset: 56px;
   --safe-bottom:        env(safe-area-inset-bottom, 16px);
 
