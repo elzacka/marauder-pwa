@@ -554,7 +554,7 @@ export default function MenuSheet({
                 {!q && !activeTag && totalPlaces > 0 && (
                   <div className={styles.passRow}>
                     <div className={styles.passHeader}>
-                      <span className={styles.passTitle}>Marauder-passet</span>
+                      <span className={styles.passTitle}>Marauder's Hunt Score</span>
                       <span className={styles.passCount}>{visitedCount} av {totalPlaces}</span>
                     </div>
                     <div className={styles.passBar}>
@@ -650,7 +650,7 @@ export default function MenuSheet({
                     </button>
                     {showFavouritesList && (favouriteLocations.length === 0 ? (
                       <p className={styles.empty}>
-                        Ingen favoritter ennå. Trykk hjerteikonet på et sted for å lagre det.
+                        Ingen favoritter ennå. Trykk hjerte på et sted for å lagre.
                       </p>
                     ) : (
                       <>
