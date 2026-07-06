@@ -1,8 +1,19 @@
 # Marauder
 
-Kartbasert app[^1] for å utforske Harry Potter-universet i Storbritannia og Irland.
+Kartbasert [PWA](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps) for å utforske Harry Potter-universet i Storbritannia og Irland.
 
 Finn den her: [elzacka.github.io/marauder-pwa](https://elzacka.github.io/marauder-pwa/)
+
+## Funksjoner
+
+- Kart over innspillingssteder, kanoniske steder og steder med HP-atmosfære
+- Filtrer etter kategori og sted (land/by-chips)
+- Søk på steds- eller stedsnavn med geokoding
+- Favoritter og egne steder (Mine steder) med kartvisning
+- Marauders pass: Marker besøkte steder og svar på quizspørsmål
+- Offline-kart: Last ned valgte områder for bruk uten internett
+- To bakgrunnskart: Standard (vektorkart, offline-støtte) og Satellitt (hybrid)
+- Installeres som app på iPhone og Android
 
 ## Utvikling
 
@@ -27,18 +38,15 @@ Kartdata © OpenStreetMap-bidragsytere, lisensiert under ODbL.
 
 Appen har to bakgrunnskart, valgbare i Innstillinger:
 
-- **Standard** – vektorkart fra openfreemap. Fungerer offline i nedlastede
+- **Standard**: Vektorkart fra openfreemap. Fungerer offline i nedlastede
   områder (Verktøy → Offline kart).
-- **Satellitt** – flyfoto fra Esri World Imagery med steds- og veinavn fra
-  standardkartet lagt oppå (hybrid). Krever internett; nedlastede
+- **Satellitt**: Flyfoto fra Esri World Imagery med steds- og veinavn fra
+  standardkartet lagt oppå (hybrid). Krever internett: Nedlastede
   offline-områder gjelder bare Standard-kartet. Esri-bildene er gratis å bruke
-  med attribusjon, men er ikke åpen kildekode – de reelt åpne alternativene
-  (f.eks. Sentinel-2, 10 m oppløsning) mangler detaljnivået som trengs for
+  med attribusjon, men er ikke åpen kildekode. Andre datakilder som er åpen kildekode (f.eks. Sentinel-2, 10 m oppløsning) mangler detaljnivået som trengs for
   navigasjon i byer.
 
 ## Personvern
 
 Se [PERSONVERN.md](PERSONVERN.md).
 
-----
-[^1]: En [Progressive Web App(PWA)]([https://elzacka.github.io/marauder-pwa/](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps))
