@@ -86,6 +86,9 @@ export default function App() {
 
   const [selectedLocation, setSelectedLocation] = useState<HPLocation | null>(null)
   const [selectedIsCustom, setSelectedIsCustom] = useState(false)
+  // Marker and sheet are SEPARATE (Lene, 2026-07-06): closing the sheet by
+  // tapping the map keeps the marker; a second tap on empty map clears it
+  const [detailOpen, setDetailOpen] = useState(false)
   const [showZoomControls, setShowZoomControls] = useState(getInitialZoomControls)
   const [showLocateBtn, setShowLocateBtn] = useState(getInitialLocateBtn)
   // Long-press on the FAB temporarily hides/shows the map button group
@@ -132,8 +135,9 @@ export default function App() {
   const [activeFilter, setActiveFilter] = useState<FilterState>(emptyFilter)
   // Per-favourite map visibility (shown-set: hearts are opt-in, map starts clean)
   const [shownFavouriteIds, setShownFavouriteIds] = useState<Set<string>>(new Set())
-  // Per-place visibility for Mine steder (hidden-set: new places show by default)
-  const [hiddenCustomIds, setHiddenCustomIds] = useState<Set<string>>(new Set())
+  // Per-place visibility for Mine steder (shown-set: nothing ticked by default,
+  // Lene 2026-07-06 — but a freshly saved place is shown immediately)
+  const [shownCustomIds, setShownCustomIds] = useState<Set<string>>(new Set())
   const mapRef = useRef<MapHandle>(null)
 
   // All user tags in use — offered as quick-add suggestions in the form
@@ -144,12 +148,12 @@ export default function App() {
   }, [customPlaces])
 
   const visibleCustomPlaces = useMemo(
-    () => customPlaces.filter((p) => !hiddenCustomIds.has(p.id)),
-    [customPlaces, hiddenCustomIds],
+    () => customPlaces.filter((p) => shownCustomIds.has(p.id)),
+    [customPlaces, shownCustomIds],
   )
 
   const handleToggleCustomVisible = useCallback((id: string) => {
-    setHiddenCustomIds((prev) => {
+    setShownCustomIds((prev) => {
       const next = new Set(prev)
       if (next.has(id)) next.delete(id)
       else next.add(id)
@@ -158,8 +162,10 @@ export default function App() {
   }, [])
 
   const handleToggleAllCustomVisible = useCallback(() => {
-    setHiddenCustomIds((prev) =>
-      prev.size === 0 ? new Set(customPlaces.map((p) => p.id)) : new Set(),
+    setShownCustomIds((prev) =>
+      prev.size === customPlaces.length && customPlaces.length > 0
+        ? new Set()
+        : new Set(customPlaces.map((p) => p.id)),
     )
   }, [customPlaces])
 
@@ -196,6 +202,7 @@ export default function App() {
     mapRef.current?.flyTo(loc.lng, loc.lat, 13, -Math.round(window.innerHeight * 0.16))
     setSelectedLocation(loc)
     setSelectedIsCustom(false)
+    setDetailOpen(true)
   }, [])
 
   const handleCustomPlaceClick = useCallback((id: string) => {
@@ -203,11 +210,22 @@ export default function App() {
     if (!p) return
     setSelectedLocation(customPlaceToHPLocation(p))
     setSelectedIsCustom(true)
+    setDetailOpen(true)
   }, [customPlaces])
 
+  // Drag-down/Escape: close the sheet, keep the marker
   const handleCloseDetail = useCallback(() => {
-    setSelectedLocation(null)
-    setSelectedIsCustom(false)
+    setDetailOpen(false)
+  }, [])
+
+  // Tap on empty map: first close the sheet, then (next tap) clear the marker
+  const handleMapClick = useCallback(() => {
+    setDetailOpen((open) => {
+      if (open) return false
+      setSelectedLocation(null)
+      setSelectedIsCustom(false)
+      return false
+    })
   }, [])
 
   function handleToggleZoomControls(v: boolean) {
@@ -316,7 +334,9 @@ export default function App() {
       lng: pendingLongPress.lng,
     })
     setPendingLongPress(null)
-    // Saved as a custom place: the geocode pin has served its purpose
+    // Saved as a custom place: the geocode pin has served its purpose, and the
+    // fresh place is shown on the map right away
+    setShownCustomIds((prev) => new Set(prev).add(p.id))
     setGeocodeMarker(null)
     setShowGeocodeCard(false)
     mapRef.current?.flyTo(p.lng, p.lat)
@@ -355,7 +375,7 @@ export default function App() {
         onLongPress={handleLongPress}
         geocodeMarker={geocodeMarker}
         onGeocodeMarkerClick={() => setShowGeocodeCard((v) => !v)}
-        onMapClick={handleCloseDetail}
+        onMapClick={handleMapClick}
         baseLayer={baseLayer}
         selectedLocation={selectedLocation}
         activeFilter={activeFilter}
@@ -394,7 +414,7 @@ export default function App() {
         onToggleFavouriteVisible={handleToggleFavouriteVisible}
         onToggleAllFavouritesVisible={handleToggleAllFavouritesVisible}
         onFabLongPress={() => setMapButtonsHidden((v) => !v)}
-        hiddenCustomIds={hiddenCustomIds}
+        shownCustomIds={shownCustomIds}
         onToggleCustomVisible={handleToggleCustomVisible}
         onToggleAllCustomVisible={handleToggleAllCustomVisible}
         showZoomControls={showZoomControls}
@@ -415,7 +435,7 @@ export default function App() {
         dataError={dataError}
       />
       <POIDetailSheet
-        location={selectedLocation}
+        location={detailOpen ? selectedLocation : null}
         onClose={handleCloseDetail}
         isFavourite={selectedLocation ? favouriteIds.has(selectedLocation.id) : false}
         onToggleFavourite={toggleFavourite}

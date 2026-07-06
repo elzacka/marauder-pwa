@@ -452,6 +452,8 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
         padding: { top: 60, right: 20, bottom: 140, left: 20 },
         duration: 0,
       })
+      // Default view one zoom level closer than the full-bounds fit (Lene, 2026-07-06)
+      map.setZoom(map.getZoom() + 1)
       addOverlays(map)
       setMapReady(true)
 
@@ -696,11 +698,16 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
 
     // Favourites ("Alle" toggle) render as hearts in their own layer; the same
     // POIs are excluded from hp-dots so a favourite never shows dot + heart.
+    // The SELECTED place is excluded from both layers — only the enlarged
+    // selected marker shows it (fixes "double marker", Lene 2026-07-06).
+    const selId = selectedLocation?.id ?? null
     const hasFavs = favouriteMarkerIds.length > 0
     if (map.getLayer('favourite-hearts')) {
       map.setLayoutProperty('favourite-hearts', 'visibility', hasFavs ? 'visible' : 'none')
       if (hasFavs) {
-        map.setFilter('favourite-hearts', ['match', ['get', 'id'], favouriteMarkerIds, true, false] as unknown as maplibregl.FilterSpecification)
+        let heartsExpr: unknown = ['match', ['get', 'id'], favouriteMarkerIds, true, false]
+        if (selId) heartsExpr = ['all', heartsExpr, ['!=', ['get', 'id'], selId]]
+        map.setFilter('favourite-hearts', heartsExpr as maplibregl.FilterSpecification)
       }
     }
 
@@ -738,8 +745,11 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
     if (hasFavs) {
       expr = ['all', expr, ['!', ['match', ['get', 'id'], favouriteMarkerIds, true, false]]]
     }
+    if (selId) {
+      expr = ['all', expr, ['!=', ['get', 'id'], selId]]
+    }
     map.setFilter('hp-dots', expr as maplibregl.FilterSpecification)
-  }, [activeFilter, favouriteMarkerIds, mapReady])
+  }, [activeFilter, favouriteMarkerIds, selectedLocation, mapReady])
 
   // HP locations data — set when the fetched FeatureCollection arrives OR when
   // the map becomes ready, whichever happens last (see mapReady comment above)

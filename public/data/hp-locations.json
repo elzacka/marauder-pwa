@@ -878,6 +878,405 @@
         "city": "Pembrokeshire",
         "fun_fact": "\"Here lies Dobby, a free elf.\" Fans still leave socks on the beach."
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.1252,
+          51.5063
+        ]
+      },
+      "properties": {
+        "id": "ministry-of-magic-entrance",
+        "name": "Ministry of Magic entrance – Great Scotland Yard",
+        "location_type": "filming",
+        "categories": [
+          "locations"
+        ],
+        "hp_references": [
+          "HP5",
+          "HP7"
+        ],
+        "description": "Scotland Place and Great Scotland Yard played the visitors’ entrance to the Ministry of Magic — red telephone box and all.",
+        "source": "manual",
+        "external_url": null,
+        "country": "England",
+        "city": "London",
+        "fun_fact": "Harry and Mr Weasley dialled 6-2-4-4-2 — MAGIC — in the phone box here in Order of the Phoenix."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -2.5556,
+          51.7967
+        ]
+      },
+      "properties": {
+        "id": "forest-of-dean",
+        "name": "Forest of Dean",
+        "location_type": "canonical",
+        "categories": [
+          "locations",
+          "atmosphere"
+        ],
+        "hp_references": [
+          "HP7"
+        ],
+        "description": "The ancient forest where Harry and Hermione camp in Deathly Hallows — and where the silver doe leads Harry to the Sword of Gryffindor.",
+        "source": "manual",
+        "external_url": null,
+        "country": "England",
+        "city": "Forest of Dean",
+        "fun_fact": "Hermione’s parents took her here as a child — and J.K. Rowling grew up in Tutshill, on the forest’s edge."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.1284,
+          51.5133
+        ]
+      },
+      "properties": {
+        "id": "charing-cross-road",
+        "name": "Charing Cross Road",
+        "location_type": "canonical",
+        "categories": [
+          "locations",
+          "inspiration"
+        ],
+        "hp_references": [
+          "HP1",
+          "HP3"
+        ],
+        "description": "The canonical home of the Leaky Cauldron — the wizarding gateway between Muggle London and Diagon Alley.",
+        "source": "manual",
+        "external_url": null,
+        "country": "England",
+        "city": "London",
+        "fun_fact": "The Palace Theatre on this street has hosted Harry Potter and the Cursed Child since 2016."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.1249,
+          51.501
+        ]
+      },
+      "properties": {
+        "id": "westminster-station",
+        "name": "Westminster Underground Station",
+        "location_type": "filming",
+        "categories": [
+          "locations",
+          "transport"
+        ],
+        "hp_references": [
+          "HP5"
+        ],
+        "description": "Harry and Mr Weasley take the Underground here on the way to Harry’s hearing at the Ministry of Magic.",
+        "country": "England",
+        "city": "London",
+        "fun_fact": "The station was closed for a full day of filming — Mr Weasley remained delighted by the ticket barriers.",
+        "source": "manual",
+        "external_url": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.091,
+          51.5055
+        ]
+      },
+      "properties": {
+        "id": "borough-market",
+        "name": "Borough Market – Stoney Street",
+        "location_type": "filming",
+        "categories": [
+          "locations",
+          "eat_and_drink"
+        ],
+        "hp_references": [
+          "HP3"
+        ],
+        "description": "The Leaky Cauldron’s exterior in Prisoner of Azkaban — the Knight Bus squeezes between Muggle traffic right here.",
+        "country": "England",
+        "city": "London",
+        "fun_fact": "The pub entrance was the flower shop at 7 Stoney Street; next door became the Third Hand Book Emporium.",
+        "source": "manual",
+        "external_url": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.134,
+          51.5101
+        ]
+      },
+      "properties": {
+        "id": "piccadilly-circus",
+        "name": "Piccadilly Circus",
+        "location_type": "filming",
+        "categories": [
+          "locations"
+        ],
+        "hp_references": [
+          "HP7"
+        ],
+        "description": "Harry, Ron and Hermione flee through the crowds here after the Death Eaters crash the wedding.",
+        "country": "England",
+        "city": "London",
+        "fun_fact": "They narrowly miss a double-decker bus on Shaftesbury Avenue — Apparition in central London is precision work.",
+        "source": "manual",
+        "external_url": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.1248,
+          51.4995
+        ]
+      },
+      "properties": {
+        "id": "houses-of-parliament",
+        "name": "Houses of Parliament",
+        "location_type": "filming",
+        "categories": [
+          "locations",
+          "attractions"
+        ],
+        "hp_references": [
+          "HP5"
+        ],
+        "description": "The Order of the Phoenix flies Harry down the Thames past Parliament and Big Ben on the way to Grimmauld Place.",
+        "country": "England",
+        "city": "London",
+        "fun_fact": "The broomstick flight follows the real Thames route — you can trace it on foot along the Embankment.",
+        "source": "manual",
+        "external_url": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -5.636,
+          56.8763
+        ]
+      },
+      "properties": {
+        "id": "eilean-na-moine",
+        "name": "Eilean na Mòine, Loch Eilt",
+        "location_type": "filming",
+        "categories": [
+          "locations",
+          "atmosphere"
+        ],
+        "hp_references": [
+          "HP6",
+          "HP7"
+        ],
+        "description": "The tiny islet that became Dumbledore’s final resting place — the white tomb was added digitally.",
+        "country": "Scotland",
+        "city": "Lochailort",
+        "fun_fact": "You pass it on the Jacobite steam train and the A830 — bring the camera ready between Glenfinnan and Lochailort.",
+        "source": "manual",
+        "external_url": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -5.44,
+          56.865
+        ]
+      },
+      "properties": {
+        "id": "loch-shiel",
+        "name": "Loch Shiel",
+        "location_type": "filming",
+        "categories": [
+          "locations",
+          "atmosphere"
+        ],
+        "hp_references": [
+          "HP3",
+          "HP4"
+        ],
+        "description": "The loch below Glenfinnan stood in for the Black Lake — including the second task of the Triwizard Tournament.",
+        "country": "Scotland",
+        "city": "Glenfinnan",
+        "fun_fact": "The Durmstrang ship rises from these waters in Goblet of Fire.",
+        "source": "manual",
+        "external_url": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.529,
+          51.554
+        ]
+      },
+      "properties": {
+        "id": "black-park",
+        "name": "Black Park",
+        "location_type": "filming",
+        "categories": [
+          "locations",
+          "atmosphere"
+        ],
+        "hp_references": [
+          "HP1",
+          "HP2"
+        ],
+        "description": "The Forbidden Forest of the early films — dense pines conveniently next door to Pinewood Studios.",
+        "country": "England",
+        "city": "Wexham",
+        "fun_fact": "Hagrid leads the first-years’ detention into these woods in Philosopher’s Stone.",
+        "source": "manual",
+        "external_url": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.7178,
+          51.4095
+        ]
+      },
+      "properties": {
+        "id": "picket-post-close",
+        "name": "Picket Post Close, Martins Heron",
+        "location_type": "filming",
+        "categories": [
+          "locations"
+        ],
+        "hp_references": [
+          "HP1"
+        ],
+        "description": "Number 4, Privet Drive in Philosopher’s Stone. NB: an ordinary residential street — please admire quietly from the pavement.",
+        "country": "England",
+        "city": "Bracknell",
+        "fun_fact": "Later films rebuilt Privet Drive at Leavesden — the studio set is on the Studio Tour.",
+        "source": "manual",
+        "external_url": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.1755,
+          51.5154
+        ]
+      },
+      "properties": {
+        "id": "paddington-station",
+        "name": "Paddington Station",
+        "location_type": "canonical",
+        "categories": [
+          "locations",
+          "transport"
+        ],
+        "hp_references": [
+          "HP1"
+        ],
+        "description": "In the book, Hagrid and Harry wait here for the train back to the Dursleys — Hagrid knitting what looks like a canary-yellow circus tent.",
+        "country": "England",
+        "city": "London",
+        "fun_fact": "Hagrid buys Harry a hamburger here — magic and Muggle fast food, side by side.",
+        "source": "manual",
+        "external_url": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.131,
+          51.5165
+        ]
+      },
+      "properties": {
+        "id": "tottenham-court-road",
+        "name": "Tottenham Court Road",
+        "location_type": "canonical",
+        "categories": [
+          "locations"
+        ],
+        "hp_references": [
+          "HP7"
+        ],
+        "description": "In the book, the trio Apparate here after the wedding attack and duck into an all-night café — where two Death Eaters find them.",
+        "country": "England",
+        "city": "London",
+        "fun_fact": "Hermione had a knack for escapes: the beaded bag with everything they needed was already packed.",
+        "source": "manual",
+        "external_url": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.1318,
+          51.514
+        ]
+      },
+      "properties": {
+        "id": "house-of-minalima",
+        "name": "House of MinaLima",
+        "location_type": "interpreted",
+        "categories": [
+          "attractions",
+          "inspiration"
+        ],
+        "hp_references": [
+          "HP1",
+          "HP2",
+          "HP3",
+          "HP4",
+          "HP5",
+          "HP6",
+          "HP7"
+        ],
+        "description": "The gallery of MinaLima — the design duo behind the Marauder’s Map, the Daily Prophet and every letter from Hogwarts.",
+        "country": "England",
+        "city": "London",
+        "fun_fact": "Miraphora Mina and Eduardo Lima designed the graphic universe of all eight films — entry to the gallery is free.",
+        "source": "manual",
+        "external_url": null
+      }
     }
   ]
 }

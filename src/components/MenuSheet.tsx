@@ -139,8 +139,8 @@ type Props = {
   onToggleAllFavouritesVisible: () => void
   /** Long-press on the FAB: hide/show the map button group */
   onFabLongPress: () => void
-  /** Per-place map visibility for Mine steder */
-  hiddenCustomIds: Set<string>
+  /** Per-place map visibility for Mine steder (shown-set, opt-in) */
+  shownCustomIds: Set<string>
   onToggleCustomVisible: (id: string) => void
   onToggleAllCustomVisible: () => void
   showZoomControls: boolean
@@ -175,7 +175,7 @@ export default function MenuSheet({
   favouriteIds, hpLocations, customPlaces, onCustomPlaceClick,
   activeFilter, onFilterChange,
   shownFavouriteIds, onToggleFavouriteVisible, onToggleAllFavouritesVisible, onFabLongPress,
-  hiddenCustomIds, onToggleCustomVisible, onToggleAllCustomVisible,
+  shownCustomIds, onToggleCustomVisible, onToggleAllCustomVisible,
   showZoomControls, onToggleZoomControls,
   showLocateBtn, onToggleLocateBtn,
   baseLayer, onBaseLayerChange,
@@ -191,6 +191,7 @@ export default function MenuSheet({
   // start collapsed
   const [showCategories, setShowCategories] = useState(false)
   const [showFavouritesList, setShowFavouritesList] = useState(false)
+  const [showCustomList, setShowCustomList] = useState(false)
   // Geo tag filter (Lene, 2026-07-05): tapping a country/city chip shows every
   // place carrying that tag. Cleared by ×, or when a search starts.
   const [activeTag, setActiveTag] = useState<string | null>(null)
@@ -258,6 +259,9 @@ export default function MenuSheet({
 
   const allFavouritesShown =
     favouriteIds.size > 0 && shownFavouriteIds.size === favouriteIds.size
+
+  const allCustomShown =
+    customPlaces.length > 0 && shownCustomIds.size === customPlaces.length
 
   const singleCategory = activeFilter.categories.length === 1 ? activeFilter.categories[0] : null
 
@@ -719,19 +723,30 @@ export default function MenuSheet({
 
                 {!q && !activeTag && hasCustom && (
                   <div>
-                    <p className={styles.sectionHeader}>
-                      <span className={styles.sectionDot} aria-hidden="true" />
+                    <button
+                      type="button"
+                      className={styles.sectionToggle}
+                      onClick={() => setShowCustomList((v) => !v)}
+                      aria-expanded={showCustomList}
+                    >
                       Mine steder
-                    </p>
+                      <svg
+                        className={`${styles.sectionChevron} ${showCustomList ? styles.sectionChevronOpen : ''}`}
+                        width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"
+                      >
+                        <path d="M5 7l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
+                    {showCustomList && (<>
                     {/* "Alle": show/hide every custom place on the map */}
                     <button
                       type="button"
-                      className={`${styles.favAllRow} ${hiddenCustomIds.size === 0 ? styles.favAllRowActive : ''}`}
+                      className={`${styles.favAllRow} ${allCustomShown ? styles.favAllRowActive : ''}`}
                       onClick={onToggleAllCustomVisible}
-                      aria-pressed={hiddenCustomIds.size === 0}
+                      aria-pressed={allCustomShown}
                     >
-                      <span className={`${styles.toggleBox} ${styles.toggleBoxGreen} ${hiddenCustomIds.size === 0 ? styles.toggleBoxOn : ''}`} aria-hidden="true">
-                        {hiddenCustomIds.size === 0 && (
+                      <span className={`${styles.toggleBox} ${styles.toggleBoxGreen} ${allCustomShown ? styles.toggleBoxOn : ''}`} aria-hidden="true">
+                        {allCustomShown && (
                           <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                             <path d="M2 6.5L4.8 9.2L10 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
@@ -741,7 +756,7 @@ export default function MenuSheet({
                     </button>
                     <ul className={styles.list} role="list">
                       {customWithDist.map((p) => {
-                        const visible = !hiddenCustomIds.has(p.id)
+                        const visible = shownCustomIds.has(p.id)
                         return (
                           <li key={p.id} className={styles.itemBlock}>
                             <div className={styles.itemRowFlex}>
@@ -777,6 +792,7 @@ export default function MenuSheet({
                         )
                       })}
                     </ul>
+                    </>)}
                   </div>
                 )}
               </div>

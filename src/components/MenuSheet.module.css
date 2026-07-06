@@ -352,15 +352,6 @@
   margin-top: 0;
 }
 
-/* Colour key dot in a section header — matches the custom-place map markers */
-.sectionDot {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-offline);
-  margin-right: 6px;
-}
 
 /* Collapsible section header (Kategorier / Favoritter) */
 .sectionToggle {
