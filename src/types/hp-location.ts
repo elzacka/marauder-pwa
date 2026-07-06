@@ -20,6 +20,8 @@ export type HPLocation = {
   /** Geo tags for the clickable tag chips (English established names) */
   country: string | null
   city: string | null
+  /** User-defined tags — only set for custom places */
+  tags?: string[]
   lat: number
   lng: number
 }

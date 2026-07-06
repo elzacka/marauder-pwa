@@ -123,10 +123,12 @@
 
   /* Layout */
   /* Default sheet height ~1/3 of screen (Lene, 2026-07-05) — content scrolls within */
-  /* Snap points — keep in sync with SNAP_FRACTIONS in useSheetDrag.ts */
+  /* Snap points — keep in sync with SNAP_FRACTIONS in useSheetDrag.ts.
+     Expanded is 70svh (not 85): with the iOS keyboard open, a taller sheet
+     pushed the search field out of sight (Lene, 2026-07-05) */
   --sheet-default-height: 33svh;
   --sheet-half-height: 50svh;
-  --sheet-expanded-height: 85svh;
+  --sheet-expanded-height: 70svh;
   --map-control-offset: 56px;
   --safe-bottom:        env(safe-area-inset-bottom, 16px);
 

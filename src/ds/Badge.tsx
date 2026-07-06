@@ -1,20 +1,12 @@
 import type { CSSProperties } from 'react'
+import { CATEGORY_COLORS, LOCATION_TYPE_COLORS } from './filterMeta'
 import styles from './Badge.module.css'
 
-// Type colours MUST match the map dots (HP_PAINT in MapView / LOCATION_TYPE_COLORS
-// in filterMeta) — aligned 2026-07-05, was previously inconsistent (D14)
+// One palette everywhere: colours come from filterMeta (single source)
 const VARIANT_DOT_COLORS: Record<string, string> = {
-  filming:       '#5C1010',
-  canonical:     '#9E6B1A',
-  interpreted:   '#4A3B6B',
-  atmosphere:    '#2A5070',
-  attractions:   '#5C1010',
-  eat_and_drink: '#6B3E1A',
-  inspiration:   '#4A3B6B',
-  sleep:         '#2E6B3E',
-  locations:     '#3E1F6B',
-  transport:     '#1A4A1A',
-  default:       'rgba(26,10,0,0.4)',
+  ...CATEGORY_COLORS,
+  ...LOCATION_TYPE_COLORS,
+  default: 'rgba(26,10,0,0.4)',
 }
 
 const LOCATION_TYPE_LABELS: Record<string, string> = {

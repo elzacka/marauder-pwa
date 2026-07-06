@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useMemo } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useGeolocation } from './hooks/useGeolocation'
 import { useWakeLock } from './hooks/useWakeLock'
 import { useOfflineAreas } from './hooks/useOfflineAreas'
@@ -6,7 +6,7 @@ import { useNetworkStatus } from './hooks/useNetworkStatus'
 import { useFavourites } from './hooks/useFavourites'
 import { useCustomPlaces } from './hooks/useCustomPlaces'
 import { useHPLocations } from './hooks/useHPLocations'
-import MapView, { type MapHandle } from './map/MapView'
+import MapView, { type MapHandle, type BaseLayer } from './map/MapView'
 import MenuSheet from './components/MenuSheet'
 import POIDetailSheet from './components/POIDetailSheet'
 import MeasureBar from './components/MeasureBar'
@@ -22,6 +22,14 @@ function getInitialZoomControls(): boolean {
   return localStorage.getItem('showZoomControls') !== 'false'
 }
 
+function getInitialLocateBtn(): boolean {
+  return localStorage.getItem('showLocateBtn') !== 'false'
+}
+
+function getInitialBaseLayer(): BaseLayer {
+  return localStorage.getItem('baseLayer') === 'satellite' ? 'satellite' : 'standard'
+}
+
 function customPlaceToHPLocation(p: CustomPlace): HPLocation {
   return {
     id: p.id,
@@ -32,8 +40,8 @@ function customPlaceToHPLocation(p: CustomPlace): HPLocation {
     description: p.description,
     source: 'custom',
     external_url: null,
-    country: null,
-    city: null,
+    country: p.country ?? null,
+    city: p.city ?? null,
     lat: p.lat,
     lng: p.lng,
   }
@@ -57,6 +65,13 @@ export default function App() {
   const [selectedLocation, setSelectedLocation] = useState<HPLocation | null>(null)
   const [selectedIsCustom, setSelectedIsCustom] = useState(false)
   const [showZoomControls, setShowZoomControls] = useState(getInitialZoomControls)
+  const [showLocateBtn, setShowLocateBtn] = useState(getInitialLocateBtn)
+  // Long-press on the FAB temporarily hides/shows the map button group
+  // (whatever is toggled on in Settings) — a quick declutter gesture
+  const [mapButtonsHidden, setMapButtonsHidden] = useState(false)
+  const [baseLayer, setBaseLayer] = useState<BaseLayer>(getInitialBaseLayer)
+  // Locate requested before the first GPS fix arrived — fly when it does
+  const [pendingLocate, setPendingLocate] = useState(false)
   const [measureMode, setMeasureMode] = useState(false)
   const [measurePoints, setMeasurePoints] = useState<Array<[number, number]>>([])
   // Selected geocode result: pin + card stay until dismissed, replaced or saved
@@ -70,15 +85,58 @@ export default function App() {
   // appear only for categories the user has CHECKED in the menu; unchecking
   // removes them. No checked categories = no markers. Do not change this.
   const [activeFilter, setActiveFilter] = useState<FilterState>(emptyFilter)
-  // "Alle" over favourites: show every favourite as a map marker in one tap
-  const [favouritesOnMap, setFavouritesOnMap] = useState(false)
+  // Per-favourite map visibility (shown-set: hearts are opt-in, map starts clean)
+  const [shownFavouriteIds, setShownFavouriteIds] = useState<Set<string>>(new Set())
+  // Per-place visibility for Mine steder (hidden-set: new places show by default)
+  const [hiddenCustomIds, setHiddenCustomIds] = useState<Set<string>>(new Set())
   const mapRef = useRef<MapHandle>(null)
 
-  // Stable id list for the map filter; empty when the toggle is off
-  const favouriteMarkerIds = useMemo(
-    () => (favouritesOnMap ? [...favouriteIds] : []),
-    [favouritesOnMap, favouriteIds],
+  // All user tags in use — offered as quick-add suggestions in the form
+  const existingCustomTags = useMemo(() => {
+    const set = new Set<string>()
+    for (const p of customPlaces) for (const t of p.tags ?? []) set.add(t)
+    return [...set].sort((a, b) => a.localeCompare(b, 'nb'))
+  }, [customPlaces])
+
+  const visibleCustomPlaces = useMemo(
+    () => customPlaces.filter((p) => !hiddenCustomIds.has(p.id)),
+    [customPlaces, hiddenCustomIds],
   )
+
+  const handleToggleCustomVisible = useCallback((id: string) => {
+    setHiddenCustomIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }, [])
+
+  const handleToggleAllCustomVisible = useCallback(() => {
+    setHiddenCustomIds((prev) =>
+      prev.size === 0 ? new Set(customPlaces.map((p) => p.id)) : new Set(),
+    )
+  }, [customPlaces])
+
+  // Stable id list for the map's heart layer
+  const favouriteMarkerIds = useMemo(() => [...shownFavouriteIds], [shownFavouriteIds])
+
+  const handleToggleFavouriteVisible = useCallback((id: string) => {
+    setShownFavouriteIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }, [])
+
+  const handleToggleAllFavouritesVisible = useCallback(() => {
+    setShownFavouriteIds((prev) =>
+      prev.size === favouriteIds.size && favouriteIds.size > 0
+        ? new Set()
+        : new Set(favouriteIds),
+    )
+  }, [favouriteIds])
 
   function handleDownloadVisibleArea() {
     const bounds = mapRef.current?.getBounds()
@@ -111,6 +169,33 @@ export default function App() {
     setShowZoomControls(v)
     localStorage.setItem('showZoomControls', String(v))
   }
+
+  function handleToggleLocateBtn(v: boolean) {
+    setShowLocateBtn(v)
+    localStorage.setItem('showLocateBtn', String(v))
+  }
+
+  function handleBaseLayerChange(layer: BaseLayer) {
+    setBaseLayer(layer)
+    localStorage.setItem('baseLayer', layer)
+  }
+
+  const handleLocate = useCallback(() => {
+    if (position) {
+      mapRef.current?.flyTo(position.lng, position.lat, 14)
+      return
+    }
+    // GPS off or no fix yet: switch it on and fly when the fix arrives
+    setActive(true)
+    setPendingLocate(true)
+  }, [position, setActive])
+
+  useEffect(() => {
+    if (pendingLocate && position) {
+      setPendingLocate(false)
+      mapRef.current?.flyTo(position.lng, position.lat, 14)
+    }
+  }, [pendingLocate, position])
 
   function handleToggleMeasure() {
     setMeasureMode((m) => {
@@ -150,9 +235,9 @@ export default function App() {
     setPendingLongPress({ lng, lat })
   }
 
-  function handleSaveCustomPlace(name: string, description: string) {
+  function handleSaveCustomPlace(name: string, description: string, tags: string[]) {
     if (editingPlace) {
-      updateCustomPlace(editingPlace.id, { name, description })
+      updateCustomPlace(editingPlace.id, { name, description, tags })
       setEditingPlace(null)
       return
     }
@@ -160,6 +245,7 @@ export default function App() {
     const p = addCustomPlace({
       name,
       description,
+      tags,
       lat: pendingLongPress.lat,
       lng: pendingLongPress.lng,
     })
@@ -192,15 +278,19 @@ export default function App() {
         ref={mapRef}
         position={position}
         onLocationSelect={handleLocationSelect}
-        showZoomControls={showZoomControls}
+        showZoomControls={showZoomControls && !mapButtonsHidden}
+        showLocateBtn={showLocateBtn && !mapButtonsHidden}
+        onLocate={handleLocate}
         mapMode={measureMode ? 'measure' : 'browse'}
         measurePoints={measurePoints}
         onMeasurePoint={handleMeasurePoint}
-        customPlaces={customPlaces}
+        customPlaces={visibleCustomPlaces}
         onCustomPlaceClick={handleCustomPlaceClick}
         onLongPress={handleLongPress}
         geocodeMarker={geocodeMarker}
         onGeocodeMarkerClick={() => setShowGeocodeCard((v) => !v)}
+        onMapClick={handleCloseDetail}
+        baseLayer={baseLayer}
         selectedLocation={selectedLocation}
         activeFilter={activeFilter}
         favouriteMarkerIds={favouriteMarkerIds}
@@ -229,10 +319,19 @@ export default function App() {
         onCustomPlaceClick={handleCustomPlaceClick}
         activeFilter={activeFilter}
         onFilterChange={setActiveFilter}
-        favouritesOnMap={favouritesOnMap}
-        onToggleFavouritesOnMap={() => setFavouritesOnMap((v) => !v)}
+        shownFavouriteIds={shownFavouriteIds}
+        onToggleFavouriteVisible={handleToggleFavouriteVisible}
+        onToggleAllFavouritesVisible={handleToggleAllFavouritesVisible}
+        onFabLongPress={() => setMapButtonsHidden((v) => !v)}
+        hiddenCustomIds={hiddenCustomIds}
+        onToggleCustomVisible={handleToggleCustomVisible}
+        onToggleAllCustomVisible={handleToggleAllCustomVisible}
         showZoomControls={showZoomControls}
         onToggleZoomControls={handleToggleZoomControls}
+        showLocateBtn={showLocateBtn}
+        onToggleLocateBtn={handleToggleLocateBtn}
+        baseLayer={baseLayer}
+        onBaseLayerChange={handleBaseLayerChange}
         offlineAreas={offlineAreas}
         offlineStatus={offlineStatus}
         offlineDone={offlineDone}
@@ -266,6 +365,8 @@ export default function App() {
         coords={editingPlace ? { lng: editingPlace.lng, lat: editingPlace.lat } : pendingLongPress}
         initialName={editingPlace ? editingPlace.name : pendingLongPress?.name}
         initialDescription={editingPlace?.description}
+        initialTags={editingPlace?.tags}
+        existingTags={existingCustomTags}
         title={editingPlace ? 'Rediger sted' : 'Legg til sted'}
         onSave={handleSaveCustomPlace}
         onClose={() => { setPendingLongPress(null); setEditingPlace(null) }}

@@ -8,37 +8,71 @@ type Props = {
   initialName?: string
   /** Prefilled description — used when editing an existing place */
   initialDescription?: string
+  /** Prefilled tags — used when editing an existing place */
+  initialTags?: string[]
+  /** Tags already in use on other places — offered as quick-add chips */
+  existingTags?: string[]
   /** Sheet heading; defaults to "Legg til sted" */
   title?: string
-  onSave: (name: string, description: string) => void
+  onSave: (name: string, description: string, tags: string[]) => void
   onClose: () => void
 }
 
 export default function AddPlaceSheet({
-  coords, initialName, initialDescription, title = 'Legg til sted', onSave, onClose,
+  coords, initialName, initialDescription, initialTags, existingTags = [],
+  title = 'Legg til sted', onSave, onClose,
 }: Props) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
+  const [tags, setTags] = useState<string[]>([])
+  const [newTag, setNewTag] = useState('')
 
   // Reset the form each time the sheet opens; prefill when provided
-  // (geocode hits pass a name; editing passes name + description).
+  // (geocode hits pass a name; editing passes name + description + tags).
   useEffect(() => {
     if (coords) {
       setName(initialName ?? '')
       setDescription(initialDescription ?? '')
+      setTags(initialTags ?? [])
+      setNewTag('')
     }
-  }, [coords, initialName, initialDescription])
+  }, [coords, initialName, initialDescription, initialTags])
+
+  function addTag(raw: string) {
+    const t = raw.trim()
+    if (!t) return
+    setTags((prev) =>
+      prev.some((x) => x.toLowerCase() === t.toLowerCase()) ? prev : [...prev, t],
+    )
+    setNewTag('')
+  }
+
+  function removeTag(t: string) {
+    setTags((prev) => prev.filter((x) => x !== t))
+  }
+
+  const suggestions = existingTags.filter(
+    (t) => !tags.some((x) => x.toLowerCase() === t.toLowerCase()),
+  )
   // Form sheet: content-sized, not resizable — drag only closes
   const { sheetRef, onDragStart, onDragMove, onDragEnd } = useSheetDrag(onClose, { resizable: false })
   const nameId = useId()
   const descId = useId()
+  const tagId = useId()
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!name.trim()) return
-    onSave(name.trim(), description.trim())
+    // Include a typed-but-not-added tag so it is not silently lost
+    const pending = newTag.trim()
+    const finalTags = pending && !tags.some((x) => x.toLowerCase() === pending.toLowerCase())
+      ? [...tags, pending]
+      : tags
+    onSave(name.trim(), description.trim(), finalTags)
     setName('')
     setDescription('')
+    setTags([])
+    setNewTag('')
   }
 
   if (!coords) return null
@@ -96,6 +130,66 @@ export default function AddPlaceSheet({
                 placeholder="Notater om stedet…"
                 rows={3}
               />
+            </div>
+
+            <div className={styles.field}>
+              <label htmlFor={tagId} className={styles.label}>
+                Etiketter <span className={styles.optional}>(valgfritt)</span>
+              </label>
+              {tags.length > 0 && (
+                <div className={styles.tagRow}>
+                  {tags.map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      className={styles.tagChipOn}
+                      onClick={() => removeTag(t)}
+                      aria-label={`Fjern etiketten ${t}`}
+                    >
+                      {t} ×
+                    </button>
+                  ))}
+                </div>
+              )}
+              <div className={styles.tagInputRow}>
+                <input
+                  id={tagId}
+                  type="text"
+                  className={styles.input}
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  placeholder="Ny etikett…"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      addTag(newTag)
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  className={styles.tagAddBtn}
+                  onClick={() => addTag(newTag)}
+                  disabled={!newTag.trim()}
+                >
+                  Legg til
+                </button>
+              </div>
+              {suggestions.length > 0 && (
+                <div className={styles.tagRow}>
+                  {suggestions.map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      className={styles.tagChip}
+                      onClick={() => addTag(t)}
+                      aria-label={`Legg til etiketten ${t}`}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className={styles.actions}>

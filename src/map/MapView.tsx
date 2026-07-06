@@ -6,7 +6,7 @@ import type { Position } from '../hooks/useGeolocation'
 import type { HPLocation } from '../types/hp-location'
 import { propsToLocation } from '../utils/featureToLocation'
 import type { CustomPlace } from '../types/custom-place'
-import type { FilterState } from '../ds/filterMeta'
+import { LOCATION_TYPE_COLORS, CATEGORY_META, type FilterState } from '../ds/filterMeta'
 import styles from './MapView.module.css'
 
 const VIEW_BOUNDS: maplibregl.LngLatBoundsLike = [[-13.0, 48.0], [3.5, 62.0]]
@@ -33,15 +33,66 @@ const worldMask: Feature<Polygon> = {
 // serving tiles CacheFirst (see src/offline/OfflineAreaManager.ts)
 const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty'
 
+export type BaseLayer = 'standard' | 'satellite'
+
+// Esri World Imagery: the best freely usable satellite source (≤1 m detail).
+// Free with attribution — NOT open source; the open alternatives (Sentinel-2,
+// 10 m) lack street-level detail. Verified 2026-07-05.
+const ESRI_IMAGERY =
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+
+/**
+ * Hybrid satellite style: Esri imagery as base + the SYMBOL layers (place
+ * names, road names) from the standard vector style on top.
+ */
+async function buildSatelliteStyle(): Promise<maplibregl.StyleSpecification> {
+  const liberty = (await fetch(MAP_STYLE).then((r) => r.json())) as maplibregl.StyleSpecification
+  return {
+    version: 8,
+    glyphs: liberty.glyphs,
+    sprite: liberty.sprite,
+    sources: {
+      ...liberty.sources,
+      satellite: {
+        type: 'raster',
+        tiles: [ESRI_IMAGERY],
+        tileSize: 256,
+        maxzoom: 19,
+        attribution: 'Imagery © Esri, Maxar, Earthstar Geographics',
+      },
+    },
+    layers: [
+      { id: 'satellite-base', type: 'raster', source: 'satellite' },
+      // Labels restyled for imagery (Google hybrid look): white text with a
+      // strong dark halo — the standard style's dark-on-light labels are
+      // unreadable on top of photos
+      ...liberty.layers
+        .filter((l) => l.type === 'symbol')
+        .map((l) => ({
+          ...l,
+          paint: {
+            ...((l as { paint?: Record<string, unknown> }).paint ?? {}),
+            'text-color': '#FFFFFF',
+            'text-halo-color': 'rgba(0, 0, 0, 0.8)',
+            'text-halo-width': 1.6,
+          },
+        })),
+    ] as maplibregl.LayerSpecification[],
+  }
+}
+
+// Dot colours come from the shared palette in filterMeta (single source)
+const TYPE_COLOR_EXPR = [
+  'match', ['get', 'location_type'],
+  'filming',     LOCATION_TYPE_COLORS.filming,
+  'canonical',   LOCATION_TYPE_COLORS.canonical,
+  'interpreted', LOCATION_TYPE_COLORS.interpreted,
+  LOCATION_TYPE_COLORS.filming,
+] as unknown as maplibregl.ExpressionSpecification
+
 const HP_PAINT: maplibregl.CircleLayerSpecification['paint'] = {
   'circle-radius': ['interpolate', ['linear'], ['zoom'], 5, 7, 12, 12],
-  'circle-color': [
-    'match', ['get', 'location_type'],
-    'filming',     '#5C1010',
-    'canonical',   '#9E6B1A',
-    'interpreted', '#4A3B6B',
-    '#5C1010',
-  ],
+  'circle-color': TYPE_COLOR_EXPR,
   'circle-stroke-width': 2,
   'circle-stroke-color': '#E8D5AA',
   'circle-opacity': 0.92,
@@ -49,19 +100,66 @@ const HP_PAINT: maplibregl.CircleLayerSpecification['paint'] = {
 
 const SELECTED_HP_PAINT: maplibregl.CircleLayerSpecification['paint'] = {
   'circle-radius': ['interpolate', ['linear'], ['zoom'], 5, 10, 12, 15],
-  'circle-color': [
-    'match', ['get', 'location_type'],
-    'filming',     '#5C1010',
-    'canonical',   '#9E6B1A',
-    'interpreted', '#4A3B6B',
-    '#5C1010',
-  ],
+  'circle-color': TYPE_COLOR_EXPR,
   'circle-stroke-width': 3,
   'circle-stroke-color': '#FFFFFF',
   'circle-opacity': 1,
 }
 
 const EMPTY_FC: FeatureCollection = { type: 'FeatureCollection', features: [] }
+
+// Static SVG strings for the map button group (no user data — safe as markup)
+const ICON_LOCATE =
+  '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="3" fill="currentColor"/><circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 1v3M10 16v3M1 10h3M16 10h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>'
+const ICON_ZOOM_IN =
+  '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'
+const ICON_ZOOM_OUT =
+  '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'
+
+type MapButtonsOptions = {
+  showLocate: boolean
+  showZoom: boolean
+  onLocate: () => void
+}
+
+/**
+ * One combined control group: locate + zoom in + zoom out (Lene, 2026-07-05).
+ * Custom control instead of maplibregl.NavigationControl so all three buttons
+ * share the exact same design — built by the same code path.
+ */
+class MapButtonsControl implements maplibregl.IControl {
+  private container: HTMLDivElement | null = null
+
+  constructor(private opts: MapButtonsOptions) {}
+
+  onAdd(map: maplibregl.Map): HTMLElement {
+    const c = document.createElement('div')
+    c.className = 'maplibregl-ctrl maplibregl-ctrl-group'
+
+    const addBtn = (icon: string, label: string, onClick: () => void) => {
+      const b = document.createElement('button')
+      b.type = 'button'
+      b.setAttribute('aria-label', label)
+      b.innerHTML = icon
+      b.addEventListener('click', (e) => { e.stopPropagation(); onClick() })
+      c.appendChild(b)
+    }
+
+    if (this.opts.showLocate) addBtn(ICON_LOCATE, 'Gå til min posisjon', this.opts.onLocate)
+    if (this.opts.showZoom) {
+      addBtn(ICON_ZOOM_IN, 'Zoom inn', () => map.zoomIn({ duration: 300 }))
+      addBtn(ICON_ZOOM_OUT, 'Zoom ut', () => map.zoomOut({ duration: 300 }))
+    }
+
+    this.container = c
+    return c
+  }
+
+  onRemove(): void {
+    this.container?.remove()
+    this.container = null
+  }
+}
 
 /**
  * Heart icon for favourite markers, drawn on a canvas (no innerHTML).
@@ -93,11 +191,7 @@ function makeHeartImage(size = 56): ImageData {
   return ctx.getImageData(0, 0, size, size)
 }
 
-function addOverlays(
-  map: maplibregl.Map,
-  onLocationSelectRef: React.MutableRefObject<((loc: HPLocation) => void) | undefined>,
-  onCustomPlaceClickRef: React.MutableRefObject<((id: string) => void) | undefined>,
-) {
+function addOverlays(map: maplibregl.Map) {
   // World parchment mask
   map.addSource('world-mask', { type: 'geojson', data: worldMask })
   map.addLayer({
@@ -138,29 +232,11 @@ function addOverlays(
   map.addSource('selected-hp-location', { type: 'geojson', data: EMPTY_FC })
   map.addLayer({ id: 'selected-hp-dot', type: 'circle', source: 'selected-hp-location', paint: SELECTED_HP_PAINT })
 
-  map.on('click', 'hp-dots', (e) => {
-    if (!e.features?.length || !onLocationSelectRef.current) return
-    const feat = e.features[0]
-    const geom = feat.geometry
-    if (geom.type !== 'Point') return
-    // Single conversion point — do not rebuild HPLocation by hand here (CLAUDE.md)
-    onLocationSelectRef.current(
-      propsToLocation(feat.properties, geom.coordinates[0], geom.coordinates[1]),
-    )
-  })
+  // NB: marker CLICKS are handled centrally in the map's general click
+  // handler (init effect) with a forgiving hit box — do not add per-layer
+  // click handlers here (they would double-fire).
   map.on('mouseenter', 'hp-dots', () => { map.getCanvas().style.cursor = 'pointer' })
   map.on('mouseleave', 'hp-dots', () => { map.getCanvas().style.cursor = '' })
-
-  // Favourite hearts open the same POI detail as regular dots
-  map.on('click', 'favourite-hearts', (e) => {
-    if (!e.features?.length || !onLocationSelectRef.current) return
-    const feat = e.features[0]
-    const geom = feat.geometry
-    if (geom.type !== 'Point') return
-    onLocationSelectRef.current(
-      propsToLocation(feat.properties, geom.coordinates[0], geom.coordinates[1]),
-    )
-  })
   map.on('mouseenter', 'favourite-hearts', () => { map.getCanvas().style.cursor = 'pointer' })
   map.on('mouseleave', 'favourite-hearts', () => { map.getCanvas().style.cursor = '' })
 
@@ -177,11 +253,6 @@ function addOverlays(
       'circle-stroke-color': '#E8D5AA',
       'circle-opacity': 0.9,
     },
-  })
-  map.on('click', 'custom-place-dots', (e) => {
-    if (!e.features?.length || !onCustomPlaceClickRef.current) return
-    const id = e.features[0].properties?.id as string | undefined
-    if (id) onCustomPlaceClickRef.current(id)
   })
   map.on('mouseenter', 'custom-place-dots', () => { map.getCanvas().style.cursor = 'pointer' })
   map.on('mouseleave', 'custom-place-dots', () => { map.getCanvas().style.cursor = '' })
@@ -227,6 +298,8 @@ type Props = {
   position: Position | null
   onLocationSelect?: (loc: HPLocation) => void
   showZoomControls?: boolean
+  showLocateBtn?: boolean
+  onLocate?: () => void
   mapMode?: MapMode
   measurePoints?: Array<[number, number]>
   onMeasurePoint?: (lng: number, lat: number) => void
@@ -235,6 +308,9 @@ type Props = {
   onLongPress?: (lng: number, lat: number) => void
   geocodeMarker?: { lng: number; lat: number } | null
   onGeocodeMarkerClick?: () => void
+  /** Tap on empty map (browse mode) — used to close the POI detail sheet */
+  onMapClick?: () => void
+  baseLayer?: BaseLayer
   selectedLocation?: HPLocation | null
   activeFilter?: FilterState
   /** Favourite POI ids to force-show as markers regardless of category filter */
@@ -245,9 +321,10 @@ type Props = {
 const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
   const {
     position, onLocationSelect, showZoomControls = true,
+    showLocateBtn = true, onLocate,
     mapMode = 'browse', measurePoints = [], onMeasurePoint,
     customPlaces = [], onCustomPlaceClick,
-    onLongPress, geocodeMarker, onGeocodeMarkerClick,
+    onLongPress, geocodeMarker, onGeocodeMarkerClick, onMapClick, baseLayer = 'standard',
     selectedLocation = null, activeFilter, favouriteMarkerIds = [],
     hpLocations = null,
   } = props
@@ -262,7 +339,6 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
   const [mapReady, setMapReady] = useState(false)
   const markerRef = useRef<maplibregl.Marker | null>(null)
   const geocodeMarkerRef = useRef<maplibregl.Marker | null>(null)
-  const navControlRef = useRef<maplibregl.NavigationControl | null>(null)
   const firstPositionRef = useRef(false)
 
   const onLocationSelectRef = useRef(onLocationSelect)
@@ -275,8 +351,12 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
   useEffect(() => { onLongPressRef.current = onLongPress }, [onLongPress])
   const onGeocodeMarkerClickRef = useRef(onGeocodeMarkerClick)
   useEffect(() => { onGeocodeMarkerClickRef.current = onGeocodeMarkerClick }, [onGeocodeMarkerClick])
+  const onMapClickRef = useRef(onMapClick)
+  useEffect(() => { onMapClickRef.current = onMapClick }, [onMapClick])
   const mapModeRef = useRef(mapMode)
   useEffect(() => { mapModeRef.current = mapMode }, [mapMode])
+  const positionRef = useRef(position)
+  useEffect(() => { positionRef.current = position }, [position])
 
   const flyTo = useCallback((lng: number, lat: number, zoom = 13, offsetY = 0) => {
     mapRef.current?.flyTo({ center: [lng, lat], zoom, duration: 700, offset: [0, offsetY] })
@@ -288,18 +368,27 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
   }, [])
   useImperativeHandle(ref, () => ({ flyTo, getBounds }), [flyTo, getBounds])
 
-  const showZoomControlsRef = useRef(showZoomControls)
+  const onLocateRef = useRef(onLocate)
+  useEffect(() => { onLocateRef.current = onLocate }, [onLocate])
+
+  // Combined button group (locate + zoom). Recreated when the Settings
+  // toggles change. NB: must run AFTER the map init effect below on first
+  // render — React runs effects in declaration order, but map init is
+  // declared later, so this effect waits for mapReady instead.
   useEffect(() => {
-    showZoomControlsRef.current = showZoomControls
     const map = mapRef.current
-    const ctrl = navControlRef.current
-    if (!map || !ctrl) return
-    if (showZoomControls) {
-      try { map.addControl(ctrl, 'bottom-right') } catch { /* already added */ }
-    } else {
-      try { map.removeControl(ctrl) } catch { /* not added */ }
+    if (!map) return
+    if (!showZoomControls && !showLocateBtn) return
+    const ctrl = new MapButtonsControl({
+      showLocate: showLocateBtn,
+      showZoom: showZoomControls,
+      onLocate: () => onLocateRef.current?.(),
+    })
+    map.addControl(ctrl, 'bottom-right')
+    return () => {
+      try { map.removeControl(ctrl) } catch { /* map already removed */ }
     }
-  }, [showZoomControls])
+  }, [showZoomControls, showLocateBtn, mapReady])
 
   // Map init
   useEffect(() => {
@@ -316,26 +405,38 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
     })
 
     mapRef.current = map
-    navControlRef.current = new maplibregl.NavigationControl({ showCompass: false })
-    if (showZoomControlsRef.current) {
-      map.addControl(navControlRef.current, 'bottom-right')
-    }
 
     map.on('load', () => {
       map.fitBounds(VIEW_BOUNDS, {
         padding: { top: 60, right: 20, bottom: 140, left: 20 },
         duration: 0,
       })
-      addOverlays(map, onLocationSelectRef, onCustomPlaceClickRef)
+      addOverlays(map)
       setMapReady(true)
 
-      // Long press (touch) → add custom place
+      // Long press (touch): browse mode → add custom place; measure mode →
+      // add a measure point, snapped to a marker under the finger if any
       let lpTimer: ReturnType<typeof setTimeout> | null = null
       map.on('touchstart', (e) => {
         if (e.originalEvent.touches.length !== 1) return
         const { lng, lat } = e.lngLat
+        const point = e.point
         lpTimer = setTimeout(() => {
           lpTimer = null
+          if (mapModeRef.current === 'measure') {
+            const pad = 14
+            const features = map.queryRenderedFeatures(
+              [[point.x - pad, point.y - pad], [point.x + pad, point.y + pad]],
+              { layers: ['hp-dots', 'favourite-hearts', 'custom-place-dots', 'selected-hp-dot'] },
+            )
+            const snapped = features.find((f) => f.geometry.type === 'Point')
+            if (snapped && snapped.geometry.type === 'Point') {
+              onMeasurePointRef.current?.(snapped.geometry.coordinates[0], snapped.geometry.coordinates[1])
+            } else {
+              onMeasurePointRef.current?.(lng, lat)
+            }
+            return
+          }
           onLongPressRef.current?.(lng, lat)
         }, 600)
       })
@@ -344,14 +445,43 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
       map.on('touchmove', cancelLp)
       map.on('touchcancel', cancelLp)
 
-      // Map click in measure mode
+      // General map click.
+      // Measure mode: tapping ON a marker snaps the measure point to the
+      // marker's exact coordinates (Lene, 2026-07-05).
+      // Browse mode: a tap on EMPTY map closes the POI detail sheet — drags
+      // don't fire 'click', so panning never closes it.
       map.on('click', (e) => {
-        if (mapModeRef.current !== 'measure') return
-        const features = map.queryRenderedFeatures(e.point, {
-          layers: ['hp-dots', 'custom-place-dots', 'selected-hp-dot'],
-        })
-        if (features.length > 0) return
-        onMeasurePointRef.current?.(e.lngLat.lng, e.lngLat.lat)
+        const pad = 12
+        const markerLayers = ['hp-dots', 'favourite-hearts', 'custom-place-dots', 'selected-hp-dot']
+          .filter((id) => map.getLayer(id))
+        const features = map.queryRenderedFeatures(
+          [[e.point.x - pad, e.point.y - pad], [e.point.x + pad, e.point.y + pad]],
+          { layers: markerLayers },
+        )
+        if (mapModeRef.current === 'measure') {
+          const snapped = features.find((f) => f.geometry.type === 'Point')
+          if (snapped && snapped.geometry.type === 'Point') {
+            onMeasurePointRef.current?.(snapped.geometry.coordinates[0], snapped.geometry.coordinates[1])
+          } else {
+            onMeasurePointRef.current?.(e.lngLat.lng, e.lngLat.lat)
+          }
+          return
+        }
+        // Browse mode: a marker within the hit box opens/switches the POI
+        // detail sheet; empty map closes it
+        const hit = features.find((f) => f.geometry.type === 'Point')
+        if (hit && hit.geometry.type === 'Point') {
+          if (hit.layer.id === 'custom-place-dots') {
+            const id = hit.properties?.id as string | undefined
+            if (id) onCustomPlaceClickRef.current?.(id)
+          } else if (onLocationSelectRef.current) {
+            onLocationSelectRef.current(
+              propsToLocation(hit.properties, hit.geometry.coordinates[0], hit.geometry.coordinates[1]),
+            )
+          }
+          return
+        }
+        onMapClickRef.current?.()
       })
     })
 
@@ -361,10 +491,39 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
       mapRef.current = null
       markerRef.current = null
       geocodeMarkerRef.current = null
-      navControlRef.current = null
       firstPositionRef.current = false
     }
   }, [])
+
+  // Base layer switch (Standard ↔ Satellitt). setStyle wipes custom sources,
+  // layers and images, so overlays are re-added and mapReady re-triggers the
+  // data effects afterwards.
+  const appliedLayerRef = useRef<BaseLayer>('standard')
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || appliedLayerRef.current === baseLayer) return
+    appliedLayerRef.current = baseLayer
+    let cancelled = false
+    ;(async () => {
+      try {
+        const style = baseLayer === 'satellite' ? await buildSatelliteStyle() : MAP_STYLE
+        if (cancelled) return
+        setMapReady(false)
+        map.setStyle(style as maplibregl.StyleSpecification | string, { diff: false })
+        map.once('idle', () => {
+          if (cancelled) return
+          if (!map.getLayer('hp-dots')) {
+            addOverlays(map)
+          }
+          setMapReady(true)
+        })
+      } catch {
+        // Style fetch failed (offline?) — keep the current base layer
+        appliedLayerRef.current = appliedLayerRef.current === 'satellite' ? 'satellite' : 'standard'
+      }
+    })()
+    return () => { cancelled = true }
+  }, [baseLayer])
 
   // Cursor style for map mode
   useEffect(() => {
@@ -372,10 +531,10 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
     if (canvas) canvas.style.cursor = mapMode === 'measure' ? 'crosshair' : ''
   }, [mapMode])
 
-  // Measure points overlay
+  // Measure points overlay (mapReady dep: re-populate after base layer switch)
   useEffect(() => {
     const map = mapRef.current
-    if (!map) return
+    if (!mapReady || !map) return
     const pointSrc = map.getSource('measure-points') as maplibregl.GeoJSONSource | undefined
     const lineSrc = map.getSource('measure-line') as maplibregl.GeoJSONSource | undefined
     if (!pointSrc || !lineSrc) return
@@ -397,7 +556,7 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
         geometry: { type: 'LineString' as const, coordinates: measurePoints },
       }] : [],
     })
-  }, [measurePoints])
+  }, [measurePoints, mapReady])
 
   // Custom places overlay (localStorage data — also arrives before map load)
   useEffect(() => {
@@ -429,6 +588,11 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
       el.setAttribute('aria-label', 'Valgt søketreff — trykk for detaljer')
       el.addEventListener('click', (e) => {
         e.stopPropagation()
+        // Measure mode: tap/long-press on the pin = measure point at the pin
+        if (mapModeRef.current === 'measure') {
+          onMeasurePointRef.current?.(geocodeMarker.lng, geocodeMarker.lat)
+          return
+        }
         onGeocodeMarkerClickRef.current?.()
       })
       geocodeMarkerRef.current = new maplibregl.Marker({ element: el, anchor: 'bottom' })
@@ -460,7 +624,7 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
         geometry: { type: 'Point', coordinates: [selectedLocation.lng, selectedLocation.lat] },
       }],
     })
-  }, [selectedLocation])
+  }, [selectedLocation, mapReady])
 
   // Active category filter → hp-dots visibility and filter expression.
   // Multi-select: each checked category contributes an OR-branch; no checked
@@ -497,6 +661,30 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
       if (hasFavs) {
         map.setFilter('favourite-hearts', ['match', ['get', 'id'], favouriteMarkerIds, true, false] as unknown as maplibregl.FilterSpecification)
       }
+    }
+
+    // Marker colour = the colour of the checkbox that made it visible
+    // (Lene, 2026-07-05): dots shown via a category tick get that category's
+    // colour; Locations dots keep the sub-type shades (their checkboxes).
+    // Overlaps resolve in menu order. Fallback (nothing ticked, e.g. the
+    // selected marker from search) = sub-type colours.
+    const orderedChecked = CATEGORY_META.filter((c) => cats.includes(c.key))
+    let colorExpr: unknown = TYPE_COLOR_EXPR
+    if (orderedChecked.length > 0) {
+      const e: unknown[] = ['case']
+      for (const c of orderedChecked) {
+        if (c.key === 'locations') {
+          e.push(['in', 'locations', ['get', 'categories']], TYPE_COLOR_EXPR)
+        } else {
+          e.push(['in', c.key, ['get', 'categories']], c.color)
+        }
+      }
+      e.push(TYPE_COLOR_EXPR)
+      colorExpr = e
+    }
+    map.setPaintProperty('hp-dots', 'circle-color', colorExpr as maplibregl.ExpressionSpecification)
+    if (map.getLayer('selected-hp-dot')) {
+      map.setPaintProperty('selected-hp-dot', 'circle-color', colorExpr as maplibregl.ExpressionSpecification)
     }
 
     if (parts.length === 0) {
@@ -537,6 +725,13 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
     } else {
       const el = document.createElement('div')
       el.className = 'user-location-marker'
+      // Measure mode: tap on your own position = measure point exactly there
+      el.addEventListener('click', (ev) => {
+        if (mapModeRef.current === 'measure' && positionRef.current) {
+          ev.stopPropagation()
+          onMeasurePointRef.current?.(positionRef.current.lng, positionRef.current.lat)
+        }
+      })
       markerRef.current = new maplibregl.Marker({ element: el })
         .setLngLat([position.lng, position.lat])
         .addTo(map)

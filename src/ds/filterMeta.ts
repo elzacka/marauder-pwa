@@ -12,24 +12,33 @@ export type CategoryMeta = { key: string; label: string; types: string[]; color:
 
 export const LOCATION_TYPES = ['filming', 'canonical', 'interpreted']
 
-/** Same colors as the map's POI dots (HP_PAINT in MapView) — keep in sync */
+/**
+ * SINGLE SOURCE for the category/type palette (Lene, 2026-07-05):
+ * every category has a distinct colour; the Locations sub-types are
+ * progressively LIGHTER shades of the Locations purple. MapView (POI dots)
+ * and Badge import these — never define these colours elsewhere.
+ * Reserved elsewhere: burgundy #5C1010 (favourites/selected/search pin),
+ * green #2E6B3E (custom places / Mine steder).
+ */
 export const LOCATION_TYPE_COLORS: Record<string, string> = {
-  filming:     '#5C1010',
-  canonical:   '#9E6B1A',
-  interpreted: '#4A3B6B',
+  filming:     '#5A3D95',
+  canonical:   '#7659AE',
+  interpreted: '#8F74C4',
 }
 
-/** Category palette — shared with Badge dots. Colours the checkboxes so the
- *  menu shows which colour belongs to which category (Lene, 2026-07-05). */
 export const CATEGORY_META: CategoryMeta[] = [
   { key: 'atmosphere',   label: 'Atmosphere',   types: [], color: '#2A5070' },
-  { key: 'attractions',  label: 'Attractions',  types: [], color: '#5C1010' },
-  { key: 'eat_and_drink', label: 'Eat and drink', types: [], color: '#6B3E1A' },
-  { key: 'inspiration',  label: 'Inspiration',  types: [], color: '#4A3B6B' },
+  { key: 'attractions',  label: 'Attractions',  types: [], color: '#A04220' },
+  { key: 'eat_and_drink', label: 'Eat and drink', types: [], color: '#7A5214' },
+  { key: 'inspiration',  label: 'Inspiration',  types: [], color: '#7D3C6B' },
   { key: 'locations',    label: 'Locations',    types: LOCATION_TYPES, color: '#3E1F6B' },
-  { key: 'sleep',        label: 'Sleep',        types: [], color: '#2E6B3E' },
+  { key: 'sleep',        label: 'Sleep',        types: [], color: '#1F6B5E' },
   { key: 'transport',    label: 'Transport',    types: [], color: '#1A4A1A' },
 ]
+
+export const CATEGORY_COLORS: Record<string, string> = Object.fromEntries(
+  CATEGORY_META.map((c) => [c.key, c.color]),
+)
 
 export const ALL_CATEGORY_KEYS = CATEGORY_META.map((c) => c.key)
 

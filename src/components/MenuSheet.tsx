@@ -1,12 +1,12 @@
-import { useState, useMemo, useId, useCallback, useEffect } from 'react'
+import { useState, useMemo, useId, useRef, useCallback, useEffect } from 'react'
+import type { CSSProperties } from 'react'
 import marauderIcon from '../assets/marauder-icon.png'
 import { CategoryTree } from '../ds/CategoryTree'
-import { type FilterState, CATEGORY_META, locationMatchesFilter } from '../ds/filterMeta'
+import { type FilterState, CATEGORY_META, LOCATION_TYPES, locationMatchesFilter } from '../ds/filterMeta'
 import { haversineKm, formatDistance } from '../utils/distance'
 import { useGeocoder } from '../hooks/useGeocoder'
 import { useSheetDrag } from '../hooks/useSheetDrag'
 import { formatBytes, estimateBytes, type OfflineArea } from '../offline/OfflineAreaManager'
-import { Badge } from '../ds/Badge'
 import type { HPLocation } from '../types/hp-location'
 import type { OfflineAreaStatus } from '../hooks/useOfflineAreas'
 import type { Position } from '../hooks/useGeolocation'
@@ -49,13 +49,38 @@ function FavHeart() {
   )
 }
 
-/** Clickable country/city tag chips — tapping one filters on that tag */
-function GeoChips({ loc, activeTag, onTag }: {
-  loc: HPLocation
+/** Clickable category chip — toggles the category in the multi-select map
+ *  filter, exactly like the checkbox in the category tree */
+function CategoryChip({ catKey, selected, onToggle }: {
+  catKey: string
+  selected: boolean
+  onToggle: () => void
+}) {
+  const meta = CATEGORY_META.find((c) => c.key === catKey)
+  if (!meta) return null
+  return (
+    <button
+      type="button"
+      className={`${styles.geoChip} ${selected ? styles.geoChipActive : ''}`}
+      style={{ '--chip-color': meta.color } as CSSProperties}
+      onClick={onToggle}
+      aria-pressed={selected}
+    >
+      <span className={styles.chipColorDot} aria-hidden="true" />
+      {meta.label}
+    </button>
+  )
+}
+
+/** Clickable country/city (+ user tag) chips — tapping one filters on that tag */
+function GeoChips({ city, country, userTags = [], activeTag, onTag }: {
+  city: string | null
+  country: string | null
+  userTags?: string[]
   activeTag: string | null
   onTag: (tag: string) => void
 }) {
-  const tags = [loc.city, loc.country].filter((t): t is string => !!t)
+  const tags = [city, country, ...userTags].filter((t): t is string => !!t)
   if (tags.length === 0) return null
   return (
     <div className={styles.geoChips}>
@@ -75,11 +100,11 @@ function GeoChips({ loc, activeTag, onTag }: {
 }
 
 const SEARCH_PLACEHOLDERS = [
-  'Søk på adresser...',
-  'Søk på steder...',
-  'Søk etter Hogwarts…',
-  "Søk etter King's Cross…",
-  'Søk etter The Leaky Cauldron…',
+  'Søk på ekte adresser...',
+  'Søk på ekte steder...',
+  'Søk på Hogwarts…',
+  "Søk på King's Cross…",
+  'Søk på Diagon Alley…',
 ]
 
 function connectionType(): string {
@@ -108,11 +133,22 @@ type Props = {
   onCustomPlaceClick: (id: string) => void
   activeFilter: FilterState
   onFilterChange: (f: FilterState) => void
-  /** "Alle" checkbox over favourites: show all favourites as map markers */
-  favouritesOnMap: boolean
-  onToggleFavouritesOnMap: () => void
+  /** Per-favourite map visibility (heart markers) */
+  shownFavouriteIds: Set<string>
+  onToggleFavouriteVisible: (id: string) => void
+  onToggleAllFavouritesVisible: () => void
+  /** Long-press on the FAB: hide/show the map button group */
+  onFabLongPress: () => void
+  /** Per-place map visibility for Mine steder */
+  hiddenCustomIds: Set<string>
+  onToggleCustomVisible: (id: string) => void
+  onToggleAllCustomVisible: () => void
   showZoomControls: boolean
   onToggleZoomControls: (v: boolean) => void
+  showLocateBtn: boolean
+  onToggleLocateBtn: (v: boolean) => void
+  baseLayer: 'standard' | 'satellite'
+  onBaseLayerChange: (layer: 'standard' | 'satellite') => void
   offlineAreas: OfflineArea[]
   offlineStatus: OfflineAreaStatus
   offlineDone: number
@@ -131,8 +167,11 @@ export default function MenuSheet({
   measureMode, onToggleMeasure, onAddressSelect, onLocationSelect,
   favouriteIds, hpLocations, customPlaces, onCustomPlaceClick,
   activeFilter, onFilterChange,
-  favouritesOnMap, onToggleFavouritesOnMap,
+  shownFavouriteIds, onToggleFavouriteVisible, onToggleAllFavouritesVisible, onFabLongPress,
+  hiddenCustomIds, onToggleCustomVisible, onToggleAllCustomVisible,
   showZoomControls, onToggleZoomControls,
+  showLocateBtn, onToggleLocateBtn,
+  baseLayer, onBaseLayerChange,
   offlineAreas, offlineStatus, offlineDone, offlineTotal, offlineError,
   onDownloadVisibleArea, onCancelDownload, onDeleteArea,
   online, dataError = null,
@@ -153,6 +192,35 @@ export default function MenuSheet({
   const closeSheet = useCallback(() => setIsOpen(false), [])
   const { sheetRef, size, setSize, onDragStart, onDragMove, onDragEnd } =
     useSheetDrag(closeSheet)
+
+  // FAB long-press (600 ms): toggle map button visibility. The click that
+  // follows the release must not open the menu.
+  const fabLpTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const fabLpFired = useRef(false)
+
+  const onFabPointerDown = useCallback(() => {
+    fabLpFired.current = false
+    fabLpTimer.current = setTimeout(() => {
+      fabLpTimer.current = null
+      fabLpFired.current = true
+      onFabLongPress()
+    }, 600)
+  }, [onFabLongPress])
+
+  const cancelFabLp = useCallback(() => {
+    if (fabLpTimer.current) {
+      clearTimeout(fabLpTimer.current)
+      fabLpTimer.current = null
+    }
+  }, [])
+
+  const onFabClick = useCallback(() => {
+    if (fabLpFired.current) {
+      fabLpFired.current = false
+      return
+    }
+    setIsOpen(true)
+  }, [])
 
   const { results: geoResults, loading: geoLoading } = useGeocoder(query)
 
@@ -179,6 +247,9 @@ export default function MenuSheet({
     if (q) return []
     return withDistAndSort(hpLocations.filter((loc) => favouriteIds.has(loc.id)), position)
   }, [q, favouriteIds, position, hpLocations])
+
+  const allFavouritesShown =
+    favouriteIds.size > 0 && shownFavouriteIds.size === favouriteIds.size
 
   const singleCategory = activeFilter.categories.length === 1 ? activeFilter.categories[0] : null
 
@@ -211,13 +282,56 @@ export default function MenuSheet({
     setActiveTag((cur) => (cur === tag ? null : tag))
   }, [])
 
+  // Chip tapped in SEARCH results: leave search and open the tag view
+  const tagFromSearch = useCallback((tag: string) => {
+    setQuery('')
+    setActiveTag(tag)
+  }, [])
+
+  // Category chip: toggle the category in the multi-select filter — same
+  // effect as ticking its checkbox in the category tree
+  const toggleCategoryFilter = useCallback((key: string) => {
+    const selected = new Set(activeFilter.categories)
+    let types = [...activeFilter.locationTypes]
+    if (selected.has(key)) {
+      selected.delete(key)
+      if (key === 'locations') types = []
+    } else {
+      selected.add(key)
+      if (key === 'locations') types = [...LOCATION_TYPES]
+    }
+    onFilterChange({ categories: [...selected], locationTypes: types })
+  }, [activeFilter, onFilterChange])
+
   const taggedLocations = useMemo<HPLocationWithDist[]>(() => {
     if (!activeTag) return []
+    // Custom places participate in tag filtering too (they get geo tags
+    // automatically via reverse geocoding)
+    const customAsLoc: HPLocation[] = customPlaces.map((p) => ({
+      id: p.id,
+      name: p.name,
+      location_type: 'interpreted',
+      categories: [],
+      hp_references: [],
+      description: p.description,
+      source: 'custom',
+      external_url: null,
+      country: p.country ?? null,
+      city: p.city ?? null,
+      tags: p.tags,
+      lat: p.lat,
+      lng: p.lng,
+    }))
     return withDistAndSort(
-      hpLocations.filter((loc) => loc.city === activeTag || loc.country === activeTag),
+      [...hpLocations, ...customAsLoc].filter(
+        (loc) =>
+          loc.city === activeTag ||
+          loc.country === activeTag ||
+          (loc.tags ?? []).includes(activeTag),
+      ),
       position,
     )
-  }, [activeTag, hpLocations, position])
+  }, [activeTag, hpLocations, customPlaces, position])
 
   function handleGeoClick(lng: number, lat: number, name: string, detail: string) {
     onAddressSelect(lng, lat, name, detail)
@@ -257,8 +371,13 @@ export default function MenuSheet({
         <button
           type="button"
           className={styles.fab}
-          onClick={() => setIsOpen(true)}
-          aria-label="Åpne meny"
+          onClick={onFabClick}
+          onPointerDown={onFabPointerDown}
+          onPointerUp={cancelFabLp}
+          onPointerLeave={cancelFabLp}
+          onPointerCancel={cancelFabLp}
+          onContextMenu={(e) => e.preventDefault()}
+          aria-label="Åpne meny (hold inne for å skjule kartknappene)"
         >
           <span
             aria-hidden="true"
@@ -346,29 +465,33 @@ export default function MenuSheet({
                     {(
                       <ul className={styles.list} role="list">
                         {filteredHP.map((loc) => (
-                          <li key={loc.id}>
+                          <li key={loc.id} className={styles.itemBlock}>
                             <button
                               type="button"
-                              className={styles.item}
+                              className={styles.itemMainBtn}
                               onClick={() => handleHPClick(loc)}
                             >
-                              <div className={styles.itemMain}>
-                                <span className={styles.itemName}>
-                                  {favouriteIds.has(loc.id) && (
-                                    <span className={styles.favStar} aria-label="Favoritt"><FavHeart /> </span>
-                                  )}
-                                  {loc.name}
-                                </span>
-                                <div className={styles.itemBadges}>
-                                  {loc.categories.slice(0, 2).map((cat) => (
-                                    <Badge key={cat} category={cat} size="sm" />
-                                  ))}
-                                </div>
-                              </div>
+                              <span className={styles.itemName}>
+                                {favouriteIds.has(loc.id) && (
+                                  <span className={styles.favStar} aria-label="Favoritt"><FavHeart /> </span>
+                                )}
+                                {loc.name}
+                              </span>
                               {loc.km !== null && (
                                 <span className={styles.itemDistance}>{formatDistance(loc.km)}</span>
                               )}
                             </button>
+                            <div className={styles.chipsRow}>
+                              {loc.categories.slice(0, 1).map((cat) => (
+                                <CategoryChip
+                                  key={cat}
+                                  catKey={cat}
+                                  selected={activeFilter.categories.includes(cat)}
+                                  onToggle={() => toggleCategoryFilter(cat)}
+                                />
+                              ))}
+                              <GeoChips city={loc.city} country={loc.country} activeTag={activeTag} onTag={tagFromSearch} />
+                            </div>
                           </li>
                         ))}
                       </ul>
@@ -437,7 +560,14 @@ export default function MenuSheet({
                           <button
                             type="button"
                             className={styles.itemMainBtn}
-                            onClick={() => handleHPClick(loc)}
+                            onClick={() => {
+                              if (loc.source === 'custom') {
+                                onCustomPlaceClick(loc.id)
+                                setIsOpen(false)
+                              } else {
+                                handleHPClick(loc)
+                              }
+                            }}
                           >
                             <span className={styles.itemName}>
                               {favouriteIds.has(loc.id) && (
@@ -449,7 +579,7 @@ export default function MenuSheet({
                               <span className={styles.itemDistance}>{formatDistance(loc.km)}</span>
                             )}
                           </button>
-                          <GeoChips loc={loc} activeTag={activeTag} onTag={toggleTag} />
+                          <GeoChips city={loc.city} country={loc.country} userTags={loc.tags} activeTag={activeTag} onTag={toggleTag} />
                         </li>
                       ))}
                     </ul>
@@ -498,12 +628,12 @@ export default function MenuSheet({
                       <>
                         <button
                           type="button"
-                          className={`${styles.favAllRow} ${favouritesOnMap ? styles.favAllRowActive : ''}`}
-                          onClick={onToggleFavouritesOnMap}
-                          aria-pressed={favouritesOnMap}
+                          className={`${styles.favAllRow} ${allFavouritesShown ? styles.favAllRowActive : ''}`}
+                          onClick={onToggleAllFavouritesVisible}
+                          aria-pressed={allFavouritesShown}
                         >
-                          <span className={`${styles.toggleBox} ${favouritesOnMap ? styles.toggleBoxOn : ''}`} aria-hidden="true">
-                            {favouritesOnMap && (
+                          <span className={`${styles.toggleBox} ${allFavouritesShown ? styles.toggleBoxOn : ''}`} aria-hidden="true">
+                            {allFavouritesShown && (
                               <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                                 <path d="M2 6.5L4.8 9.2L10 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                               </svg>
@@ -512,24 +642,51 @@ export default function MenuSheet({
                           Alle
                         </button>
                       <ul className={styles.list} role="list">
-                        {favouriteLocations.map((loc) => (
-                          <li key={loc.id} className={styles.itemBlock}>
-                            <button
-                              type="button"
-                              className={styles.itemMainBtn}
-                              onClick={() => handleHPClick(loc)}
-                            >
-                              <span className={styles.itemName}>
-                                <span className={styles.favStar} aria-hidden="true"><FavHeart /> </span>
-                                {loc.name}
-                              </span>
-                              {loc.km !== null && (
-                                <span className={styles.itemDistance}>{formatDistance(loc.km)}</span>
-                              )}
-                            </button>
-                            <GeoChips loc={loc} activeTag={activeTag} onTag={toggleTag} />
-                          </li>
-                        ))}
+                        {favouriteLocations.map((loc) => {
+                          const shown = shownFavouriteIds.has(loc.id)
+                          return (
+                            <li key={loc.id} className={styles.itemBlock}>
+                              <div className={styles.itemRowFlex}>
+                                <button
+                                  type="button"
+                                  className={styles.itemCheckBtn}
+                                  onClick={() => onToggleFavouriteVisible(loc.id)}
+                                  aria-pressed={shown}
+                                  aria-label={shown ? `Skjul ${loc.name} på kartet` : `Vis ${loc.name} på kartet`}
+                                >
+                                  <span className={`${styles.toggleBox} ${shown ? styles.toggleBoxOn : ''}`} aria-hidden="true">
+                                    {shown && (
+                                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                        <path d="M2 6.5L4.8 9.2L10 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                      </svg>
+                                    )}
+                                  </span>
+                                </button>
+                                <button
+                                  type="button"
+                                  className={styles.itemMainBtn}
+                                  onClick={() => handleHPClick(loc)}
+                                >
+                                  <span className={styles.itemName}>{loc.name}</span>
+                                  {loc.km !== null && (
+                                    <span className={styles.itemDistance}>{formatDistance(loc.km)}</span>
+                                  )}
+                                </button>
+                              </div>
+                              <div className={styles.chipsRow}>
+                                {loc.categories.slice(0, 1).map((cat) => (
+                                  <CategoryChip
+                                    key={cat}
+                                    catKey={cat}
+                                    selected={activeFilter.categories.includes(cat)}
+                                    onToggle={() => toggleCategoryFilter(cat)}
+                                  />
+                                ))}
+                                <GeoChips city={loc.city} country={loc.country} activeTag={activeTag} onTag={toggleTag} />
+                              </div>
+                            </li>
+                          )
+                        })}
                       </ul>
                       </>
                     ))}
@@ -542,22 +699,59 @@ export default function MenuSheet({
                       <span className={styles.sectionDot} aria-hidden="true" />
                       Mine steder
                     </p>
+                    {/* "Alle": show/hide every custom place on the map */}
+                    <button
+                      type="button"
+                      className={`${styles.favAllRow} ${hiddenCustomIds.size === 0 ? styles.favAllRowActive : ''}`}
+                      onClick={onToggleAllCustomVisible}
+                      aria-pressed={hiddenCustomIds.size === 0}
+                    >
+                      <span className={`${styles.toggleBox} ${styles.toggleBoxGreen} ${hiddenCustomIds.size === 0 ? styles.toggleBoxOn : ''}`} aria-hidden="true">
+                        {hiddenCustomIds.size === 0 && (
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                            <path d="M2 6.5L4.8 9.2L10 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        )}
+                      </span>
+                      Alle
+                    </button>
                     <ul className={styles.list} role="list">
-                      {customWithDist.map((p) => (
-                        <li key={p.id}>
-                          <button
-                            type="button"
-                            className={styles.item}
-                            onClick={() => { onCustomPlaceClick(p.id); setIsOpen(false) }}
-                          >
-                            <div className={styles.itemMain}>
-                              <span className={styles.itemName}>{p.name}</span>
-                              {p.description && <span className={styles.itemSub}>{p.description}</span>}
+                      {customWithDist.map((p) => {
+                        const visible = !hiddenCustomIds.has(p.id)
+                        return (
+                          <li key={p.id} className={styles.itemBlock}>
+                            <div className={styles.itemRowFlex}>
+                              <button
+                                type="button"
+                                className={styles.itemCheckBtn}
+                                onClick={() => onToggleCustomVisible(p.id)}
+                                aria-pressed={visible}
+                                aria-label={visible ? `Skjul ${p.name} på kartet` : `Vis ${p.name} på kartet`}
+                              >
+                                <span className={`${styles.toggleBox} ${styles.toggleBoxGreen} ${visible ? styles.toggleBoxOn : ''}`} aria-hidden="true">
+                                  {visible && (
+                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                      <path d="M2 6.5L4.8 9.2L10 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                  )}
+                                </span>
+                              </button>
+                              <button
+                                type="button"
+                                className={styles.itemMainBtn}
+                                onClick={() => { onCustomPlaceClick(p.id); setIsOpen(false) }}
+                              >
+                                <span className={styles.itemMain}>
+                                  <span className={styles.itemName}>{p.name}</span>
+                                  {p.description && <span className={styles.itemSub}>{p.description}</span>}
+                                </span>
+                                {p.km !== null && <span className={styles.itemDistance}>{formatDistance(p.km)}</span>}
+                              </button>
                             </div>
-                            {p.km !== null && <span className={styles.itemDistance}>{formatDistance(p.km)}</span>}
-                          </button>
-                        </li>
-                      ))}
+                            <GeoChips city={p.city ?? null} country={p.country ?? null} userTags={p.tags} activeTag={activeTag} onTag={toggleTag} />
+                          </li>
+                        )
+                      })}
                     </ul>
                   </div>
                 )}
@@ -594,9 +788,8 @@ export default function MenuSheet({
                   <p className={styles.sectionTitle}>Offline kart</p>
                   <div className={styles.card}>
                     <p className={styles.actionDesc}>
-                      Naviger kartet til området du vil ha uten nett, og last det ned her.
-                      Nedlastede områder virker i flymodus.
-                      {connectionType().startsWith('Mobil') && ' Du er på mobildata nå.'}
+                      Naviger kartet til området du trenger når du mangler dekning, og last det ned her.
+                      {connectionType().startsWith('Mobil') && ' Nå bruker du mobildata.'}
                     </p>
 
                     {offlineStatus === 'downloading' && (
@@ -623,7 +816,7 @@ export default function MenuSheet({
                         </button>
                       ) : (
                         <button className={styles.btnPrimary} type="button" onClick={onDownloadVisibleArea}>
-                          Last ned området på skjermen
+                          Last ned gjeldende kartområde
                         </button>
                       )}
                     </div>
@@ -664,26 +857,51 @@ export default function MenuSheet({
               <div className={styles.scrollAreaPadded}>
 
                 <div className={styles.section}>
-                  <p className={styles.sectionTitle}>Tilkobling</p>
+                  <p className={styles.sectionTitle}>Kartknapper</p>
                   <div className={styles.card}>
-                    <div className={styles.statusRow}>
-                      <span className={styles.statusLabel}>Nettverk</span>
-                      <span className={styles.infoValue}>
-                        {online ? `Tilkoblet (${connectionType()})` : 'Frakoblet'}
-                      </span>
+                    {/* Same order as the buttons appear on the map: locate on top */}
+                    <ToggleRow
+                      label="Min posisjon"
+                      checked={showLocateBtn}
+                      onChange={onToggleLocateBtn}
+                    />
+                    <div className={styles.statusRowBorder}>
+                      <ToggleRow
+                        label="Zoom"
+                        checked={showZoomControls}
+                        onChange={onToggleZoomControls}
+                      />
                     </div>
                   </div>
                 </div>
 
                 <div className={styles.section}>
-                  <p className={styles.sectionTitle}>Kart</p>
-                  <div className={styles.card}>
-                    <ToggleRow
-                      label="Zoom-knapper"
-                      description="Vis +/− på kartet"
-                      checked={showZoomControls}
-                      onChange={onToggleZoomControls}
-                    />
+                  <p className={styles.sectionTitle}>Bakgrunnskart</p>
+                  <div className={styles.card} role="radiogroup" aria-label="Bakgrunnskart">
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={baseLayer === 'standard'}
+                      className={`${styles.favAllRow} ${baseLayer === 'standard' ? styles.favAllRowActive : ''}`}
+                      onClick={() => onBaseLayerChange('standard')}
+                    >
+                      <span className={`${styles.toggleBox} ${styles.roundBox} ${baseLayer === 'standard' ? styles.toggleBoxOn : ''}`} aria-hidden="true">
+                        {baseLayer === 'standard' && <span className={styles.radioDot} />}
+                      </span>
+                      Standard
+                    </button>
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={baseLayer === 'satellite'}
+                      className={`${styles.favAllRow} ${baseLayer === 'satellite' ? styles.favAllRowActive : ''}`}
+                      onClick={() => onBaseLayerChange('satellite')}
+                    >
+                      <span className={`${styles.toggleBox} ${styles.roundBox} ${baseLayer === 'satellite' ? styles.toggleBoxOn : ''}`} aria-hidden="true">
+                        {baseLayer === 'satellite' && <span className={styles.radioDot} />}
+                      </span>
+                      Satellitt
+                    </button>
                   </div>
                 </div>
 
@@ -691,8 +909,7 @@ export default function MenuSheet({
                   <p className={styles.sectionTitle}>GPS</p>
                   <div className={styles.card}>
                     <ToggleRow
-                      label="GPS"
-                      description="Vis posisjonen din på kartet"
+                      label="Vis posisjonen min på kartet"
                       checked={active}
                       onChange={() => onToggle()}
                     />
@@ -785,7 +1002,7 @@ function TabBtn({ active, label, onClick, children }: {
 
 function ToggleRow({ label, description, checked, onChange }: {
   label: string
-  description: string
+  description?: string
   checked: boolean
   onChange: (v: boolean) => void
 }) {
@@ -793,7 +1010,7 @@ function ToggleRow({ label, description, checked, onChange }: {
     <div className={styles.toggleRow}>
       <div className={styles.toggleLabels}>
         <span className={styles.toggleLabel}>{label}</span>
-        <span className={styles.toggleDesc}>{description}</span>
+        {description && <span className={styles.toggleDesc}>{description}</span>}
       </div>
       <button
         type="button"

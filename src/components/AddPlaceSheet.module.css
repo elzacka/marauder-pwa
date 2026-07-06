@@ -112,6 +112,70 @@
   min-height: 80px;
 }
 
+/* Tag chips (same visual language as the menu chips) */
+.tagRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.tagChip,
+.tagChipOn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 30px;
+  padding: 3px 11px;
+  border: none;
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.tagChip {
+  background: rgba(26, 10, 0, 0.07);
+  color: rgba(26, 10, 0, 0.75);
+}
+
+.tagChipOn {
+  background: var(--color-burgundy);
+  color: var(--color-cream);
+}
+
+.tagInputRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.tagInputRow .input {
+  flex: 1;
+}
+
+.tagAddBtn {
+  flex-shrink: 0;
+  min-height: var(--touch-min);
+  padding: 0 14px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-btn);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-burgundy);
+  cursor: pointer;
+}
+
+.tagAddBtn:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: default;
+}
+
 .actions {
   display: flex;
   gap: 10px;

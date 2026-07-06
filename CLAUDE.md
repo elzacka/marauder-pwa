@@ -25,6 +25,10 @@ Primary users: Lene + her 14-year old daughter, on iPhones, often offline (Scott
 
 To update POI data: `npm run fetch-data` (runs `scripts/fetch-hp-data.mjs`).
 
+Geo tags (country/city) for the clickable chip filter are curated in the `GEO_TAGS`
+map at the top of `scripts/fetch-hp-data.mjs`. When adding a new POI, add an entry
+there — the script logs a warning for any POI that is missing one.
+
 ## Architecture
 
 - Single data pipeline: `public/data/hp-locations.json` → `useHPLocations()` → parses via `featureToLocation()` from `src/utils/featureToLocation.ts` → returns `{ data: FeatureCollection, locations: HPLocation[], loading }`.
@@ -53,6 +57,9 @@ All previously known-unused files were deleted 2026-07-05: `NearbySheet.tsx`,
 `ds/BottomSheet.tsx` (+ their .module.css) and the stale `src/data/hp-locations.json`.
 `AppHeader.tsx` is back IN USE (the "Marauder" wordmark — reinstated 2026-07-05
 after being removed by mistake during PWA layout debugging). Do not delete it.
+
+Deleted 2026-07-06: `src/hooks/useNominatim.ts` — replaced by `src/hooks/useGeocoder.ts`
+(Photon geocoder, prefix/fuzzy search, filtered to GB/IE bbox).
 
 ## Offline-first priorities
 
@@ -85,12 +92,50 @@ master toggle. Do not "fix" this by showing markers on startup, and do not
 revert FilterState to single-select. Search pins, custom-place markers and the
 selected-location marker are unaffected.
 
+## Base layers
+
+Two base layers, chosen in Settings: Standard (openfreemap vector; works
+offline in downloaded areas) and Satellitt (Esri World Imagery raster + the
+standard style's symbol layers restyled white-with-dark-halo on top; online
+only). Esri is free-with-attribution, not open source — chosen because open
+alternatives (Sentinel-2, 10 m) lack street-level detail. Switching base layer
+calls `map.setStyle`, which wipes custom layers/images — MapView re-adds
+overlays and re-triggers data effects via `mapReady`.
+
 ## Map flyTo
 
+`flyTo(lng, lat, zoom?, offsetY?)` — the 4th param shifts the animation target
+vertically (pixels, negative = up) so the marker lands in the visible upper portion
+of the screen above a bottom sheet. Do not remove the offset from `handleLocationSelect`.
+
 Whenever a location is selected (HP location, custom place, geocode result), the map must pan to it:
-- HP location / favourites: `mapRef.current?.flyTo(loc.lng, loc.lat)` — already in `handleLocationSelect`
+- HP location / favourites: `mapRef.current?.flyTo(loc.lng, loc.lat, 13, -Math.round(window.innerHeight * 0.16))` — already in `handleLocationSelect`
 - Geocode: `mapRef.current?.flyTo(lng, lat)` — already in `handleAddressSelect`
 - Custom place add: `mapRef.current?.flyTo(p.lng, p.lat)` — already in `handleSaveCustomPlace`
+
+## Bottom sheets
+
+Three snap points — keep `SNAP_FRACTIONS` in `src/hooks/useSheetDrag.ts` in sync with the
+CSS tokens in `src/ds/tokens.css`:
+
+| Size | Fraction | CSS token |
+|------|----------|-----------|
+| default | 33 % | `--sheet-default-height` |
+| half | 50 % | `--sheet-half-height` |
+| expanded | 70 % | `--sheet-expanded-height` |
+
+(Expanded is 70svh, not 85: a taller sheet pushed the search field out of
+view when the iOS keyboard was open — diagnosed 2026-07-06.)
+
+`POIDetailSheet` is non-modal (no backdrop, no `aria-modal`). The map stays
+pannable while a detail sheet is open; tapping a different POI switches
+selection. Close via drag-down or Escape.
+
+**Never animate `transform` on `.maplibregl-marker` elements.** MapLibre positions
+markers via inline `transform`; an animation with `fill-mode: both` or `forwards`
+overrides it permanently and strands the pin at the top-left corner, detached from
+map panning. Animate `opacity` instead. The geocode-marker pop was fixed this way
+on 2026-07-06 after diagnosing the stuck-pin bug live.
 
 ## iOS 26 / Safari 26 platform notes
 
@@ -107,3 +152,18 @@ Parchment #E8D5AA · Burgundy #5C1010 · Dark ink #1A0A00 · Gold #9E6B1A
 Fonts: Cinzel Decorative (headings) + EB Garamond (body), self-hosted via @fontsource
 
 Note: `html/body` background and PWA manifest `background_color` are `#E3DCCD` — distinct from the Parchment design token (#E8D5AA). See iOS 26 platform notes above for why.
+
+**Single palette source** — all category and location-type colours live in
+`src/ds/filterMeta.ts` (`CATEGORY_META[*].color`, `LOCATION_TYPE_COLORS`,
+`CATEGORY_COLORS`). `Badge.tsx` and `MapView.tsx` import from there.
+Never define these colours elsewhere. Reserved outside the palette:
+burgundy `#5C1010` (favourites / selected marker / search pin),
+green `#2E6B3E` (custom places / Mine steder).
+
+## Custom places
+
+Geo tags (country/city) are reverse-geocoded automatically via Photon when a
+place is added (fire-and-forget). A backfill pass runs once on mount for older
+places saved before tags existed. Both paths are in `src/hooks/useCustomPlaces.ts`.
+For UK points Photon returns `state` (Scotland/England/Wales) as the "country" — the
+hook maps `country === 'United Kingdom' → state` so the chips match the HP data.

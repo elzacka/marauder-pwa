@@ -32,9 +32,51 @@ html, body, #root {
    bundler merged the two duplicate rules and MapLibre's value won — the override
    was silently missing from the built CSS (diagnosed on-device 2026-07-05).
    Do not "simplify" this selector back. */
+/* One combined button group (locate + zoom) sits 12px above the FAB
+   (FAB top edge = 62px) */
 .maplibregl-map .maplibregl-ctrl-bottom-right {
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 74px);
   right: 12px;
+}
+
+/* Zoom controls match the locate button: cream card, burgundy-tinted border,
+   44px touch targets (Lene, 2026-07-05).
+   NB: maplibre-gl.css loads AFTER main.css in the bundle, and its ring shadow
+   uses `.maplibregl-ctrl-group:not(:empty)` — equal specificity would lose on
+   order. These selectors are therefore deliberately MORE specific. The inner
+   .maplibregl-ctrl also carries a built-in 10px right margin that misaligned
+   the group from the screen edge — zeroed so it lines up with the locate
+   button and the FAB (right: 12px). */
+.maplibregl-map .maplibregl-ctrl-bottom-right .maplibregl-ctrl {
+  margin: 0;
+}
+
+.maplibregl-map .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group {
+  background: var(--surface-card, #F5ECD7);
+  border: var(--border-width-base) solid rgba(92, 16, 16, 0.15);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.maplibregl-map .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group:not(:empty) {
+  box-shadow: var(--shadow-md);
+}
+
+.maplibregl-map .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group button {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--color-burgundy);
+  cursor: pointer;
+}
+
+.maplibregl-map .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group button + button {
+  border-top: 1px solid var(--border-hairline);
 }
 
 /* Subtle parchment warmth on map canvas */

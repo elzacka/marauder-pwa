@@ -9,7 +9,7 @@ export type SheetSize = 'default' | 'half' | 'expanded'
 const SNAP_FRACTIONS: Array<{ size: SheetSize; fraction: number }> = [
   { size: 'default', fraction: 0.33 },
   { size: 'half', fraction: 0.5 },
-  { size: 'expanded', fraction: 0.85 },
+  { size: 'expanded', fraction: 0.7 },
 ]
 
 type Options = {

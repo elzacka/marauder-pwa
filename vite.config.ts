@@ -26,6 +26,17 @@ export default defineConfig({
               cacheableResponse: { statuses: [200] },
             },
           },
+          {
+            // Satellite imagery (Esri): ambient cache only, capped — imagery
+            // tiles are large and area downloads do not cover them
+            urlPattern: /^https:\/\/server\.arcgisonline\.com\//,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'satellite-tiles',
+              expiration: { maxEntries: 3000 },
+              cacheableResponse: { statuses: [200] },
+            },
+          },
         ],
       },
       manifest: {

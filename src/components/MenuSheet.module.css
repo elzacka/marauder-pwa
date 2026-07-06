@@ -303,7 +303,8 @@
 .itemName {
   font-family: var(--font-body);
   font-size: var(--text-base);
-  font-weight: var(--weight-medium);
+  /* Regular, not medium/bold: list rows match the category rows (Lene, 2026-07-05) */
+  font-weight: var(--weight-regular);
   color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
@@ -647,30 +648,89 @@
   padding-bottom: 2px;
 }
 
-.geoChip {
-  min-height: 30px;
-  padding: 3px 12px;
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius-full);
+/* Badges + geo chips on one line (search results) */
+.chipsRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding-bottom: 2px;
+}
+
+/* Row with a visibility checkbox in front of the main button (Mine steder) */
+.itemRowFlex {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.itemRowFlex .itemMainBtn {
+  flex: 1;
+  min-width: 0;
+}
+
+.itemCheckBtn {
+  width: var(--touch-min);
+  height: var(--touch-min);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: none;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-left: -10px;
+}
+
+/* Green checkbox variant — matches the custom-place map markers */
+.toggleBoxGreen.toggleBoxOn {
+  background: var(--color-offline);
+  border-color: var(--color-offline);
+}
+
+/* Unified chip style — same visual language as the category badges:
+   small uppercase pill with an optional colour dot. All chips are buttons.
+   Active = filled with the chip colour (categories) or burgundy (geo). */
+.geoChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 30px;
+  padding: 3px 11px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: rgba(26, 10, 0, 0.07);
   font-family: var(--font-body);
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: rgba(26, 10, 0, 0.75);
   cursor: pointer;
   transition: background var(--duration-fast) var(--ease-out),
-              border-color var(--duration-fast) var(--ease-out),
               color var(--duration-fast) var(--ease-out);
 }
 
 .geoChip:hover {
-  background: var(--bg-hover);
+  background: rgba(26, 10, 0, 0.12);
 }
 
 .geoChipActive {
-  background: var(--color-burgundy);
-  border-color: var(--color-burgundy);
+  background: var(--chip-color, var(--color-burgundy));
   color: var(--color-cream);
-  font-weight: var(--weight-semibold);
+}
+
+/* Colour dot inside a category chip (mirrors the Badge dot) */
+.chipColorDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--chip-color, rgba(26, 10, 0, 0.4));
+}
+
+.geoChipActive .chipColorDot {
+  background: var(--color-cream);
 }
 
 /* Tag view header ("Merket med Edinburgh" + clear) */
@@ -702,6 +762,18 @@
   color: var(--text-secondary);
   cursor: pointer;
   flex-shrink: 0;
+}
+
+/* Round radio variant of the checkbox (Bakgrunnskart) */
+.roundBox {
+  border-radius: 50%;
+}
+
+.radioDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-cream);
 }
 
 /* Delete button in the offline area list */
