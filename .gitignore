@@ -13,5 +13,6 @@ dist-ssr/
 
 .obsidian/
 dev_only/
+CLAUDE.md
 
 public/tiles-gb.pmtiles

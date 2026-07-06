@@ -48,7 +48,10 @@ export default defineConfig({
         // Matches the map's rendered parchment tone (see html/body background in
         // main.css) so iOS 26's reserved bottom zone blends into the map.
         background_color: '#E3DCCD',
-        display: 'standalone',
+        // 'fullscreen': asks iOS for true edge-to-edge placement (map behind
+        // the clock). Experiment 2026-07-06 — if the iOS 26 bottom dead zone
+        // returns, revert this one word to 'standalone'.
+        display: 'fullscreen',
         start_url: '/marauder-pwa/',
         orientation: 'portrait-primary',
         // Relative paths: vite-plugin-pwa does not rewrite absolute icon paths
