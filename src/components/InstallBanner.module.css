@@ -1,47 +1,79 @@
-.banner {
+.card {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  left: 12px;
+  right: 12px;
   z-index: 50;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px 10px 16px;
-  padding-top: calc(10px + env(safe-area-inset-top, 0px));
-  background: var(--surface-card);
-  border-bottom: var(--border-width-base) solid var(--color-gold);
-  box-shadow: var(--shadow-md);
+  gap: 12px;
+  padding: 10px 10px 10px 12px;
+  background: color-mix(in srgb, var(--surface-card, #F5ECD7) 86%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  backdrop-filter: blur(14px) saturate(1.1);
+  border: 1px solid rgba(158, 107, 26, 0.25);
+  border-radius: 16px;
+  box-shadow: 0 10px 34px rgba(26, 10, 0, 0.20);
+  animation: install-in 420ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.text {
+@keyframes install-in {
+  from { opacity: 0; transform: translateY(-14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.icon {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  padding: 7px;
+  border-radius: 12px;
+  object-fit: contain;
+  background: var(--color-cream, #F5ECD7);
+  box-shadow: inset 0 0 0 1px rgba(158, 107, 26, 0.28);
+}
+
+.body {
   flex: 1;
+  min-width: 0;
+}
+
+.title {
+  margin: 0 0 1px;
+  font-family: var(--font-body);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-base);
+  color: var(--text-heading);
+  line-height: 1.2;
+}
+
+.hint {
+  margin: 0;
   font-family: var(--font-body);
   font-size: var(--text-sm);
-  color: var(--text-primary);
-  line-height: var(--leading-normal);
+  color: var(--text-muted);
+  line-height: 1.35;
 }
 
-.shareIcon {
-  font-family: -apple-system, sans-serif;
-  font-size: 16px;
+.share {
+  display: inline;
+  vertical-align: -2px;
+  margin: 0 1px;
+  color: var(--color-burgundy);
 }
 
 .dismiss {
   flex-shrink: 0;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--touch-min);
-  height: var(--touch-min);
+  width: 34px;
+  height: 34px;
   background: none;
   border: none;
-  font-size: 20px;
-  line-height: 1;
+  border-radius: var(--radius-full, 999px);
   color: var(--text-muted);
   cursor: pointer;
-  border-radius: var(--radius-full);
-  padding: 0;
   transition: background var(--duration-fast) var(--ease-out),
               color var(--duration-fast) var(--ease-out);
 }
@@ -49,4 +81,8 @@
 .dismiss:hover {
   background: rgba(26, 10, 0, 0.08);
   color: var(--text-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card { animation-duration: 1ms; }
 }

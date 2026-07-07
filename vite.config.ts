@@ -13,6 +13,11 @@ export default defineConfig({
       registerType: 'autoUpdate',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}', 'data/*.json'],
+        // Remove precaches from previous deploys so an installed PWA never mixes
+        // an old bundle with new assets (the classic iOS stale-cache ghost bug).
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
         runtimeCaching: [
           {
             // Map tiles, style, TileJSON, glyphs and sprites. CacheFirst against

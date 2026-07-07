@@ -14,6 +14,9 @@ html, body, #root {
   height: 100%;
   width: 100%;
   overflow: hidden;
+  /* Fixed light theme — stops iOS/Android Dark Mode from darkening default
+     colours, scrollbars and form controls (belt-and-braces with the meta tag). */
+  color-scheme: light;
   font-family: var(--font-body);
   color: var(--text-primary);
   /* #E3DCCD, NOT var(--surface-base): iOS 26 reserves a bottom zone that web

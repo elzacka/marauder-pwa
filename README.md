@@ -34,19 +34,6 @@ npm run dev
 
 Kartdata © OpenStreetMap-bidragsytere, lisensiert under ODbL.
 
-## Bakgrunnskart
-
-Appen har to bakgrunnskart, valgbare i Innstillinger:
-
-- **Standard**: Vektorkart fra openfreemap. Fungerer offline i nedlastede
-  områder (Verktøy → Offline kart).
-- **Satellitt**: Flyfoto fra Esri World Imagery med steds- og veinavn fra
-  standardkartet lagt oppå (hybrid). Krever internett: Nedlastede
-  offline-områder gjelder bare Standard-kartet. Esri-bildene er gratis å bruke
-  med attribusjon, men er ikke åpen kildekode. Andre datakilder som er åpen kildekode (f.eks. Sentinel-2, 10 m oppløsning) mangler detaljnivået som trengs for
-  navigasjon i byer.
-
 ## Personvern
 
 Se [PERSONVERN.md](PERSONVERN.md).
-
