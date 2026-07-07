@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Heart, Pencil, Trash2, ArrowUpRight } from 'lucide-react'
 import { Badge } from '../ds/Badge'
 import { formatHpRef } from '../types/hp-location'
 import type { HPLocation } from '../types/hp-location'
@@ -84,15 +85,7 @@ export default function POIDetailSheet({
                 aria-label={isFavourite ? 'Fjern fra favoritter' : 'Legg til favoritter'}
                 aria-pressed={isFavourite}
               >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                  <path
-                    d="M10 16.5L4 10.7A4 4 0 0 1 4 4.8a4 4 0 0 1 5.6 0L10 5.4l.4-.6a4 4 0 0 1 5.6 0 4 4 0 0 1 0 5.9L10 16.5Z"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinejoin="round"
-                    fill={isFavourite ? 'currentColor' : 'none'}
-                  />
-                </svg>
+                <Heart size={20} strokeWidth={1.6} fill={isFavourite ? 'currentColor' : 'none'} aria-hidden="true" />
               </button>
             )}
 
@@ -104,9 +97,7 @@ export default function POIDetailSheet({
                 onClick={() => onEditCustomPlace(location.id)}
                 aria-label="Rediger sted"
               >
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                  <path d="M3 15h3l8-8-3-3-8 8v3ZM10 5l3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                <Pencil size={18} strokeWidth={1.6} aria-hidden="true" />
               </button>
             )}
 
@@ -118,9 +109,7 @@ export default function POIDetailSheet({
                 onClick={() => { onDeleteCustomPlace(location.id); onClose() }}
                 aria-label="Slett sted"
               >
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                  <path d="M3 5h12M7 5V3.5h4V5M6 5v9.5h6V5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                <Trash2 size={18} strokeWidth={1.5} aria-hidden="true" />
               </button>
             )}
           </div>
@@ -145,7 +134,7 @@ export default function POIDetailSheet({
 
           {location.fun_fact && (
             <div className={styles.funFact}>
-              <span className={styles.funFactTitle}>Visste du?</span>
+              <span className={styles.funFactTitle}>Did you know?</span>
               <p className={styles.funFactText}>{location.fun_fact}</p>
             </div>
           )}
@@ -169,9 +158,7 @@ export default function POIDetailSheet({
               className={styles.externalLink}
             >
               Les mer
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                <path d="M2.5 9.5L9.5 2.5M9.5 2.5H5M9.5 2.5V7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <ArrowUpRight size={12} strokeWidth={2} aria-hidden="true" />
             </a>
           )}
         </div>

@@ -1,6 +1,7 @@
 import { useState, useMemo, useId, useRef, useCallback, useEffect } from 'react'
 import type { CSSProperties } from 'react'
 import marauderIcon from '../assets/marauder-icon.png'
+import { Home, WandSparkles, Wrench, Settings as SettingsIcon, Search, ChevronDown, X, Check, Trash2, Heart, UserRound } from 'lucide-react'
 import { CategoryTree } from '../ds/CategoryTree'
 import { type FilterState, CATEGORY_META, LOCATION_TYPES, locationMatchesFilter } from '../ds/filterMeta'
 import { haversineKm, formatDistance } from '../utils/distance'
@@ -11,6 +12,7 @@ import type { HPLocation } from '../types/hp-location'
 import type { OfflineAreaStatus } from '../hooks/useOfflineAreas'
 import type { Position } from '../hooks/useGeolocation'
 import type { CustomPlace } from '../types/custom-place'
+import HouseSigil from './HouseSigil'
 import styles from './MenuSheet.module.css'
 
 type HPLocationWithDist = HPLocation & { km: number | null }
@@ -43,9 +45,7 @@ function matchesTokens(loc: HPLocation, tokens: string[]): boolean {
 
 function FavHeart() {
   return (
-    <svg width="11" height="10" viewBox="0 0 11 10" fill="currentColor" style={{ display: 'inline', verticalAlign: '-0.1em' }} aria-hidden="true">
-      <path d="M5.5 9C5.5 9 1 6.1 1 3.2a2.5 2.5 0 0 1 4.5-1.5A2.5 2.5 0 0 1 10 3.2C10 6.1 5.5 9 5.5 9Z" />
-    </svg>
+    <Heart size={11} fill="currentColor" strokeWidth={0} style={{ display: 'inline', verticalAlign: '-0.1em' }} aria-hidden="true" />
   )
 }
 
@@ -116,7 +116,7 @@ function connectionType(): string {
   return 'Ukjent'
 }
 
-type MenuTab = 'home' | 'tools' | 'settings'
+type MenuTab = 'home' | 'wizarding' | 'tools' | 'settings'
 
 type Props = {
   position: Position | null
@@ -151,11 +151,14 @@ type Props = {
   onBaseLayerChange: (layer: 'standard' | 'satellite') => void
   /** Marauder pass progress */
   visitedCount: number
+  /** Which HP places are visited — for the expandable score list */
+  visitedIds: Set<string>
   totalPlaces: number
   /** House choice (theming accent) */
   house: 'none' | 'gryffindor' | 'hufflepuff' | 'ravenclaw' | 'slytherin'
   onHouseChange: (h: 'none' | 'gryffindor' | 'hufflepuff' | 'ravenclaw' | 'slytherin') => void
   onOpenQuiz: () => void
+  onOpenFunFacts: () => void
   offlineAreas: OfflineArea[]
   offlineStatus: OfflineAreaStatus
   offlineDone: number
@@ -179,7 +182,7 @@ export default function MenuSheet({
   showZoomControls, onToggleZoomControls,
   showLocateBtn, onToggleLocateBtn,
   baseLayer, onBaseLayerChange,
-  visitedCount, totalPlaces, house, onHouseChange, onOpenQuiz,
+  visitedCount, visitedIds, totalPlaces, house, onHouseChange, onOpenQuiz, onOpenFunFacts,
   offlineAreas, offlineStatus, offlineDone, offlineTotal, offlineError,
   onDownloadVisibleArea, onCancelDownload, onDeleteArea,
   online, dataError = null,
@@ -195,6 +198,8 @@ export default function MenuSheet({
   // Geo tag filter (Lene, 2026-07-05): tapping a country/city chip shows every
   // place carrying that tag. Cleared by ×, or when a search starts.
   const [activeTag, setActiveTag] = useState<string | null>(null)
+  const [scoreOpen, setScoreOpen] = useState(false)
+  const [searchHPOpen, setSearchHPOpen] = useState(false)
   const [placeholderIdx, setPlaceholderIdx] = useState(0)
   const searchId = useId()
 
@@ -233,6 +238,10 @@ export default function MenuSheet({
 
   const { results: geoResults, loading: geoLoading } = useGeocoder(query)
 
+  // Keep HP matches folded by default on each new query so ordinary address /
+  // place results stay visible; expand the HP group by tapping its header.
+  useEffect(() => { setSearchHPOpen(false) }, [query])
+
   const q = normalize(query.trim())
 
   // List results are search-driven only. Category checkboxes filter the map
@@ -256,6 +265,12 @@ export default function MenuSheet({
     if (q) return []
     return withDistAndSort(hpLocations.filter((loc) => favouriteIds.has(loc.id)), position)
   }, [q, favouriteIds, position, hpLocations])
+
+  // Places already stamped onto the pass — the expandable Hunt Score list
+  const visitedLocations = useMemo<HPLocationWithDist[]>(
+    () => withDistAndSort(hpLocations.filter((loc) => visitedIds.has(loc.id)), position),
+    [visitedIds, position, hpLocations],
+  )
 
   const allFavouritesShown =
     favouriteIds.size > 0 && shownFavouriteIds.size === favouriteIds.size
@@ -441,10 +456,7 @@ export default function MenuSheet({
               <div className={styles.searchRow}>
                 <label htmlFor={searchId} className={styles.srOnly}>Søk etter sted</label>
                 <div className={styles.searchWrap}>
-                  <svg className={styles.searchIcon} width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                    <circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" strokeWidth="1.5"/>
-                    <path d="M10.5 10.5L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                  </svg>
+                  <Search className={styles.searchIcon} size={16} strokeWidth={1.7} aria-hidden="true" />
                   <input
                     id={searchId}
                     type="search"
@@ -458,7 +470,7 @@ export default function MenuSheet({
                   />
                   {query && (
                     <button type="button" className={styles.clearBtn} onClick={() => setQuery('')} aria-label="Tøm søk">
-                      ×
+                      <X size={16} aria-hidden="true" />
                     </button>
                   )}
                 </div>
@@ -469,12 +481,23 @@ export default function MenuSheet({
                   <p className={styles.errorText} role="alert">{dataError}</p>
                 )}
 
-                {/* HP location search results — only when there ARE hits; an
-                    empty section must not push address results below the fold */}
+                {/* HP location search results — folded by default so address
+                    results stay visible; tap the header to expand (Lene, 2026-07-07) */}
                 {q && filteredHP.length > 0 && (
                   <div>
-                    <p className={styles.sectionHeader}>Harry Potter-steder</p>
-                    {(
+                    <button
+                      type="button"
+                      className={styles.sectionToggle}
+                      onClick={() => setSearchHPOpen((v) => !v)}
+                      aria-expanded={searchHPOpen}
+                    >
+                      Harry Potter-steder ({filteredHP.length})
+                      <ChevronDown
+                        className={`${styles.sectionChevron} ${searchHPOpen ? styles.sectionChevronOpen : ''}`}
+                        size={16} aria-hidden="true"
+                      />
+                    </button>
+                    {searchHPOpen && (
                       <ul className={styles.list} role="list">
                         {filteredHP.map((loc) => (
                           <li key={loc.id} className={styles.itemBlock}>
@@ -550,19 +573,66 @@ export default function MenuSheet({
                   <p className={styles.empty}>{`Ingen treff for «${query}»`}</p>
                 )}
 
-                {/* Marauder pass progress */}
+                {/* Marauder pass progress — tap to reveal which places are stamped */}
                 {!q && !activeTag && totalPlaces > 0 && (
                   <div className={styles.passRow}>
-                    <div className={styles.passHeader}>
+                    <button
+                      type="button"
+                      className={styles.passHeaderBtn}
+                      onClick={() => setScoreOpen((v) => !v)}
+                      aria-expanded={scoreOpen}
+                      aria-label={scoreOpen ? 'Skjul oppdagede steder' : 'Vis oppdagede steder'}
+                    >
                       <span className={styles.passTitle}>Marauder's Hunt Score</span>
-                      <span className={styles.passCount}>{visitedCount} av {totalPlaces}</span>
-                    </div>
+                      <span className={styles.passCount}>
+                        {visitedCount} av {totalPlaces}
+                        <ChevronDown
+                          className={`${styles.passChevron} ${scoreOpen ? styles.passChevronOpen : ''}`}
+                          size={14} aria-hidden="true"
+                        />
+                      </span>
+                    </button>
                     <div className={styles.passBar}>
                       <div
                         className={styles.passFill}
                         style={{ width: `${Math.round((visitedCount / totalPlaces) * 100)}%` }}
                       />
                     </div>
+                    {scoreOpen && (
+                      <div className={styles.passList}>
+                        {visitedLocations.length === 0 ? (
+                          <p className={styles.passEmpty}>Ingen steder oppdaget ennå. Kom deg ut på jakt!</p>
+                        ) : (
+                          <ul className={styles.list} role="list">
+                            {visitedLocations.map((loc) => (
+                              <li key={loc.id} className={styles.itemBlock}>
+                                <button
+                                  type="button"
+                                  className={styles.itemMainBtn}
+                                  onClick={() => handleHPClick(loc)}
+                                >
+                                  <span className={styles.itemName}>{loc.name}</span>
+                                  {loc.km !== null && (
+                                    <span className={styles.itemDistance}>{formatDistance(loc.km)}</span>
+                                  )}
+                                </button>
+                                <div className={styles.chipsRow}>
+                                  {loc.categories.slice(0, 1).map((cat) => (
+                                    <CategoryChip
+                                      key={cat}
+                                      catKey={cat}
+                                      selected={activeFilter.categories.includes(cat)}
+                                      onToggle={() => toggleCategoryFilter(cat)}
+                                    />
+                                  ))}
+                                  <GeoChips city={loc.city} country={loc.country} activeTag={activeTag} onTag={toggleTag} />
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -577,9 +647,7 @@ export default function MenuSheet({
                         onClick={() => setActiveTag(null)}
                         aria-label="Fjern stedsfilter"
                       >
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                          <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                        </svg>
+                        <X size={16} strokeWidth={1.8} aria-hidden="true" />
                       </button>
                     </div>
                     <ul className={styles.list} role="list">
@@ -625,12 +693,10 @@ export default function MenuSheet({
                       aria-expanded={showCategories}
                     >
                       Kategorier
-                      <svg
+                      <ChevronDown
                         className={`${styles.sectionChevron} ${showCategories ? styles.sectionChevronOpen : ''}`}
-                        width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"
-                      >
-                        <path d="M5 7l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
+                        size={16} aria-hidden="true"
+                      />
                     </button>
                     {showCategories && <CategoryTree value={activeFilter} onChange={onFilterChange} />}
 
@@ -641,12 +707,10 @@ export default function MenuSheet({
                       aria-expanded={showFavouritesList}
                     >
                       Favoritter
-                      <svg
+                      <ChevronDown
                         className={`${styles.sectionChevron} ${showFavouritesList ? styles.sectionChevronOpen : ''}`}
-                        width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"
-                      >
-                        <path d="M5 7l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
+                        size={16} aria-hidden="true"
+                      />
                     </button>
                     {showFavouritesList && (favouriteLocations.length === 0 ? (
                       <p className={styles.empty}>
@@ -661,11 +725,7 @@ export default function MenuSheet({
                           aria-pressed={allFavouritesShown}
                         >
                           <span className={`${styles.toggleBox} ${allFavouritesShown ? styles.toggleBoxOn : ''}`} aria-hidden="true">
-                            {allFavouritesShown && (
-                              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                                <path d="M2 6.5L4.8 9.2L10 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                              </svg>
-                            )}
+                            {allFavouritesShown && <Check size={12} strokeWidth={2.5} aria-hidden="true" />}
                           </span>
                           Alle
                         </button>
@@ -683,11 +743,7 @@ export default function MenuSheet({
                                   aria-label={shown ? `Skjul ${loc.name} på kartet` : `Vis ${loc.name} på kartet`}
                                 >
                                   <span className={`${styles.toggleBox} ${shown ? styles.toggleBoxOn : ''}`} aria-hidden="true">
-                                    {shown && (
-                                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                                        <path d="M2 6.5L4.8 9.2L10 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                      </svg>
-                                    )}
+                                    {shown && <Check size={12} strokeWidth={2.5} aria-hidden="true" />}
                                   </span>
                                 </button>
                                 <button
@@ -730,12 +786,10 @@ export default function MenuSheet({
                       aria-expanded={showCustomList}
                     >
                       Mine steder
-                      <svg
+                      <ChevronDown
                         className={`${styles.sectionChevron} ${showCustomList ? styles.sectionChevronOpen : ''}`}
-                        width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"
-                      >
-                        <path d="M5 7l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
+                        size={16} aria-hidden="true"
+                      />
                     </button>
                     {showCustomList && (<>
                     {/* "Alle": show/hide every custom place on the map */}
@@ -746,11 +800,7 @@ export default function MenuSheet({
                       aria-pressed={allCustomShown}
                     >
                       <span className={`${styles.toggleBox} ${styles.toggleBoxGreen} ${allCustomShown ? styles.toggleBoxOn : ''}`} aria-hidden="true">
-                        {allCustomShown && (
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                            <path d="M2 6.5L4.8 9.2L10 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        )}
+                        {allCustomShown && <Check size={12} strokeWidth={2.5} aria-hidden="true" />}
                       </span>
                       Alle
                     </button>
@@ -768,11 +818,7 @@ export default function MenuSheet({
                                 aria-label={visible ? `Skjul ${p.name} på kartet` : `Vis ${p.name} på kartet`}
                               >
                                 <span className={`${styles.toggleBox} ${styles.toggleBoxGreen} ${visible ? styles.toggleBoxOn : ''}`} aria-hidden="true">
-                                  {visible && (
-                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                                      <path d="M2 6.5L4.8 9.2L10 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                  )}
+                                  {visible && <Check size={12} strokeWidth={2.5} aria-hidden="true" />}
                                 </span>
                               </button>
                               <button
@@ -800,6 +846,87 @@ export default function MenuSheet({
           )}
 
           {/* Tools tab */}
+          {activeTab === 'wizarding' && (
+            <div className={styles.tabContent}>
+              <div className={styles.scrollAreaPadded}>
+
+                <div className={styles.section}>
+                  <p className={styles.sectionTitle}>OWLs and NEWT</p>
+                  <div className={styles.card}>
+                    <p className={styles.actionDesc}>
+                      Du er blodfan sier du... 115 spørsmål. Griselda Marchbanks venter på deg, består du?
+                    </p>
+                    <div className={styles.actionRow}>
+                      <button
+                        className={styles.btnPrimary}
+                        type="button"
+                        onClick={() => { onOpenQuiz(); setIsOpen(false) }}
+                      >
+                        Bevis hva du kan
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.section}>
+                  <p className={styles.sectionTitle}>Hogwarts Library's Restricted Section</p>
+                  <div className={styles.card}>
+                    <p className={styles.actionDesc}>
+                      30 hemmelige opplysninger, strengt bevoktet av Madam Irma Pince. 
+                    </p>
+                    <div className={styles.actionRow}>
+                      <button
+                        className={styles.btnPrimary}
+                        type="button"
+                        onClick={() => { onOpenFunFacts(); setIsOpen(false) }}
+                      >
+                        Snik deg inn for å se
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.section}>
+                  <p className={styles.sectionTitle}>Hus</p>
+                  <div className={styles.card} role="radiogroup" aria-label="Velg hus">
+                    {([
+                      ['none', 'Muggle', ''],
+                      ['gryffindor', 'Gryffindor', '#7F0909'],
+                      ['hufflepuff', 'Hufflepuff', '#8C6B00'],
+                      ['ravenclaw', 'Ravenclaw', '#222F5B'],
+                      ['slytherin', 'Slytherin', '#1A472A'],
+                    ] as const).map(([key, label, color]) => (
+                      <button
+                        key={key}
+                        type="button"
+                        role="radio"
+                        aria-checked={house === key}
+                        className={`${styles.favAllRow} ${house === key ? styles.favAllRowActive : ''}`}
+                        onClick={() => onHouseChange(key)}
+                        style={color ? ({ '--checkbox-color': color } as React.CSSProperties) : undefined}
+                      >
+                        <span className={`${styles.toggleBox} ${styles.roundBox} ${house === key ? styles.toggleBoxOn : ''}`} aria-hidden="true">
+                          {house === key && <span className={styles.radioDot} />}
+                        </span>
+                        <span
+                          className={styles.houseSigilSlot}
+                          style={color ? ({ color } as CSSProperties) : undefined}
+                          aria-hidden="true"
+                        >
+                          {key === 'none'
+                            ? <UserRound size={24} strokeWidth={1.6} color="#1A0A00" aria-hidden="true" />
+                            : <HouseSigil house={key} size={28} decorative />}
+                        </span>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          )}
+
           {activeTab === 'tools' && (
             <div className={styles.tabContent}>
               <div className={styles.scrollAreaPadded}>
@@ -828,7 +955,7 @@ export default function MenuSheet({
                   <p className={styles.sectionTitle}>Offline kart</p>
                   <div className={styles.card}>
                     <p className={styles.actionDesc}>
-                      Naviger kartet til området du trenger når du mangler dekning, og last det ned her.
+                      Naviger kartet til området du vil ha tilgang på uten nett/dekning, og last det ned her.
                       {connectionType().startsWith('Mobil') && ' Nå bruker du mobildata.'}
                     </p>
 
@@ -877,32 +1004,12 @@ export default function MenuSheet({
                             onClick={() => onDeleteArea(area.id)}
                             aria-label={`Slett ${area.name}`}
                           >
-                            <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                              <path d="M3 5h12M7 5V3.5h4V5M6 5v9.5h6V5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
+                            <Trash2 size={16} strokeWidth={1.5} aria-hidden="true" />
                           </button>
                         </div>
                       ))}
                     </div>
                   )}
-                </div>
-
-                <div className={styles.section}>
-                  <p className={styles.sectionTitle}>HP-quiz</p>
-                  <div className={styles.card}>
-                    <p className={styles.actionDesc}>
-                      Ti spørsmål fra bøkene og filmene. Fungerer uten nett – perfekt på toget.
-                    </p>
-                    <div className={styles.actionRow}>
-                      <button
-                        className={styles.btnPrimary}
-                        type="button"
-                        onClick={() => { onOpenQuiz(); setIsOpen(false) }}
-                      >
-                        Start quiz
-                      </button>
-                    </div>
-                  </div>
                 </div>
 
               </div>
@@ -982,34 +1089,6 @@ export default function MenuSheet({
                 </div>
 
                 <div className={styles.section}>
-                  <p className={styles.sectionTitle}>Hus</p>
-                  <div className={styles.card} role="radiogroup" aria-label="Velg hus">
-                    {([
-                      ['none', 'Ingen', ''],
-                      ['gryffindor', 'Gryffindor', '#7F0909'],
-                      ['hufflepuff', 'Hufflepuff', '#8C6B00'],
-                      ['ravenclaw', 'Ravenclaw', '#222F5B'],
-                      ['slytherin', 'Slytherin', '#1A472A'],
-                    ] as const).map(([key, label, color]) => (
-                      <button
-                        key={key}
-                        type="button"
-                        role="radio"
-                        aria-checked={house === key}
-                        className={`${styles.favAllRow} ${house === key ? styles.favAllRowActive : ''}`}
-                        onClick={() => onHouseChange(key)}
-                        style={color ? ({ '--checkbox-color': color } as React.CSSProperties) : undefined}
-                      >
-                        <span className={`${styles.toggleBox} ${styles.roundBox} ${house === key ? styles.toggleBoxOn : ''}`} aria-hidden="true">
-                          {house === key && <span className={styles.radioDot} />}
-                        </span>
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className={styles.section}>
                   <p className={styles.sectionTitle}>Kildekode og dokumentasjon</p>
                   <div className={styles.card}>
                     <div className={styles.infoRow}>
@@ -1033,33 +1112,16 @@ export default function MenuSheet({
         {/* Tab bar */}
         <nav className={styles.tabBar} aria-label="Menynavigasjon">
           <TabBtn active={activeTab === 'home'} label="Hjem" onClick={() => setActiveTab('home')}>
-            {/* House */}
-            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-              <path
-                d="M3 11L11 4L19 11V19H14V14H8V19H3V11Z"
-                stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"
-                fill={activeTab === 'home' ? 'currentColor' : 'none'} fillOpacity="0.15"
-              />
-            </svg>
+            <Home size={22} strokeWidth={1.6} aria-hidden="true" />
+          </TabBtn>
+          <TabBtn active={activeTab === 'wizarding'} label="Magi" onClick={() => setActiveTab('wizarding')}>
+            <WandSparkles size={22} strokeWidth={1.6} aria-hidden="true" />
           </TabBtn>
           <TabBtn active={activeTab === 'tools'} label="Verktøy" onClick={() => setActiveTab('tools')}>
-            {/* Wrench */}
-            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-              <path
-                d="M14.5 4.5a4.5 4.5 0 0 0-4 6.5L4 17.5A1.5 1.5 0 0 0 6.5 20l6.5-6.5a4.5 4.5 0 0 0 6-5.5l-2.5 2.5-2-2 2.5-2.5A4.5 4.5 0 0 0 14.5 4.5Z"
-                stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"
-              />
-            </svg>
+            <Wrench size={22} strokeWidth={1.6} aria-hidden="true" />
           </TabBtn>
           <TabBtn active={activeTab === 'settings'} label="Innstillinger" onClick={() => setActiveTab('settings')}>
-            {/* Gear */}
-            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-              <path d="M9 2h4l.55 2.2a6 6 0 0 1 1.85 1.07l2.14-.67L19.5 8l-1.73 1.47c.07.34.1.7.1 1.03s-.03.7-.1 1.03L19.5 13l-1.96 3.4-2.14-.67a6 6 0 0 1-1.85 1.07L13 19H9l-.55-2.2A6 6 0 0 1 6.6 15.73l-2.14.67L2.5 13l1.73-1.47a6.5 6.5 0 0 1 0-2.06L2.5 8l1.96-3.4 2.14.67A6 6 0 0 1 8.45 4.2L9 2Z"
-                stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" strokeLinecap="round"
-                fill={activeTab === 'settings' ? 'currentColor' : 'none'} fillOpacity="0.15"
-              />
-              <circle cx="11" cy="11" r="2.5" stroke="currentColor" strokeWidth="1.3"/>
-            </svg>
+            <SettingsIcon size={22} strokeWidth={1.6} aria-hidden="true" />
           </TabBtn>
         </nav>
       </div>

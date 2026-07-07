@@ -126,7 +126,7 @@
   /* Snap points — keep in sync with SNAP_FRACTIONS in useSheetDrag.ts.
      Expanded is 70svh (not 85): with the iOS keyboard open, a taller sheet
      pushed the search field out of sight (Lene, 2026-07-05) */
-  --sheet-default-height: 33svh;
+  --sheet-default-height: 50svh;
   --sheet-half-height: 50svh;
   --sheet-expanded-height: 70svh;
   /* Full = everything except the strip under the Marauder wordmark (64px —

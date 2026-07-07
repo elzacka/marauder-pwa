@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
+import { Check, ChevronDown } from 'lucide-react'
 import { CATEGORY_META, ALL_CATEGORY_KEYS, LOCATION_TYPES, LOCATION_TYPE_COLORS } from './filterMeta'
 import type { FilterState } from './filterMeta'
 import styles from './CategoryTree.module.css'
@@ -24,11 +25,7 @@ function CheckBox({ checked, color }: { checked: boolean; color?: string }) {
       style={color ? ({ '--checkbox-color': color } as CSSProperties) : undefined}
       aria-hidden="true"
     >
-      {checked && (
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-          <path d="M2 6.5L4.8 9.2L10 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      )}
+      {checked && <Check size={12} strokeWidth={2.5} aria-hidden="true" />}
     </span>
   )
 }
@@ -127,12 +124,10 @@ export function CategoryTree({ value, onChange }: Props) {
                   onClick={(e) => toggleExpand(e, cat.key)}
                   aria-label={isExpanded ? `Hide sub-types for ${cat.label}` : `Show sub-types for ${cat.label}`}
                 >
-                  <svg
+                  <ChevronDown
                     className={`${styles.chevron} ${isExpanded ? styles.chevronOpen : ''}`}
-                    width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"
-                  >
-                    <path d="M5 7l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                    size={16} aria-hidden="true"
+                  />
                 </button>
               )}
             </div>

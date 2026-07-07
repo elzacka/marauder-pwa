@@ -7,13 +7,13 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "fetch-data": "node scripts/fetch-hp-data.mjs"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@fontsource/cinzel-decorative": "^5.2.8",
     "@fontsource/eb-garamond": "^5.2.7",
     "@protomaps/basemaps": "^5.7.2",
+    "lucide-react": "^1.23.0",
     "maplibre-gl": "^5.24.0",
     "pmtiles": "^4.4.1",
     "react": "^19.2.7",

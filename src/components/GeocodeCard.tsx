@@ -1,3 +1,4 @@
+import { X } from 'lucide-react'
 import styles from './GeocodeCard.module.css'
 
 type Props = {
@@ -28,9 +29,7 @@ export default function GeocodeCard({ name, detail, onSave, onRemove, onClose }:
         Fjern nål
       </button>
       <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Lukk kortet">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-        </svg>
+        <X size={16} strokeWidth={1.8} aria-hidden="true" />
       </button>
     </div>
   )

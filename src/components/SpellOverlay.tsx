@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react'
 import styles from './SpellOverlay.module.css'
 
 /**
- * Short spell/ritual messages over the map ("I solemnly swear…",
- * "Mischief managed", place discoveries). One message at a time,
- * fades in and out on its own.
+ * Short spell/ritual messages over the map ("Mischief managed",
+ * "Oppdaget: …"). One message at a time, fades in and out on its own.
+ * The launch oath is a full splash (see OathSplash), not this banner.
  */
 export default function SpellOverlay({ message, onDone }: {
   message: string | null

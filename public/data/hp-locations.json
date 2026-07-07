@@ -25,7 +25,7 @@
         ],
         "description": "The coffee house where J.K. Rowling sat writing the early Harry Potter books.",
         "source": "manual",
-        "external_url": "https://www.elephanthouse.biz",
+        "external_url": "https://elephanthousecafe.com/",
         "country": "Scotland",
         "city": "Edinburgh",
         "fun_fact": "Rowling wrote here with a view of Edinburgh Castle. The back room became a place of pilgrimage for fans."
@@ -52,10 +52,10 @@
         ],
         "description": "The curved street with colourful shopfronts widely said to have inspired Diagon Alley.",
         "source": "manual",
-        "external_url": null,
+        "external_url": "https://ewh.org.uk/victoria-street/",
         "country": "Scotland",
         "city": "Edinburgh",
-        "fun_fact": "Look closely at the shop signs — several lean happily into the wizarding connection."
+        "fun_fact": "Look closely at the shop signs – several lean happily into the wizarding connection."
       }
     },
     {
@@ -78,12 +78,12 @@
         "hp_references": [
           "HP1"
         ],
-        "description": "The kirkyard where the gravestone of Thomas Riddell is believed to have inspired Tom Riddle — Lord Voldemort.",
+        "description": "The kirkyard where the gravestone of Thomas Riddell is believed to have inspired Tom Riddle – Lord Voldemort.",
         "source": "manual",
         "external_url": "https://www.greyfriarskirk.com",
         "country": "Scotland",
         "city": "Edinburgh",
-        "fun_fact": "Also buried here: William McGonagall, famously the worst poet in Britain — and quite possibly a certain Professor’s namesake."
+        "fun_fact": "Also buried here: William McGonagall, famously the worst poet in Britain – and quite possibly a certain Professor’s namesake."
       }
     },
     {
@@ -111,7 +111,7 @@
         "external_url": "https://www.george-heriots.com",
         "country": "Scotland",
         "city": "Edinburgh",
-        "fun_fact": "The school sorts its pupils into four houses — sound familiar?"
+        "fun_fact": "The school sorts its pupils into four houses – sound familiar?"
       }
     },
     {
@@ -136,7 +136,7 @@
         ],
         "description": "Where J.K. Rowling finished Harry Potter and the Deathly Hallows in 2007. The room is now the J.K. Rowling Suite.",
         "source": "manual",
-        "external_url": "https://www.roccofortehotels.com/hotels-and-resorts/the-balmoral-hotel",
+        "external_url": "https://www.roccofortehotels.com/hotels-and-resorts/the-balmoral-hotel/",
         "country": "Scotland",
         "city": "Edinburgh",
         "fun_fact": "She signed a marble bust in the room: \"J.K. Rowling finished writing Harry Potter and the Deathly Hallows in this room (552) on 11th Jan 2007\"."
@@ -172,7 +172,7 @@
         "external_url": "https://www.nts.org.uk/visit/places/glenfinnan-monument",
         "country": "Scotland",
         "city": "Glenfinnan",
-        "fun_fact": "The flying Ford Anglia chases the train here in Chamber of Secrets — with Harry hanging out of the door."
+        "fun_fact": "The flying Ford Anglia chases the train here in Chamber of Secrets – with Harry hanging out of the door."
       }
     },
     {
@@ -233,7 +233,7 @@
         "external_url": "https://www.nts.org.uk/visit/places/glencoe",
         "country": "Scotland",
         "city": "Glencoe",
-        "fun_fact": "Hagrid’s hut was built here for Prisoner of Azkaban — near the Clachaig Inn."
+        "fun_fact": "Hagrid’s hut was built here for Prisoner of Azkaban – near the Clachaig Inn."
       }
     },
     {
@@ -257,9 +257,8 @@
           "HP4"
         ],
         "description": "The glen at the foot of Britain’s highest mountain hosted Hogwarts grounds scenes; Steall Falls appears in the Triwizard Tournament.",
-        "source": "wikidata",
-        "external_url": "https://www.walkhighlands.co.uk/lochaber/glen-nevis.shtml",
-        "wikidata_id": "Q3108687",
+        "source": "manual",
+        "external_url": "https://perceptivetravel.com/blog/2026/03/20/steall-falls/",
         "country": "Scotland",
         "city": "Fort William",
         "fun_fact": "Quidditch scenes in the early films were set against this landscape."
@@ -290,7 +289,7 @@
         "external_url": "https://www.nymr.co.uk",
         "country": "England",
         "city": "Goathland",
-        "fun_fact": "Built in 1865 and barely changed since — no set dressing needed."
+        "fun_fact": "Built in 1865 and barely changed since – no set dressing needed."
       }
     },
     {
@@ -315,10 +314,10 @@
         ],
         "description": "The vast limestone cliff in the Yorkshire Dales where Harry and Hermione camp in Deathly Hallows: Part 1.",
         "source": "manual",
-        "external_url": "https://www.nationaltrust.org.uk/visit/yorkshire/malham-cove",
+        "external_url": "https://en.wikipedia.org/wiki/Malham_Cove",
         "country": "England",
         "city": "Malham",
-        "fun_fact": "They pitched the tent on the limestone pavement at the very top — worth the climb."
+        "fun_fact": "They pitched the tent on the limestone pavement at the very top – worth the climb."
       }
     },
     {
@@ -342,13 +341,12 @@
           "HP1",
           "HP2"
         ],
-        "description": "Hogwarts exterior in the first two films — including Madam Hooch’s first flying lesson.",
-        "source": "wikidata",
+        "description": "Hogwarts exterior in the first two films – including Madam Hooch’s first flying lesson.",
+        "source": "manual",
         "external_url": "https://www.alnwickcastle.com",
-        "wikidata_id": "Q1320427",
         "country": "England",
         "city": "Alnwick",
-        "fun_fact": "\"Up!\" — the broomstick lesson happened on the lawns here. The Ford Anglia also crash-landed here in Chamber of Secrets."
+        "fun_fact": "\"Up!\" – the broomstick lesson happened on the lawns here. The Ford Anglia also crash-landed here in Chamber of Secrets."
       }
     },
     {
@@ -374,12 +372,11 @@
           "HP6"
         ],
         "description": "The medieval cloisters became the Hogwarts corridors in Philosopher’s Stone, Chamber of Secrets and Half-Blood Prince.",
-        "source": "wikidata",
+        "source": "manual",
         "external_url": "https://www.gloucestercathedral.org.uk",
-        "wikidata_id": "Q262500",
         "country": "England",
         "city": "Gloucester",
-        "fun_fact": "\"The Chamber of Secrets has been opened…\" — the writing on the wall scene was shot in these cloisters."
+        "fun_fact": "\"The Chamber of Secrets has been opened…\" – the writing on the wall scene was shot in these cloisters."
       }
     },
     {
@@ -405,9 +402,8 @@
           "HP7"
         ],
         "description": "Used across four films: Snape’s potions classroom, Quirrell’s classroom and Hogwarts corridors.",
-        "source": "wikidata",
-        "external_url": "https://www.nationaltrust.org.uk/visit/wiltshire/lacock-abbey-village-and-clutterbuck",
-        "wikidata_id": "Q1148460",
+        "source": "manual",
+        "external_url": "https://en.wikipedia.org/wiki/Lacock_Abbey",
         "country": "England",
         "city": "Lacock",
         "fun_fact": "The Mirror of Erised stood here, in the Chapter House."
@@ -436,10 +432,10 @@
         ],
         "description": "The medieval village that played Budleigh Babberton in Half-Blood Prince.",
         "source": "manual",
-        "external_url": "https://www.nationaltrust.org.uk/visit/wiltshire/lacock-abbey-village-and-clutterbuck",
+        "external_url": "https://en.wikipedia.org/wiki/Lacock",
         "country": "England",
         "city": "Lacock",
-        "fun_fact": "Horace Slughorn hid here — disguised as an armchair."
+        "fun_fact": "Horace Slughorn hid here – disguised as an armchair."
       }
     },
     {
@@ -463,10 +459,10 @@
         ],
         "description": "The Elizabethan mansion that became Malfoy Manor in Deathly Hallows.",
         "source": "manual",
-        "external_url": "https://www.nationaltrust.org.uk/visit/derbyshire/hardwick-hall",
+        "external_url": "https://en.wikipedia.org/wiki/Hardwick_Hall",
         "country": "England",
         "city": "Chesterfield",
-        "fun_fact": "\"More window than wall\", they said in 1597 — digitally sharpened into the Malfoys’ forbidding home."
+        "fun_fact": "\"More window than wall\", they said in 1597 – digitally sharpened into the Malfoys’ forbidding home."
       }
     },
     {
@@ -491,10 +487,10 @@
         ],
         "description": "The crooked timber-framed village that became Godric’s Hollow in Deathly Hallows: Part 1.",
         "source": "manual",
-        "external_url": "https://www.discoversuffolk.org.uk/places/lavenham/",
+        "external_url": "https://www.lovelavenham.co.uk/",
         "country": "England",
         "city": "Lavenham",
-        "fun_fact": "The De Vere House stood in for the Potters’ cottage — where it all began."
+        "fun_fact": "The De Vere House stood in for the Potters’ cottage – where it all began."
       }
     },
     {
@@ -519,12 +515,11 @@
           "HP2"
         ],
         "description": "The staircase where Professor McGonagall greets the first-years in Philosopher’s Stone. The Great Hall inspired Hogwarts’ own.",
-        "source": "wikidata",
+        "source": "manual",
         "external_url": "https://www.chch.ox.ac.uk",
-        "wikidata_id": "Q745967",
         "country": "England",
         "city": "Oxford",
-        "fun_fact": "Hogwarts’ Great Hall was built in the studio — but modelled on the dining hall here."
+        "fun_fact": "Hogwarts’ Great Hall was built in the studio – but modelled on the dining hall here."
       }
     },
     {
@@ -549,9 +544,8 @@
           "HP2"
         ],
         "description": "Duke Humfrey’s Library became the Hogwarts library; the Divinity School became the hospital wing.",
-        "source": "wikidata",
+        "source": "manual",
         "external_url": "https://www.bodleian.ox.ac.uk",
-        "wikidata_id": "Q82133",
         "country": "England",
         "city": "Oxford",
         "fun_fact": "Harry sneaks through here under the Invisibility Cloak in the Restricted Section scene."
@@ -577,9 +571,8 @@
           "HP4"
         ],
         "description": "The medieval cloister and courtyard where Draco Malfoy gets turned into a ferret in Goblet of Fire.",
-        "source": "wikidata",
+        "source": "manual",
         "external_url": "https://www.new.ox.ac.uk",
-        "wikidata_id": "Q1179523",
         "country": "England",
         "city": "Oxford",
         "fun_fact": "\"Mad-Eye\" Moody’s amazing bouncing ferret scene happened under the great oak here."
@@ -607,12 +600,11 @@
           "HP2"
         ],
         "description": "The Norman cathedral’s cloisters became Hogwarts courtyards and classrooms in the early films.",
-        "source": "wikidata",
+        "source": "manual",
         "external_url": "https://www.durhamcathedral.co.uk",
-        "wikidata_id": "Q746207",
         "country": "England",
         "city": "Durham",
-        "fun_fact": "Harry releases Hedwig into the snow here — and McGonagall’s Transfiguration class met in the Chapter House."
+        "fun_fact": "Harry releases Hedwig into the snow here – and McGonagall’s Transfiguration class met in the Chapter House."
       }
     },
     {
@@ -642,12 +634,12 @@
           "HP7",
           "HP8"
         ],
-        "description": "The Making of Harry Potter — the original sets, props and costumes from all eight films.",
+        "description": "The Making of Harry Potter – the original sets, props and costumes from all eight films.",
         "source": "manual",
         "external_url": "https://www.wbstudiotour.co.uk",
         "country": "England",
         "city": "Leavesden",
-        "fun_fact": "The Great Hall, Diagon Alley and the original Hogwarts Express — plus Butterbeer."
+        "fun_fact": "The Great Hall, Diagon Alley and the original Hogwarts Express – plus Butterbeer."
       }
     },
     {
@@ -679,10 +671,10 @@
         ],
         "description": "Where the Hogwarts Express departs every year on 1 September. The luggage trolley in the wall is now a landmark.",
         "source": "manual",
-        "external_url": "https://www.harrypotter.com/visit/platform-nine-three-quarters",
+        "external_url": "https://www.kingscross.co.uk/harry-potters-platform-9-34",
         "country": "England",
         "city": "London",
-        "fun_fact": "The film scenes were actually shot between platforms 4 and 5 — the station’s own secret."
+        "fun_fact": "The film scenes were actually shot between platforms 4 and 5 – the station’s own secret."
       }
     },
     {
@@ -705,9 +697,8 @@
           "HP1"
         ],
         "description": "The Victorian covered market used as the way to the Leaky Cauldron and Diagon Alley in Philosopher’s Stone.",
-        "source": "wikidata",
-        "external_url": null,
-        "wikidata_id": "Q961148",
+        "source": "manual",
+        "external_url": "https://leadenhallmarket.co.uk/",
         "country": "England",
         "city": "London",
         "fun_fact": "The blue door in Bull’s Head Passage was the entrance to the Leaky Cauldron."
@@ -735,10 +726,10 @@
         ],
         "description": "The exterior of Gringotts Wizarding Bank. The marble Exhibition Hall inspired the bank’s interior.",
         "source": "manual",
-        "external_url": null,
+        "external_url": "https://programme.openhouse.org.uk/listings/1806",
         "country": "England",
         "city": "London",
-        "fun_fact": "The goblin-filled banking hall itself was built in the studio — modelled on the marble hall inside."
+        "fun_fact": "The goblin-filled banking hall itself was built in the studio – modelled on the marble hall inside."
       }
     },
     {
@@ -761,12 +752,12 @@
           "HP5",
           "HP7"
         ],
-        "description": "Filmed as Number 12, Grimmauld Place — headquarters of the Order of the Phoenix and home of the Black family.",
+        "description": "Filmed as Number 12, Grimmauld Place – headquarters of the Order of the Phoenix and home of the Black family.",
         "source": "manual",
-        "external_url": null,
+        "external_url": "https://en.wikipedia.org/wiki/Claremont_Square",
         "country": "England",
         "city": "London",
-        "fun_fact": "The house that squeezes itself into view between the neighbours — no Muggles noticed a thing."
+        "fun_fact": "The house that squeezes itself into view between the neighbours – no Muggles noticed a thing."
       }
     },
     {
@@ -790,10 +781,10 @@
         ],
         "description": "Torn apart by Death Eaters in the opening of Half-Blood Prince.",
         "source": "manual",
-        "external_url": null,
+        "external_url": "https://en.wikipedia.org/wiki/Millennium_Bridge,_London",
         "country": "England",
         "city": "London",
-        "fun_fact": "The bridge really did wobble when it opened in 2000 — Londoners nicknamed it the Wobbly Bridge."
+        "fun_fact": "The bridge really did wobble when it opened in 2000 – Londoners nicknamed it the Wobbly Bridge."
       }
     },
     {
@@ -816,10 +807,9 @@
         "hp_references": [
           "HP1"
         ],
-        "description": "Where Harry first speaks Parseltongue to a boa constrictor — and Dudley ends up behind the glass.",
-        "source": "wikidata",
-        "external_url": "https://www.zsl.org/london-zoo",
-        "wikidata_id": "Q270263",
+        "description": "Where Harry first speaks Parseltongue to a boa constrictor – and Dudley ends up behind the glass.",
+        "source": "manual",
+        "external_url": "https://www.londonzoo.org/",
         "country": "England",
         "city": "London",
         "fun_fact": "\"Thanksss, amigo.\" The snake was off to Brazil."
@@ -843,12 +833,12 @@
           "atmosphere"
         ],
         "hp_references": [],
-        "description": "A narrow 17th-century alley of bowed glass windows and gas lamps — a key inspiration for Diagon Alley and Knockturn Alley.",
+        "description": "A narrow 17th-century alley of bowed glass windows and gas lamps – a key inspiration for Diagon Alley and Knockturn Alley.",
         "source": "manual",
-        "external_url": null,
+        "external_url": "https://www.atlasobscura.com/places/goodwins-court",
         "country": "England",
         "city": "London",
-        "fun_fact": "Come at dusk when the gas lamps glow — it is the closest London gets to Knockturn Alley."
+        "fun_fact": "Come at dusk when the gas lamps glow – it is the closest London gets to Knockturn Alley."
       }
     },
     {
@@ -871,9 +861,9 @@
         "hp_references": [
           "HP7"
         ],
-        "description": "The remote Welsh beach where Shell Cottage stood — and where Dobby is buried in Deathly Hallows.",
+        "description": "The remote Welsh beach where Shell Cottage stood – and where Dobby is buried in Deathly Hallows.",
         "source": "manual",
-        "external_url": "https://www.pembrokeshirecoast.wales/things-to-do/beaches/freshwater-west/",
+        "external_url": "https://www.visitpembrokeshire.com/explore-pembrokeshire/beaches/freshwater-west",
         "country": "Wales",
         "city": "Pembrokeshire",
         "fun_fact": "\"Here lies Dobby, a free elf.\" Fans still leave socks on the beach."
@@ -899,12 +889,12 @@
           "HP5",
           "HP7"
         ],
-        "description": "Scotland Place and Great Scotland Yard played the visitors’ entrance to the Ministry of Magic — red telephone box and all.",
+        "description": "Scotland Place and Great Scotland Yard played the visitors’ entrance to the Ministry of Magic – red telephone box and all.",
         "source": "manual",
-        "external_url": null,
+        "external_url": "https://strikefans.com/great-scotland-yard/",
         "country": "England",
         "city": "London",
-        "fun_fact": "Harry and Mr Weasley dialled 6-2-4-4-2 — MAGIC — in the phone box here in Order of the Phoenix."
+        "fun_fact": "Harry and Mr Weasley dialled 6-2-4-4-2 – MAGIC – in the phone box here in Order of the Phoenix."
       }
     },
     {
@@ -927,12 +917,12 @@
         "hp_references": [
           "HP7"
         ],
-        "description": "The ancient forest where Harry and Hermione camp in Deathly Hallows — and where the silver doe leads Harry to the Sword of Gryffindor.",
+        "description": "The ancient forest where Harry and Hermione camp in Deathly Hallows – and where the silver doe leads Harry to the Sword of Gryffindor.",
         "source": "manual",
-        "external_url": null,
+        "external_url": "https://en.wikipedia.org/wiki/Forest_of_Dean",
         "country": "England",
         "city": "Forest of Dean",
-        "fun_fact": "Hermione’s parents took her here as a child — and J.K. Rowling grew up in Tutshill, on the forest’s edge."
+        "fun_fact": "Hermione’s parents took her here as a child – and J.K. Rowling grew up in Tutshill, on the forest’s edge."
       }
     },
     {
@@ -956,9 +946,9 @@
           "HP1",
           "HP3"
         ],
-        "description": "The canonical home of the Leaky Cauldron — the wizarding gateway between Muggle London and Diagon Alley.",
+        "description": "The canonical home of the Leaky Cauldron – the wizarding gateway between Muggle London and Diagon Alley.",
         "source": "manual",
-        "external_url": null,
+        "external_url": "https://en.wikipedia.org/wiki/Charing_Cross_Road",
         "country": "England",
         "city": "London",
         "fun_fact": "The Palace Theatre on this street has hosted Harry Potter and the Cursed Child since 2016."
@@ -987,9 +977,9 @@
         "description": "Harry and Mr Weasley take the Underground here on the way to Harry’s hearing at the Ministry of Magic.",
         "country": "England",
         "city": "London",
-        "fun_fact": "The station was closed for a full day of filming — Mr Weasley remained delighted by the ticket barriers.",
+        "fun_fact": "The station was closed for a full day of filming – Mr Weasley remained delighted by the ticket barriers.",
         "source": "manual",
-        "external_url": null
+        "external_url": "https://en.wikipedia.org/wiki/Westminster_tube_station"
       }
     },
     {
@@ -1012,12 +1002,12 @@
         "hp_references": [
           "HP3"
         ],
-        "description": "The Leaky Cauldron’s exterior in Prisoner of Azkaban — the Knight Bus squeezes between Muggle traffic right here.",
+        "description": "The Leaky Cauldron’s exterior in Prisoner of Azkaban – the Knight Bus squeezes between Muggle traffic right here.",
         "country": "England",
         "city": "London",
         "fun_fact": "The pub entrance was the flower shop at 7 Stoney Street; next door became the Third Hand Book Emporium.",
         "source": "manual",
-        "external_url": null
+        "external_url": "https://boroughmarket.org.uk/"
       }
     },
     {
@@ -1042,9 +1032,9 @@
         "description": "Harry, Ron and Hermione flee through the crowds here after the Death Eaters crash the wedding.",
         "country": "England",
         "city": "London",
-        "fun_fact": "They narrowly miss a double-decker bus on Shaftesbury Avenue — Apparition in central London is precision work.",
+        "fun_fact": "They narrowly miss a double-decker bus on Shaftesbury Avenue – Apparition in central London is precision work.",
         "source": "manual",
-        "external_url": null
+        "external_url": "https://en.wikipedia.org/wiki/Piccadilly_Circus"
       }
     },
     {
@@ -1070,9 +1060,9 @@
         "description": "The Order of the Phoenix flies Harry down the Thames past Parliament and Big Ben on the way to Grimmauld Place.",
         "country": "England",
         "city": "London",
-        "fun_fact": "The broomstick flight follows the real Thames route — you can trace it on foot along the Embankment.",
+        "fun_fact": "The broomstick flight follows the real Thames route – you can trace it on foot along the Embankment.",
         "source": "manual",
-        "external_url": null
+        "external_url": "https://en.wikipedia.org/wiki/Palace_of_Westminster"
       }
     },
     {
@@ -1096,12 +1086,12 @@
           "HP6",
           "HP7"
         ],
-        "description": "The tiny islet that became Dumbledore’s final resting place — the white tomb was added digitally.",
+        "description": "The tiny islet that became Dumbledore’s final resting place – the white tomb was added digitally.",
         "country": "Scotland",
         "city": "Lochailort",
-        "fun_fact": "You pass it on the Jacobite steam train and the A830 — bring the camera ready between Glenfinnan and Lochailort.",
+        "fun_fact": "You pass it on the Jacobite steam train and the A830 – bring the camera ready between Glenfinnan and Lochailort.",
         "source": "manual",
-        "external_url": null
+        "external_url": "https://en.wikipedia.org/wiki/Loch_Eilt"
       }
     },
     {
@@ -1125,12 +1115,12 @@
           "HP3",
           "HP4"
         ],
-        "description": "The loch below Glenfinnan stood in for the Black Lake — including the second task of the Triwizard Tournament.",
+        "description": "The loch below Glenfinnan stood in for the Black Lake – including the second task of the Triwizard Tournament.",
         "country": "Scotland",
         "city": "Glenfinnan",
         "fun_fact": "The Durmstrang ship rises from these waters in Goblet of Fire.",
         "source": "manual",
-        "external_url": null
+        "external_url": "https://en.wikipedia.org/wiki/Loch_Shiel"
       }
     },
     {
@@ -1154,12 +1144,12 @@
           "HP1",
           "HP2"
         ],
-        "description": "The Forbidden Forest of the early films — dense pines conveniently next door to Pinewood Studios.",
+        "description": "The Forbidden Forest of the early films – dense pines conveniently next door to Pinewood Studios.",
         "country": "England",
         "city": "Wexham",
         "fun_fact": "Hagrid leads the first-years’ detention into these woods in Philosopher’s Stone.",
         "source": "manual",
-        "external_url": null
+        "external_url": "https://en.wikipedia.org/wiki/Black_Park"
       }
     },
     {
@@ -1181,12 +1171,12 @@
         "hp_references": [
           "HP1"
         ],
-        "description": "Number 4, Privet Drive in Philosopher’s Stone. NB: an ordinary residential street — please admire quietly from the pavement.",
+        "description": "Number 4, Privet Drive in Philosopher’s Stone. NB: an ordinary residential street – please admire quietly from the pavement.",
         "country": "England",
         "city": "Bracknell",
-        "fun_fact": "Later films rebuilt Privet Drive at Leavesden — the studio set is on the Studio Tour.",
+        "fun_fact": "Later films rebuilt Privet Drive at Leavesden – the studio set is on the Studio Tour.",
         "source": "manual",
-        "external_url": null
+        "external_url": "https://harrypotter.fandom.com/wiki/Picket_Post_Closet"
       }
     },
     {
@@ -1209,12 +1199,12 @@
         "hp_references": [
           "HP1"
         ],
-        "description": "In the book, Hagrid and Harry wait here for the train back to the Dursleys — Hagrid knitting what looks like a canary-yellow circus tent.",
+        "description": "In the book, Hagrid and Harry wait here for the train back to the Dursleys – Hagrid knitting what looks like a canary-yellow circus tent.",
         "country": "England",
         "city": "London",
-        "fun_fact": "Hagrid buys Harry a hamburger here — magic and Muggle fast food, side by side.",
+        "fun_fact": "Hagrid buys Harry a hamburger here – magic and Muggle fast food, side by side.",
         "source": "manual",
-        "external_url": null
+        "external_url": "https://en.wikipedia.org/wiki/London_Paddington_station"
       }
     },
     {
@@ -1236,12 +1226,12 @@
         "hp_references": [
           "HP7"
         ],
-        "description": "In the book, the trio Apparate here after the wedding attack and duck into an all-night café — where two Death Eaters find them.",
+        "description": "In the book, the trio Apparate here after the wedding attack and duck into an all-night café – where two Death Eaters find them.",
         "country": "England",
         "city": "London",
         "fun_fact": "Hermione had a knack for escapes: the beaded bag with everything they needed was already packed.",
         "source": "manual",
-        "external_url": null
+        "external_url": "https://en.wikipedia.org/wiki/Tottenham_Court_Road"
       }
     },
     {
@@ -1270,12 +1260,12 @@
           "HP6",
           "HP7"
         ],
-        "description": "The gallery of MinaLima — the design duo behind the Marauder’s Map, the Daily Prophet and every letter from Hogwarts.",
+        "description": "The gallery of MinaLima – the design duo behind the Marauder’s Map, the Daily Prophet and every letter from Hogwarts.",
         "country": "England",
         "city": "London",
-        "fun_fact": "Miraphora Mina and Eduardo Lima designed the graphic universe of all eight films — entry to the gallery is free.",
+        "fun_fact": "Miraphora Mina and Eduardo Lima designed the graphic universe of all eight films – entry to the gallery is free.",
         "source": "manual",
-        "external_url": null
+        "external_url": "https://minalima.com/"
       }
     }
   ]

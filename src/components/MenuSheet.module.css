@@ -435,10 +435,23 @@
   border-color: var(--checkbox-color, var(--color-burgundy));
 }
 
+/* Fixed slot so the house crest sits between the radio and the label
+   and every row's label stays aligned (the "Ingen" row has an empty slot). */
+.houseSigilSlot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
 /* Marauder pass progress (Hjem) */
 .passRow {
-  padding: 10px 16px 8px;
+  padding: 10px 16px 8px 13px;
   border-bottom: 1px solid var(--border-hairline);
+  /* House-coloured edge — quiet identity tie-in; invisible until a house is set */
+  border-left: 3px solid var(--house-accent, transparent);
 }
 
 .passHeader {
@@ -447,6 +460,43 @@
   align-items: baseline;
   margin-bottom: 6px;
 }
+
+/* Tap target that expands the Hunt Score into its list of stamped places */
+.passHeaderBtn {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  width: 100%;
+  margin-bottom: 6px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.passChevron {
+  margin-left: 6px;
+  vertical-align: -2px;
+  transition: transform var(--duration-fast, 150ms) var(--ease-out, ease);
+}
+
+.passChevronOpen {
+  transform: rotate(180deg);
+}
+
+.passList {
+  margin-top: 8px;
+}
+
+.passEmpty {
+  padding: 6px 2px 2px;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-style: italic;
+  color: var(--text-muted);
+}
+
 
 .passTitle {
   font-family: var(--font-display);

@@ -108,13 +108,17 @@ const SELECTED_HP_PAINT: maplibregl.CircleLayerSpecification['paint'] = {
 
 const EMPTY_FC: FeatureCollection = { type: 'FeatureCollection', features: [] }
 
-// Static SVG strings for the map button group (no user data — safe as markup)
+// Static SVG strings for the map button group — Lucide markup (LocateFixed, Plus,
+// Minus) inlined as strings, to match the Lucide icons used elsewhere. These are
+// custom MapLibre controls set via innerHTML, so they can't use the React components.
+const LUCIDE_ATTRS =
+  'xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"'
 const ICON_LOCATE =
-  '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="3" fill="currentColor"/><circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 1v3M10 16v3M1 10h3M16 10h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>'
+  `<svg ${LUCIDE_ATTRS}><line x1="2" x2="5" y1="12" y2="12"/><line x1="19" x2="22" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="5"/><line x1="12" x2="12" y1="19" y2="22"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/></svg>`
 const ICON_ZOOM_IN =
-  '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'
+  `<svg ${LUCIDE_ATTRS}><path d="M5 12h14"/><path d="M12 5v14"/></svg>`
 const ICON_ZOOM_OUT =
-  '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'
+  `<svg ${LUCIDE_ATTRS}><path d="M5 12h14"/></svg>`
 
 /** A single footprint (sole + heel), burgundy — drawn on canvas like the heart */
 function makeFootprintImage(size = 20): ImageData {

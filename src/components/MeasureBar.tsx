@@ -1,3 +1,4 @@
+import { Ruler } from 'lucide-react'
 import { haversineKm, formatDistance } from '../utils/distance'
 import styles from './MeasureBar.module.css'
 
@@ -21,10 +22,7 @@ export default function MeasureBar({ points, onClear, onUndo, onClose }: Props) 
 
   return (
     <div className={styles.bar} role="status" aria-live="polite">
-      <svg className={styles.icon} width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-        <path d="M2 10.5L10.5 2M10.5 2H7M10.5 2V5.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M4.5 12.5L12.5 4.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeOpacity="0.4"/>
-      </svg>
+      <Ruler className={styles.icon} size={16} strokeWidth={1.5} aria-hidden="true" />
 
       {totalDistance !== null ? (
         <span className={styles.distance}>{formatDistance(totalDistance)}</span>

@@ -15,7 +15,9 @@ import InstallBanner from './components/InstallBanner'
 import GeocodeCard from './components/GeocodeCard'
 import AppHeader from './components/AppHeader'
 import SpellOverlay from './components/SpellOverlay'
+import OathSplash from './components/OathSplash'
 import QuizSheet from './components/QuizSheet'
+import FunFactsSheet from './components/FunFactsSheet'
 import { useVisited } from './hooks/useVisited'
 import { haversineKm } from './utils/distance'
 import type { HPLocation } from './types/hp-location'
@@ -96,12 +98,14 @@ export default function App() {
   const [mapButtonsHidden, setMapButtonsHidden] = useState(false)
   const [house, setHouse] = useState<House>(getInitialHouse)
   const [spell, setSpell] = useState<string | null>(null)
+  const [showOath, setShowOath] = useState(true)
   const [quizOpen, setQuizOpen] = useState(false)
+  const [funFactsOpen, setFunFactsOpen] = useState(false)
   const { visitedIds, toggleVisited, markVisited } = useVisited()
 
   // The oath — once per launch (the whole point of a Marauder's Map)
   useEffect(() => {
-    setSpell('I solemnly swear that I am up to no good')
+    setShowOath(true)
   }, [])
 
   // House accent as a CSS variable (spell text, pass progress, stamps)
@@ -352,7 +356,7 @@ export default function App() {
 
   return (
     <>
-      <AppHeader />
+      <AppHeader house={house} />
       {/* Quiet offline indicator on the map surface — being offline is the
           normal state on the train, the user should not have to open Settings
           to know it (D12) */}
@@ -396,10 +400,12 @@ export default function App() {
         error={error}
         onToggle={handleToggleGps}
         visitedCount={visitedIds.size}
+        visitedIds={visitedIds}
         totalPlaces={hpLocationList?.length ?? 0}
         house={house}
         onHouseChange={handleHouseChange}
         onOpenQuiz={() => setQuizOpen(true)}
+        onOpenFunFacts={() => setFunFactsOpen(true)}
         measureMode={measureMode}
         onToggleMeasure={handleToggleMeasure}
         onAddressSelect={handleAddressSelect}
@@ -465,7 +471,9 @@ export default function App() {
         onClose={() => { setPendingLongPress(null); setEditingPlace(null) }}
       />
       <QuizSheet open={quizOpen} onClose={() => setQuizOpen(false)} />
+      <FunFactsSheet open={funFactsOpen} onClose={() => setFunFactsOpen(false)} />
       <SpellOverlay message={spell} onDone={() => setSpell(null)} />
+      <OathSplash open={showOath} onDone={() => setShowOath(false)} />
     </>
   )
 }

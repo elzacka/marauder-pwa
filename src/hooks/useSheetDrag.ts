@@ -12,7 +12,7 @@ const TOP_RESERVED_PX = 64
  *  --sheet-*-height tokens in tokens.css */
 function snapHeights(vh: number): Array<{ size: SheetSize; height: number }> {
   return [
-    { size: 'default', height: vh * 0.33 },
+    { size: 'default', height: vh * 0.5 },
     { size: 'half', height: vh * 0.5 },
     { size: 'expanded', height: vh * 0.7 },
     { size: 'full', height: vh - TOP_RESERVED_PX },
