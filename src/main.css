@@ -152,6 +152,18 @@ html, body, #root {
   to   { opacity: 1; }
 }
 
+/* Reduced motion — honour system preference for elements defined in main.css.
+   Module-level transitions are suppressed in each .module.css file.
+   Do NOT override MapLibre marker transforms (CLAUDE.md constraint). */
+@media (prefers-reduced-motion: reduce) {
+  .user-location-marker {
+    animation: none;
+  }
+  .geocode-marker {
+    animation: none;
+  }
+}
+
 /* Hide MapLibre attribution (credits in Om-section) */
 .maplibregl-ctrl-attrib {
   display: none !important;
@@ -166,6 +178,50 @@ html, body, #root {
 :where(button, a, input, select, textarea, [role='switch']):focus-visible {
   outline: 2px solid var(--color-burgundy);
   outline-offset: 2px;
+}
+
+/* On-map hint: prompts the user to pick categories when the map is empty (P2).
+   Dismissed with × for the session; disappears automatically once a category
+   is checked. Tapping the text body opens the menu on Hjem/Kategorier. */
+.map-hint-chip {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 64px + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--surface-overlay);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: var(--border-width-thin) solid var(--border-card);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-sm);
+  white-space: nowrap;
+}
+
+.map-hint-chip__action {
+  padding: 6px 14px;
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: var(--radius-full) 0 0 var(--radius-full);
+}
+
+.map-hint-chip__dismiss {
+  padding: 6px 10px 6px 4px;
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--text-muted);
+  cursor: pointer;
+  line-height: 1;
+  border-radius: 0 var(--radius-full) var(--radius-full) 0;
 }
 
 /* Quiet offline indicator on the map surface (D12) */

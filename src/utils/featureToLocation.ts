@@ -35,13 +35,13 @@ export function propsToLocation(
   lat: number,
 ): HPLocation {
   return {
-    id: p.id as string,
-    name: p.name as string,
-    location_type: p.location_type as LocationType,
+    id: (p.id ?? '') as string,
+    name: (p.name ?? '') as string,
+    location_type: (p.location_type ?? 'interpreted') as LocationType,
     categories: parseStringArray(p.categories) as LocationCategory[],
     hp_references: parseStringArray(p.hp_references),
     description: (p.description ?? '') as string,
-    source: p.source as string,
+    source: (p.source ?? '') as string,
     external_url: safeExternalUrl(p.external_url),
     country: (p.country ?? null) as string | null,
     city: (p.city ?? null) as string | null,

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { safeSetItem } from './utils/safeStorage'
 import { useGeolocation } from './hooks/useGeolocation'
 import { useWakeLock } from './hooks/useWakeLock'
 import { useOfflineAreas } from './hooks/useOfflineAreas'
@@ -23,6 +24,7 @@ import { haversineKm } from './utils/distance'
 import type { HPLocation } from './types/hp-location'
 import type { CustomPlace } from './types/custom-place'
 import { emptyFilter, type FilterState } from './ds/filterMeta'
+import { estimateTileCount, estimateBytes, formatBytes, TILE_CAP } from './offline/OfflineAreaManager'
 
 function getInitialZoomControls(): boolean {
   return localStorage.getItem('showZoomControls') !== 'false'
@@ -79,7 +81,8 @@ export default function App() {
   const {
     areas: offlineAreas, status: offlineStatus, done: offlineDone,
     total: offlineTotal, error: offlineError,
-    download: downloadOfflineArea, cancel: cancelOfflineDownload, remove: removeOfflineArea,
+    download: downloadOfflineArea, cancel: cancelOfflineDownload,
+    remove: removeOfflineArea, rename: renameOfflineArea,
   } = useOfflineAreas()
 
   const { favouriteIds, toggleFavourite } = useFavourites()
@@ -119,7 +122,7 @@ export default function App() {
 
   function handleHouseChange(h: House) {
     setHouse(h)
-    localStorage.setItem('house', h)
+    safeSetItem('house', h)
   }
   const [baseLayer, setBaseLayer] = useState<BaseLayer>(getInitialBaseLayer)
   // Locate requested before the first GPS fix arrived — fly when it does
@@ -137,11 +140,26 @@ export default function App() {
   // appear only for categories the user has CHECKED in the menu; unchecking
   // removes them. No checked categories = no markers. Do not change this.
   const [activeFilter, setActiveFilter] = useState<FilterState>(emptyFilter)
+  // Hint chip: dismissed for this session (not persisted — returns next launch
+  // until the user checks a category). Incrementing openToCategoriesSignal
+  // causes MenuSheet to open itself on Hjem with categories expanded.
+  const [hintDismissed, setHintDismissed] = useState(false)
+  const [openToCategoriesSignal, setOpenToCategoriesSignal] = useState(0)
   // Per-favourite map visibility (shown-set: hearts are opt-in, map starts clean)
   const [shownFavouriteIds, setShownFavouriteIds] = useState<Set<string>>(new Set())
   // Per-place visibility for Mine steder (shown-set: nothing ticked by default,
   // Lene 2026-07-06 — but a freshly saved place is shown immediately)
   const [shownCustomIds, setShownCustomIds] = useState<Set<string>>(new Set())
+  // Memoized on editingPlace?.id so a new object is not created on every
+  // render while editing — the AddPlaceSheet effect resets the form on coords
+  // identity change, and any App re-render (GPS tick, download progress…)
+  // would otherwise wipe what the user has typed.
+  const editingPlaceCoords = useMemo(
+    () => editingPlace ? { lng: editingPlace.lng, lat: editingPlace.lat } : null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [editingPlace?.id],
+  )
+
   const mapRef = useRef<MapHandle>(null)
 
   // All user tags in use — offered as quick-add suggestions in the form
@@ -167,7 +185,7 @@ export default function App() {
 
   const handleToggleAllCustomVisible = useCallback(() => {
     setShownCustomIds((prev) =>
-      prev.size === customPlaces.length && customPlaces.length > 0
+      customPlaces.length > 0 && customPlaces.every((p) => prev.has(p.id))
         ? new Set()
         : new Set(customPlaces.map((p) => p.id)),
     )
@@ -187,17 +205,52 @@ export default function App() {
 
   const handleToggleAllFavouritesVisible = useCallback(() => {
     setShownFavouriteIds((prev) =>
-      prev.size === favouriteIds.size && favouriteIds.size > 0
+      favouriteIds.size > 0 && [...favouriteIds].every((id) => prev.has(id))
         ? new Set()
         : new Set(favouriteIds),
     )
   }, [favouriteIds])
 
+  const getAreaEstimate = useCallback(() => {
+    const bounds = mapRef.current?.getBounds()
+    if (!bounds) return null
+    const count = estimateTileCount(bounds)
+    if (count > TILE_CAP) return null
+    return { count, sizeStr: formatBytes(estimateBytes(count)) }
+  }, [])
+
   function handleDownloadVisibleArea() {
     const bounds = mapRef.current?.getBounds()
     if (!bounds) return
+    const count = estimateTileCount(bounds)
+    if (count > TILE_CAP) {
+      alert(
+        `Området er for stort (ca. ${count.toLocaleString('nb')} kartfliser).\nZoom inn og prøv igjen.`,
+      )
+      return
+    }
+    const sizeStr = formatBytes(estimateBytes(count))
+    if (!confirm(
+      `Last ned ca. ${count.toLocaleString('nb')} kartfliser (${sizeStr}) for offline bruk?\nDette kan ta noen minutter.`,
+    )) return
     const name = `Område ${offlineAreas.length + 1}`
-    void downloadOfflineArea(name, bounds)
+    const centerLat = (bounds.south + bounds.north) / 2
+    const centerLng = (bounds.west + bounds.east) / 2
+    void downloadOfflineArea(name, bounds).then((areaId) => {
+      if (!areaId) return
+      void fetch(
+        `https://photon.komoot.io/reverse?lat=${centerLat}&lon=${centerLng}&limit=1`,
+      )
+        .then((r) => r.json())
+        .then((data: unknown) => {
+          const props = (data as { features?: Array<{ properties?: Record<string, string> }> })
+            ?.features?.[0]?.properties
+          if (!props) return
+          const geocodedName = props['city'] ?? props['county'] ?? props['state'] ?? props['name'] ?? null
+          if (geocodedName) renameOfflineArea(areaId, geocodedName)
+        })
+        .catch(() => {})
+    })
   }
 
   const handleLocationSelect = useCallback((loc: HPLocation) => {
@@ -212,6 +265,7 @@ export default function App() {
   const handleCustomPlaceClick = useCallback((id: string) => {
     const p = customPlaces.find((cp) => cp.id === id)
     if (!p) return
+    mapRef.current?.flyTo(p.lng, p.lat, 13, -Math.round(window.innerHeight * 0.16))
     setSelectedLocation(customPlaceToHPLocation(p))
     setSelectedIsCustom(true)
     setDetailOpen(true)
@@ -222,30 +276,40 @@ export default function App() {
     setDetailOpen(false)
   }, [])
 
-  // Tap on empty map: first close the sheet, then (next tap) clear the marker
+  // Tap on empty map: first close the sheet, then (next tap) clear the marker.
+  // Reads detailOpen via ref to avoid a side-effecting setState updater.
+  const detailOpenRef = useRef(false)
+  useEffect(() => { detailOpenRef.current = detailOpen }, [detailOpen])
+
   const handleMapClick = useCallback(() => {
-    setDetailOpen((open) => {
-      if (open) return false
+    if (detailOpenRef.current) {
+      setDetailOpen(false)
+    } else {
       setSelectedLocation(null)
       setSelectedIsCustom(false)
-      return false
-    })
+    }
   }, [])
 
   function handleToggleZoomControls(v: boolean) {
     setShowZoomControls(v)
-    localStorage.setItem('showZoomControls', String(v))
+    safeSetItem('showZoomControls', String(v))
   }
 
   function handleToggleLocateBtn(v: boolean) {
     setShowLocateBtn(v)
-    localStorage.setItem('showLocateBtn', String(v))
+    safeSetItem('showLocateBtn', String(v))
   }
 
   function handleBaseLayerChange(layer: BaseLayer) {
     setBaseLayer(layer)
-    localStorage.setItem('baseLayer', layer)
+    safeSetItem('baseLayer', layer)
   }
+
+  const handleBaseLayerFailed = useCallback((failedLayer: BaseLayer) => {
+    const prev: BaseLayer = failedLayer === 'satellite' ? 'standard' : 'satellite'
+    setBaseLayer(prev)
+    safeSetItem('baseLayer', prev)
+  }, [])
 
   const handleLocate = useCallback(() => {
     if (position) {
@@ -351,6 +415,7 @@ export default function App() {
     if (!p) return
     setSelectedLocation(null)
     setSelectedIsCustom(false)
+    setDetailOpen(false)
     setEditingPlace(p)
   }
 
@@ -362,6 +427,25 @@ export default function App() {
           to know it (D12) */}
       {!online && (
         <div className="offline-chip" role="status">Frakoblet</div>
+      )}
+      {!hintDismissed && activeFilter.categories.length === 0 && !selectedLocation && (
+        <div className="map-hint-chip">
+          <button
+            type="button"
+            className="map-hint-chip__action"
+            onClick={() => setOpenToCategoriesSignal((n) => n + 1)}
+          >
+            Velg kategorier i menyen for å se steder på kartet
+          </button>
+          <button
+            type="button"
+            className="map-hint-chip__dismiss"
+            onClick={() => setHintDismissed(true)}
+            aria-label="Skjul tips"
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
       )}
       <InstallBanner />
       <MapView
@@ -381,6 +465,7 @@ export default function App() {
         onGeocodeMarkerClick={() => setShowGeocodeCard((v) => !v)}
         onMapClick={handleMapClick}
         baseLayer={baseLayer}
+        onBaseLayerFailed={handleBaseLayerFailed}
         selectedLocation={selectedLocation}
         activeFilter={activeFilter}
         favouriteMarkerIds={favouriteMarkerIds}
@@ -419,7 +504,11 @@ export default function App() {
         shownFavouriteIds={shownFavouriteIds}
         onToggleFavouriteVisible={handleToggleFavouriteVisible}
         onToggleAllFavouritesVisible={handleToggleAllFavouritesVisible}
-        onFabLongPress={() => setMapButtonsHidden((v) => !v)}
+        onFabLongPress={() => setMapButtonsHidden((v) => {
+          setSpell(v ? 'Kartknapper synlige' : 'Kartknapper skjult – hold inne for å vise')
+          return !v
+        })}
+        openToCategoriesSignal={openToCategoriesSignal}
         shownCustomIds={shownCustomIds}
         onToggleCustomVisible={handleToggleCustomVisible}
         onToggleAllCustomVisible={handleToggleAllCustomVisible}
@@ -434,6 +523,7 @@ export default function App() {
         offlineDone={offlineDone}
         offlineTotal={offlineTotal}
         offlineError={offlineError}
+        getAreaEstimate={getAreaEstimate}
         onDownloadVisibleArea={handleDownloadVisibleArea}
         onCancelDownload={cancelOfflineDownload}
         onDeleteArea={removeOfflineArea}
@@ -446,10 +536,15 @@ export default function App() {
         isFavourite={selectedLocation ? favouriteIds.has(selectedLocation.id) : false}
         onToggleFavourite={toggleFavourite}
         isCustomPlace={selectedIsCustom}
-        onDeleteCustomPlace={removeCustomPlace}
+        onDeleteCustomPlace={(id) => {
+          removeCustomPlace(id)
+          setSelectedLocation(null)
+          setSelectedIsCustom(false)
+        }}
         onEditCustomPlace={handleEditCustomPlace}
         isVisited={selectedLocation ? visitedIds.has(selectedLocation.id) : false}
         onToggleVisited={toggleVisited}
+        online={online}
       />
       {geocodeMarker && showGeocodeCard && (
         <GeocodeCard
@@ -461,7 +556,7 @@ export default function App() {
         />
       )}
       <AddPlaceSheet
-        coords={editingPlace ? { lng: editingPlace.lng, lat: editingPlace.lat } : pendingLongPress}
+        coords={editingPlaceCoords ?? pendingLongPress}
         initialName={editingPlace ? editingPlace.name : pendingLongPress?.name}
         initialDescription={editingPlace?.description}
         initialTags={editingPlace?.tags}

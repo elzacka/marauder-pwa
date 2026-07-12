@@ -68,7 +68,7 @@
 .checkbox {
   width: 20px;
   height: 20px;
-  border: 1.5px solid rgba(26, 10, 0, 0.35);
+  border: 1.5px solid rgba(26, 10, 0, 0.55);
   border-radius: 5px;
   display: flex;
   align-items: center;
@@ -240,4 +240,10 @@
   font-size: var(--text-sm);
   color: var(--text-muted);
   font-style: italic;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron {
+    transition: none;
+  }
 }

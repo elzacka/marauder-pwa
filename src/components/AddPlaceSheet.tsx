@@ -55,7 +55,7 @@ export default function AddPlaceSheet({
     (t) => !tags.some((x) => x.toLowerCase() === t.toLowerCase()),
   )
   // Form sheet: content-sized, not resizable — drag only closes
-  const { sheetRef, onDragStart, onDragMove, onDragEnd } = useSheetDrag(onClose, { resizable: false })
+  const { sheetRef, onDragStart, onDragMove, onDragEnd, onDragCancel } = useSheetDrag(onClose, { resizable: false })
   const nameId = useId()
   const descId = useId()
   const tagId = useId()
@@ -75,11 +75,18 @@ export default function AddPlaceSheet({
     setNewTag('')
   }
 
+  function handleBackdropClose() {
+    if (name.trim() || description.trim() || tags.length > 0) {
+      if (!window.confirm('Forkaste endringer og lukke?')) return
+    }
+    onClose()
+  }
+
   if (!coords) return null
 
   return (
     <>
-      <div className={styles.backdrop} onClick={onClose} role="presentation" />
+      <div className={styles.backdrop} onClick={handleBackdropClose} role="presentation" />
       <div
         ref={sheetRef}
         className={styles.sheet}
@@ -93,7 +100,7 @@ export default function AddPlaceSheet({
           onPointerDown={onDragStart}
           onPointerMove={onDragMove}
           onPointerUp={onDragEnd}
-          onPointerCancel={onDragEnd}
+          onPointerCancel={onDragCancel}
           role="presentation"
         >
           <div className={styles.dragBar} aria-hidden="true" />

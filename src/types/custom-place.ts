@@ -10,4 +10,6 @@ export type CustomPlace = {
   city?: string | null
   /** User-defined filter tags (chips), e.g. "Hotell" */
   tags?: string[]
+  /** True once a reverse-geocode attempt has been made (even if it returned nothing) */
+  geoTried?: boolean
 }

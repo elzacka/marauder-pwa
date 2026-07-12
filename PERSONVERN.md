@@ -1,6 +1,6 @@
 # Personvernerklæring – Marauder
 
-Sist oppdatert: 07/07-26
+Sist oppdatert: 07.07.2026
 
 ## Hva samles inn
 

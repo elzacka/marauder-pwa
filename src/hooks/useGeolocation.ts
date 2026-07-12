@@ -34,7 +34,10 @@ export function useGeolocation() {
             ? 'Tilgang til posisjon ble avvist.'
             : 'Kunne ikke hente posisjon.',
         )
-        setActive(false)
+        // Only kill the watch on a permanent denial. TIMEOUT and
+        // POSITION_UNAVAILABLE are transient (tunnel, weak signal) — the watch
+        // recovers on its own, and stopping it leaves a stale pulsing dot.
+        if (err.code === err.PERMISSION_DENIED) setActive(false)
       },
       { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 },
     )

@@ -23,7 +23,7 @@ export const LOCATION_TYPES = ['filming', 'canonical', 'interpreted']
 export const LOCATION_TYPE_COLORS: Record<string, string> = {
   filming:     '#5A3D95',
   canonical:   '#7659AE',
-  interpreted: '#8F74C4',
+  interpreted: '#7A5FB0',
 }
 
 export const CATEGORY_META: CategoryMeta[] = [

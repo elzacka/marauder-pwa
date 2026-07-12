@@ -23,19 +23,26 @@ export function useHPLocations(): State {
       })
       .then((data) => setState({
         data,
-        locations: data.features.map(featureToLocation),
+        locations: data.features.flatMap((f) => {
+          if (!f.properties?.id) return []
+          try {
+            return [featureToLocation(f)]
+          } catch (e) {
+            console.warn('Hopper over ugyldig POI-feature', f.properties?.id, e)
+            return []
+          }
+        }),
         loading: false,
         error: null,
       }))
       .catch((e: unknown) => {
-        if (e instanceof Error && e.name !== 'AbortError') {
-          setState({
-            data: null,
-            locations: null,
-            loading: false,
-            error: 'Kunne ikke laste Harry Potter-stedene. Sjekk tilkoblingen og last siden på nytt.',
-          })
-        }
+        if (e instanceof Error && e.name === 'AbortError') return
+        setState({
+          data: null,
+          locations: null,
+          loading: false,
+          error: 'Kunne ikke laste Harry Potter-stedene. Sjekk tilkoblingen og last siden på nytt.',
+        })
       })
     return () => ac.abort()
   }, [])

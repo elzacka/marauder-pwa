@@ -32,7 +32,7 @@ export default function FunFactsSheet({ open, onClose }: { open: boolean; onClos
   return (
     <div
       ref={sheetRef}
-      className={`${styles.sheet} ${size === 'half' ? styles.sheetHalf : ''} ${size === 'expanded' ? styles.sheetExpanded : ''} ${size === 'full' ? styles.sheetFull : ''}`}
+      className={`${styles.sheet} ${size === 'expanded' ? styles.sheetExpanded : ''} ${size === 'full' ? styles.sheetFull : ''}`}
       role="dialog"
       aria-label="Harry Potter Fun Facts"
     >

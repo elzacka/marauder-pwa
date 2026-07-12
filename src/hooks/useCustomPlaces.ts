@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import type { CustomPlace } from '../types/custom-place'
+import { safeSetItem } from '../utils/safeStorage'
 
 const KEY = 'marauder-custom-places'
 
@@ -23,7 +24,8 @@ export function useCustomPlaces() {
   const [places, setPlaces] = useState<CustomPlace[]>(() => {
     try {
       const stored = localStorage.getItem(KEY)
-      return stored ? (JSON.parse(stored) as CustomPlace[]) : []
+      const parsed = stored ? (JSON.parse(stored) as unknown) : null
+      return Array.isArray(parsed) ? (parsed as CustomPlace[]) : []
     } catch {
       return []
     }
@@ -31,8 +33,17 @@ export function useCustomPlaces() {
 
   const setGeoTags = useCallback((id: string, tags: { country: string | null; city: string | null }) => {
     setPlaces((prev) => {
-      const next = prev.map((p) => (p.id === id ? { ...p, ...tags } : p))
-      localStorage.setItem(KEY, JSON.stringify(next))
+      const next = prev.map((p) => (p.id === id ? { ...p, ...tags, geoTried: true } : p))
+      safeSetItem(KEY, JSON.stringify(next))
+      return next
+    })
+  }, [])
+
+  const markGeoTried = useCallback((id: string) => {
+    setPlaces((prev) => {
+      if (prev.find((p) => p.id === id)?.geoTried) return prev
+      const next = prev.map((p) => (p.id === id ? { ...p, geoTried: true } : p))
+      safeSetItem(KEY, JSON.stringify(next))
       return next
     })
   }, [])
@@ -46,25 +57,28 @@ export function useCustomPlaces() {
       }
       setPlaces((prev) => {
         const next = [...prev, newPlace]
-        localStorage.setItem(KEY, JSON.stringify(next))
+        safeSetItem(KEY, JSON.stringify(next))
         return next
       })
       // Fire-and-forget: attach geo tags when the lookup completes
       void reverseGeocode(data.lng, data.lat).then((tags) => {
         if (tags.country || tags.city) setGeoTags(newPlace.id, tags)
+        else markGeoTried(newPlace.id)
       })
       return newPlace
     },
-    [setGeoTags],
+    [setGeoTags, markGeoTried],
   )
 
-  // Backfill geo tags for places saved before tags existed (one attempt per load)
+  // Backfill geo tags for places saved before tags existed, skipping places
+  // where a previous attempt already returned nothing (geoTried flag).
   useEffect(() => {
     if (!navigator.onLine) return
-    const missing = places.filter((p) => p.country == null && p.city == null)
+    const missing = places.filter((p) => p.country == null && p.city == null && !p.geoTried)
     for (const p of missing) {
       void reverseGeocode(p.lng, p.lat).then((tags) => {
         if (tags.country || tags.city) setGeoTags(p.id, tags)
+        else markGeoTried(p.id)
       })
     }
     // Intentionally runs once on mount — not on every places change
@@ -75,7 +89,7 @@ export function useCustomPlaces() {
     (id: string, data: { name: string; description: string; tags?: string[] }) => {
       setPlaces((prev) => {
         const next = prev.map((p) => (p.id === id ? { ...p, ...data } : p))
-        localStorage.setItem(KEY, JSON.stringify(next))
+        safeSetItem(KEY, JSON.stringify(next))
         return next
       })
     },
@@ -85,7 +99,7 @@ export function useCustomPlaces() {
   const removeCustomPlace = useCallback((id: string) => {
     setPlaces((prev) => {
       const next = prev.filter((p) => p.id !== id)
-      localStorage.setItem(KEY, JSON.stringify(next))
+      safeSetItem(KEY, JSON.stringify(next))
       return next
     })
   }, [])

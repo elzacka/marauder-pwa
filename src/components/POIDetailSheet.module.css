@@ -19,11 +19,6 @@
               height 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.sheetHalf {
-  max-height: var(--sheet-half-height);
-  height: var(--sheet-half-height);
-}
-
 .sheetExpanded {
   max-height: var(--sheet-expanded-height);
   height: var(--sheet-expanded-height);
@@ -258,4 +253,28 @@
 
 .externalLink:hover {
   color: var(--color-burgundy);
+}
+
+.externalLinkOffline {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--text-muted);
+  opacity: var(--opacity-disabled);
+  cursor: default;
+  user-select: none;
+}
+
+.offlineNote {
+  font-size: var(--text-sm);
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet {
+    transition: none;
+  }
 }

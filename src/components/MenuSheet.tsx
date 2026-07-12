@@ -167,9 +167,14 @@ type Props = {
   onDownloadVisibleArea: () => void
   onCancelDownload: () => void
   onDeleteArea: (id: string) => void
+  /** Returns a size estimate for the current map view, or null when the area
+   *  exceeds the cap or bounds are unavailable. */
+  getAreaEstimate: () => { count: number; sizeStr: string } | null
   online: boolean
   /** Data load error from useHPLocations — shown instead of silent emptiness (K5) */
   dataError?: string | null
+  /** Increment to open the sheet on Hjem with categories expanded (P2 hint chip) */
+  openToCategoriesSignal?: number
 }
 
 export default function MenuSheet({
@@ -185,14 +190,17 @@ export default function MenuSheet({
   visitedCount, visitedIds, totalPlaces, house, onHouseChange, onOpenQuiz, onOpenFunFacts,
   offlineAreas, offlineStatus, offlineDone, offlineTotal, offlineError,
   onDownloadVisibleArea, onCancelDownload, onDeleteArea,
+  getAreaEstimate,
   online, dataError = null,
+  openToCategoriesSignal = 0,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<MenuTab>('home')
   const [query, setQuery] = useState('')
-  // Collapsible sections (Lene, 2026-07-05): both Kategorier and Favoritter
-  // start collapsed
-  const [showCategories, setShowCategories] = useState(false)
+  // Kategorier starts expanded when no categories are selected (empty map state
+  // on first launch), so the user lands directly on the filter controls.
+  const [showCategories, setShowCategories] = useState(() => activeFilter.categories.length === 0)
+  const [toolsAreaEstimate, setToolsAreaEstimate] = useState<{ count: number; sizeStr: string } | null>(null)
   const [showFavouritesList, setShowFavouritesList] = useState(false)
   const [showCustomList, setShowCustomList] = useState(false)
   // Geo tag filter (Lene, 2026-07-05): tapping a country/city chip shows every
@@ -204,8 +212,23 @@ export default function MenuSheet({
   const searchId = useId()
 
   const closeSheet = useCallback(() => setIsOpen(false), [])
-  const { sheetRef, size, setSize, onDragStart, onDragMove, onDragEnd } =
+  const { sheetRef, size, setSize, onDragStart, onDragMove, onDragEnd, onDragCancel } =
     useSheetDrag(closeSheet)
+
+  useEffect(() => {
+    if (isOpen) sheetRef.current?.focus()
+  }, [isOpen, sheetRef])
+
+  useEffect(() => {
+    if (openToCategoriesSignal === 0) return
+    setIsOpen(true)
+    setActiveTab('home')
+    setShowCategories(true)
+  }, [openToCategoriesSignal])
+
+  useEffect(() => {
+    if (activeTab === 'tools') setToolsAreaEstimate(getAreaEstimate())
+  }, [activeTab, getAreaEstimate])
 
   // FAB long-press (600 ms): toggle map button visibility. The click that
   // follows the release must not open the menu.
@@ -429,11 +452,12 @@ export default function MenuSheet({
       {/* Sheet */}
       <div
         ref={sheetRef}
-        className={`${styles.sheet} ${size === 'half' ? styles.sheetHalf : ''} ${size === 'expanded' ? styles.sheetExpanded : ''} ${size === 'full' ? styles.sheetFull : ''} ${isOpen ? styles.sheetOpen : styles.sheetClosed}`}
+        className={`${styles.sheet} ${size === 'expanded' ? styles.sheetExpanded : ''} ${size === 'full' ? styles.sheetFull : ''} ${isOpen ? styles.sheetOpen : styles.sheetClosed}`}
         role="dialog"
         aria-modal={isOpen}
         aria-label="Meny"
         inert={!isOpen}
+        tabIndex={-1}
       >
         {/* Drag zone */}
         <div
@@ -441,7 +465,7 @@ export default function MenuSheet({
           onPointerDown={onDragStart}
           onPointerMove={onDragMove}
           onPointerUp={onDragEnd}
-          onPointerCancel={onDragEnd}
+          onPointerCancel={onDragCancel}
           role="presentation"
         >
           <div className={styles.dragBar} aria-hidden="true" />
@@ -987,6 +1011,11 @@ export default function MenuSheet({
                         </button>
                       )}
                     </div>
+                    {offlineStatus !== 'downloading' && toolsAreaEstimate && (
+                      <p className={styles.estimateNote}>
+                        Synlig kartområde: Ca. {toolsAreaEstimate.count.toLocaleString('nb')} kartfliser ({toolsAreaEstimate.sizeStr})
+                      </p>
+                    )}
                   </div>
 
                   {offlineAreas.length > 0 && (
@@ -996,13 +1025,19 @@ export default function MenuSheet({
                           key={area.id}
                           className={`${styles.statusRow} ${i > 0 ? styles.statusRowBorder : ''}`}
                         >
-                          <span className={styles.statusLabel}>{area.name}</span>
+                          <span className={styles.statusLabel}>
+                            {area.name}
+                            {area.incomplete && (
+                              <span className={styles.areaWarning}> — ikke lenger tilgjengelig, last ned på nytt</span>
+                            )}
+                          </span>
                           <span className={styles.infoValue}>{formatBytes(area.bytes)}</span>
                           <button
                             type="button"
                             className={styles.areaDeleteBtn}
                             onClick={() => onDeleteArea(area.id)}
                             aria-label={`Slett ${area.name}`}
+                            disabled={offlineStatus === 'downloading'}
                           >
                             <Trash2 size={16} strokeWidth={1.5} aria-hidden="true" />
                           </button>

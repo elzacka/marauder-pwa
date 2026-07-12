@@ -17,6 +17,7 @@ type Props = {
   /** Marauder pass: visited stamp */
   isVisited?: boolean
   onToggleVisited?: (id: string) => void
+  online?: boolean
 }
 
 export default function POIDetailSheet({
@@ -24,17 +25,19 @@ export default function POIDetailSheet({
   isFavourite = false, onToggleFavourite,
   isCustomPlace = false, onDeleteCustomPlace, onEditCustomPlace,
   isVisited = false, onToggleVisited,
+  online = true,
 }: Props) {
-  const { sheetRef, size, onDragStart, onDragMove, onDragEnd } = useSheetDrag(onClose)
+  const { sheetRef, size, onDragStart, onDragMove, onDragEnd, onDragCancel } = useSheetDrag(onClose)
 
   useEffect(() => {
     if (!location) return
+    sheetRef.current?.focus()
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') onClose()
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [location, onClose])
+  }, [location, onClose, sheetRef])
 
   if (!location) return null
 
@@ -45,16 +48,17 @@ export default function POIDetailSheet({
     <>
       <div
         ref={sheetRef}
-        className={`${styles.sheet} ${size === 'half' ? styles.sheetHalf : ''} ${size === 'expanded' ? styles.sheetExpanded : ''} ${size === 'full' ? styles.sheetFull : ''}`}
+        className={`${styles.sheet} ${size === 'expanded' ? styles.sheetExpanded : ''} ${size === 'full' ? styles.sheetFull : ''}`}
         role="dialog"
         aria-label={location.name}
+        tabIndex={-1}
       >
         <div
           className={styles.handle}
           onPointerDown={onDragStart}
           onPointerMove={onDragMove}
           onPointerUp={onDragEnd}
-          onPointerCancel={onDragEnd}
+          onPointerCancel={onDragCancel}
           role="presentation"
         >
           <div className={styles.dragBar} aria-hidden="true" />
@@ -151,15 +155,23 @@ export default function POIDetailSheet({
           )}
 
           {location.external_url && (
-            <a
-              href={location.external_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.externalLink}
-            >
-              Les mer
-              <ArrowUpRight size={12} strokeWidth={2} aria-hidden="true" />
-            </a>
+            online ? (
+              <a
+                href={location.external_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.externalLink}
+              >
+                Les mer
+                <ArrowUpRight size={12} strokeWidth={2} aria-hidden="true" />
+              </a>
+            ) : (
+              <span className={styles.externalLinkOffline} aria-disabled="true">
+                Les mer
+                <ArrowUpRight size={12} strokeWidth={2} aria-hidden="true" />
+                <span className={styles.offlineNote}>Krever internett</span>
+              </span>
+            )
           )}
         </div>
       </div>

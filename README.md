@@ -6,14 +6,23 @@ Finn den her: [elzacka.github.io/marauder-pwa](https://elzacka.github.io/maraude
 
 ## Funksjoner
 
-- Kart over innspillingssteder, kanoniske steder og steder med HP-atmosfære
-- Filtrer etter kategori og sted (land/by-chips)
-- Søk på steds- eller stedsnavn med geokoding
-- Favoritter og egne steder (Mine steder) med kartvisning
-- Marauders pass: Marker besøkte steder og svar på quizspørsmål
-- Offline-kart: Last ned valgte områder for bruk uten internett
-- To bakgrunnskart: Standard (vektorkart, offline-støtte) og Satellitt (hybrid)
-- Installeres som app på iPhone og Android
+Kan installeres som app på iPhone og Android.
+
+### Tilgjengelig offline
+
+- Kart med HP-steder (innspillingssteder, kanoniske steder, HP-atmosfære), vises i nedlastede kartområder
+- Last ned kartområder for offline-bruk
+- Søk og filtrer HP-steder etter kategori og sted
+- Søk på vanlige steder og adresser (som vanlige kart-apper)
+- Merk steder som favoritter, legg til egne steder og se dem under hhv. Favoritter og Mine steder i menyen
+- Marauder's Hunt Score: Antall HP-steder stemplet som "besøkt".
+- OWLs and NEWT: Quiz med 115 spørsmål fordelt på kategoriene Generelt, alle bøkene og NEWT (eksamen)
+- Hogwarts Library's Restricted Section: 30 Harry Potter fun facts
+
+### Ikke tilgjengelig offline
+
+- Vanlig adresse-/stedsnavnsøk
+- Satellittkart
 
 ## Utvikling
 

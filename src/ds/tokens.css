@@ -29,7 +29,6 @@
   --text-muted:          color-mix(in srgb, var(--color-ink) 62%, var(--color-parchment));
   --text-on-dark:        var(--color-cream);
   --text-on-interactive: var(--color-cream);
-  --text-accent:         var(--color-gold);
   --text-heading:        var(--color-burgundy);
 
   /* Hairline/hover values used across modules — do not hardcode the rgba
@@ -122,12 +121,14 @@
   --touch-icon-btn: 44px;
 
   /* Layout */
-  /* Default sheet height ~1/3 of screen (Lene, 2026-07-05) — content scrolls within */
-  /* Snap points — keep in sync with SNAP_FRACTIONS in useSheetDrag.ts.
+  /* Default sheet height ~1/2 of screen (confirmed deliberate) — content scrolls within */
+  /* Snap points — keep in sync with snapHeights() in useSheetDrag.ts.
      Expanded is 70svh (not 85): with the iOS keyboard open, a taller sheet
-     pushed the search field out of sight (Lene, 2026-07-05) */
+     pushed the search field out of sight (Lene, 2026-07-05).
+     half snap point was removed (was a duplicate of default at 50svh and
+     could never be reached by the nearest-snap loop). */
   --sheet-default-height: 50svh;
-  --sheet-half-height: 50svh;
+  --sheet-half-height: 50svh; /* kept for CSS class refs; no longer a snap point */
   --sheet-expanded-height: 70svh;
   /* Full = everything except the strip under the Marauder wordmark (64px —
      keep in sync with TOP_RESERVED_PX in useSheetDrag.ts) */

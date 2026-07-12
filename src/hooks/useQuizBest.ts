@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { safeSetItem } from '../utils/safeStorage'
 
 const KEY = 'marauder-quiz-best'
 
@@ -8,7 +9,10 @@ export function useQuizBest() {
   const [best, setBest] = useState<Record<string, number>>(() => {
     try {
       const raw = localStorage.getItem(KEY)
-      return raw ? (JSON.parse(raw) as Record<string, number>) : {}
+      const parsed = raw ? (JSON.parse(raw) as unknown) : null
+      return parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)
+        ? (parsed as Record<string, number>)
+        : {}
     } catch {
       return {}
     }
@@ -18,7 +22,7 @@ export function useQuizBest() {
     setBest((prev) => {
       if ((prev[key] ?? -1) >= score) return prev
       const next = { ...prev, [key]: score }
-      localStorage.setItem(KEY, JSON.stringify(next))
+      safeSetItem(KEY, JSON.stringify(next))
       return next
     })
   }, [])

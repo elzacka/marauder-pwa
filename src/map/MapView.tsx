@@ -6,7 +6,7 @@ import type { Position } from '../hooks/useGeolocation'
 import type { HPLocation } from '../types/hp-location'
 import { propsToLocation } from '../utils/featureToLocation'
 import type { CustomPlace } from '../types/custom-place'
-import { LOCATION_TYPE_COLORS, CATEGORY_META, type FilterState } from '../ds/filterMeta'
+import { LOCATION_TYPE_COLORS, CATEGORY_META, LOCATION_TYPES, type FilterState } from '../ds/filterMeta'
 import styles from './MapView.module.css'
 
 const VIEW_BOUNDS: maplibregl.LngLatBoundsLike = [[-13.0, 48.0], [3.5, 62.0]]
@@ -277,14 +277,6 @@ function addOverlays(map: maplibregl.Map) {
   map.addSource('selected-hp-location', { type: 'geojson', data: EMPTY_FC })
   map.addLayer({ id: 'selected-hp-dot', type: 'circle', source: 'selected-hp-location', paint: SELECTED_HP_PAINT })
 
-  // NB: marker CLICKS are handled centrally in the map's general click
-  // handler (init effect) with a forgiving hit box — do not add per-layer
-  // click handlers here (they would double-fire).
-  map.on('mouseenter', 'hp-dots', () => { map.getCanvas().style.cursor = 'pointer' })
-  map.on('mouseleave', 'hp-dots', () => { map.getCanvas().style.cursor = '' })
-  map.on('mouseenter', 'favourite-hearts', () => { map.getCanvas().style.cursor = 'pointer' })
-  map.on('mouseleave', 'favourite-hearts', () => { map.getCanvas().style.cursor = '' })
-
   // Custom places
   map.addSource('custom-places', { type: 'geojson', data: EMPTY_FC })
   map.addLayer({
@@ -299,8 +291,9 @@ function addOverlays(map: maplibregl.Map) {
       'circle-opacity': 0.9,
     },
   })
-  map.on('mouseenter', 'custom-place-dots', () => { map.getCanvas().style.cursor = 'pointer' })
-  map.on('mouseleave', 'custom-place-dots', () => { map.getCanvas().style.cursor = '' })
+  // NB: cursor handlers are intentionally NOT registered here — they are
+  // registered once in the 'load' handler so they survive style switches
+  // without accumulating duplicate listeners on every addOverlays() call.
 
   // Measure overlay sources (empty at init)
   map.addSource('measure-points', { type: 'geojson', data: EMPTY_FC })
@@ -356,6 +349,9 @@ type Props = {
   /** Tap on empty map (browse mode) — used to close the POI detail sheet */
   onMapClick?: () => void
   baseLayer?: BaseLayer
+  /** Called when a base-layer switch fails (e.g. offline Satellitt) so App
+   *  can revert its own state and localStorage to the previous layer. */
+  onBaseLayerFailed?: (failedLayer: BaseLayer) => void
   selectedLocation?: HPLocation | null
   activeFilter?: FilterState
   /** Favourite POI ids to force-show as markers regardless of category filter */
@@ -370,6 +366,7 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
     mapMode = 'browse', measurePoints = [], onMeasurePoint,
     customPlaces = [], onCustomPlaceClick,
     onLongPress, geocodeMarker, onGeocodeMarkerClick, onMapClick, baseLayer = 'standard',
+    onBaseLayerFailed,
     selectedLocation = null, activeFilter, favouriteMarkerIds = [],
     hpLocations = null,
   } = props
@@ -398,6 +395,8 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
   useEffect(() => { onGeocodeMarkerClickRef.current = onGeocodeMarkerClick }, [onGeocodeMarkerClick])
   const onMapClickRef = useRef(onMapClick)
   useEffect(() => { onMapClickRef.current = onMapClick }, [onMapClick])
+  const onBaseLayerFailedRef = useRef(onBaseLayerFailed)
+  useEffect(() => { onBaseLayerFailedRef.current = onBaseLayerFailed }, [onBaseLayerFailed])
   const mapModeRef = useRef(mapMode)
   useEffect(() => { mapModeRef.current = mapMode }, [mapMode])
   const positionRef = useRef(position)
@@ -439,6 +438,9 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
   useEffect(() => {
     if (!containerRef.current) return
 
+    // Declared in outer scope so the cleanup can clear any pending long-press
+    let lpTimer: ReturnType<typeof setTimeout> | null = null
+
     const map = new maplibregl.Map({
       container: containerRef.current,
       style: MAP_STYLE,
@@ -459,11 +461,19 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
       // Default view one zoom level closer than the full-bounds fit (Lene, 2026-07-06)
       map.setZoom(map.getZoom() + 1)
       addOverlays(map)
+
+      // Cursor style for marker layers — registered once here so they survive
+      // setStyle() calls without accumulating duplicate listeners.
+      const setCursor = (c: string) => () => { map.getCanvas().style.cursor = c }
+      for (const layer of ['hp-dots', 'favourite-hearts', 'custom-place-dots']) {
+        map.on('mouseenter', layer, setCursor('pointer'))
+        map.on('mouseleave', layer, setCursor(''))
+      }
+
       setMapReady(true)
 
       // Long press (touch): browse mode → add custom place; measure mode →
       // add a measure point, snapped to a marker under the finger if any
-      let lpTimer: ReturnType<typeof setTimeout> | null = null
       map.on('touchstart', (e) => {
         if (e.originalEvent.touches.length !== 1) return
         const { lng, lat } = e.lngLat
@@ -498,7 +508,7 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
       // Browse mode: a tap on EMPTY map closes the POI detail sheet — drags
       // don't fire 'click', so panning never closes it.
       map.on('click', (e) => {
-        const pad = 12
+        const pad = 22
         const markerLayers = ['hp-dots', 'favourite-hearts', 'custom-place-dots', 'selected-hp-dot']
           .filter((id) => map.getLayer(id))
         const features = map.queryRenderedFeatures(
@@ -533,6 +543,7 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
     })
 
     return () => {
+      if (lpTimer) { clearTimeout(lpTimer); lpTimer = null }
       setMapReady(false)
       map.remove()
       mapRef.current = null
@@ -549,6 +560,7 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
   useEffect(() => {
     const map = mapRef.current
     if (!map || appliedLayerRef.current === baseLayer) return
+    const prev = appliedLayerRef.current
     appliedLayerRef.current = baseLayer
     let cancelled = false
     ;(async () => {
@@ -565,8 +577,9 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
           setMapReady(true)
         })
       } catch {
-        // Style fetch failed (offline?) — keep the current base layer
-        appliedLayerRef.current = appliedLayerRef.current === 'satellite' ? 'satellite' : 'standard'
+        // Style fetch failed (offline Satellitt?) — revert to previous layer
+        appliedLayerRef.current = prev
+        onBaseLayerFailedRef.current?.(baseLayer)
       }
     })()
     return () => { cancelled = true }
@@ -619,7 +632,7 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
         geometry: { type: 'Point' as const, coordinates: [p.lng, p.lat] },
       })),
     })
-  }, [customPlaces])
+  }, [customPlaces, mapReady])
 
   // Geocode marker — persistent pin; tapping it toggles the result card in App.
   // anchor: 'bottom' so the pin TIP marks the location, not the pin centre.
@@ -690,7 +703,7 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
       const catExpr = ['in', cat, ['get', 'categories']]
       if (cat === 'locations') {
         const types = activeFilter?.locationTypes ?? []
-        if (types.length > 0 && types.length < 3) {
+        if (types.length > 0 && types.length < LOCATION_TYPES.length) {
           parts.push(['all', catExpr, ['match', ['get', 'location_type'], types, true, false]])
         } else {
           parts.push(catExpr)

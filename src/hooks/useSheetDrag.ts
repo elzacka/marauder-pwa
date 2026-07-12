@@ -2,7 +2,7 @@ import { useRef, useCallback, useState } from 'react'
 
 const DISMISS_THRESHOLD = 72
 
-export type SheetSize = 'default' | 'half' | 'expanded' | 'full'
+export type SheetSize = 'default' | 'expanded' | 'full'
 
 /** Space reserved at the top for the Marauder wordmark — the sheet's upper
  *  edge never travels past this. Keep in sync with --sheet-full-height. */
@@ -13,7 +13,6 @@ const TOP_RESERVED_PX = 64
 function snapHeights(vh: number): Array<{ size: SheetSize; height: number }> {
   return [
     { size: 'default', height: vh * 0.5 },
-    { size: 'half', height: vh * 0.5 },
     { size: 'expanded', height: vh * 0.7 },
     { size: 'full', height: vh - TOP_RESERVED_PX },
   ]
@@ -26,9 +25,9 @@ type Options = {
 }
 
 /**
- * Shared drag behaviour for bottom sheets (Lene, 2026-07-05):
- * three snap points — 33 % (default), 50 % (half), 85 % (expanded) — plus
- * drag far down to close. During the drag the sheet height follows the
+ * Shared drag behaviour for bottom sheets:
+ * three snap points — 50svh (default), 70svh (expanded), full (100svh − 64px) —
+ * plus drag far down to close. During the drag the sheet height follows the
  * finger; on release it snaps to the nearest point.
  */
 export function useSheetDrag(onClose: () => void, { resizable = true }: Options = {}) {
@@ -82,7 +81,7 @@ export function useSheetDrag(onClose: () => void, { resizable = true }: Options 
       onClose()
       return
     }
-    // Snap to the nearest point (default / half / expanded / full)
+    // Snap to the nearest point (default / expanded / full)
     let nearest: SheetSize = 'default'
     let best = Number.POSITIVE_INFINITY
     for (const { size: s, height } of snapHeights(vh)) {
@@ -95,5 +94,17 @@ export function useSheetDrag(onClose: () => void, { resizable = true }: Options 
     setSize(nearest)
   }, [onClose, resizable])
 
-  return { sheetRef, size, setSize, onDragStart, onDragMove, onDragEnd }
+  // pointercancel (e.g. iOS scroll takeover) — revert the in-flight drag
+  // without snapping or closing. clientY may be 0 on iOS 26, so never pass
+  // pointercancel through onDragEnd.
+  const onDragCancel = useCallback(() => {
+    const sheet = sheetRef.current
+    if (sheet) {
+      sheet.style.transition = ''
+      sheet.style.transform = ''
+      sheet.style.height = ''
+    }
+  }, [])
+
+  return { sheetRef, size, setSize, onDragStart, onDragMove, onDragEnd, onDragCancel }
 }

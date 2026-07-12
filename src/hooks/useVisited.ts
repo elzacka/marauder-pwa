@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { safeSetItem } from '../utils/safeStorage'
 
 const KEY = 'marauder-visited'
 
@@ -8,14 +9,15 @@ export function useVisited() {
   const [visitedIds, setVisitedIds] = useState<Set<string>>(() => {
     try {
       const raw = localStorage.getItem(KEY)
-      return raw ? new Set(JSON.parse(raw) as string[]) : new Set()
+      const parsed = raw ? (JSON.parse(raw) as unknown) : null
+      return new Set(Array.isArray(parsed) ? (parsed as string[]) : [])
     } catch {
       return new Set()
     }
   })
 
   const persist = (next: Set<string>) => {
-    localStorage.setItem(KEY, JSON.stringify([...next]))
+    safeSetItem(KEY, JSON.stringify([...next]))
     return next
   }
 
