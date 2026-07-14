@@ -8,7 +8,7 @@ import { useFavourites } from './hooks/useFavourites'
 import { useCustomPlaces } from './hooks/useCustomPlaces'
 import { useHPLocations } from './hooks/useHPLocations'
 import MapView, { type MapHandle, type BaseLayer } from './map/MapView'
-import MenuSheet from './components/MenuSheet'
+import MenuSheet, { type MenuSheetHandle } from './components/MenuSheet'
 import POIDetailSheet from './components/POIDetailSheet'
 import MeasureBar from './components/MeasureBar'
 import AddPlaceSheet from './components/AddPlaceSheet'
@@ -140,16 +140,9 @@ export default function App() {
   // appear only for categories the user has CHECKED in the menu; unchecking
   // removes them. No checked categories = no markers. Do not change this.
   const [activeFilter, setActiveFilter] = useState<FilterState>(emptyFilter)
-  // Hint chip: dismissed for this session (not persisted — returns next launch
-  // until the user checks a category). Incrementing openToCategoriesSignal
-  // causes MenuSheet to open itself on Hjem with categories expanded.
-  const [hintDismissed, setHintDismissed] = useState(false)
-  const [openToCategoriesSignal, setOpenToCategoriesSignal] = useState(0)
-  // Per-favourite map visibility (shown-set: hearts are opt-in, map starts clean)
-  const [shownFavouriteIds, setShownFavouriteIds] = useState<Set<string>>(new Set())
-  // Per-place visibility for Mine steder (shown-set: nothing ticked by default,
-  // Lene 2026-07-06 — but a freshly saved place is shown immediately)
-  const [shownCustomIds, setShownCustomIds] = useState<Set<string>>(new Set())
+  // Map visibility for Favoritter and Mine steder — unified chip toggles (false = hidden)
+  const [showFavourites, setShowFavourites] = useState(false)
+  const [showCustom, setShowCustom] = useState(false)
   // Memoized on editingPlace?.id so a new object is not created on every
   // render while editing — the AddPlaceSheet effect resets the form on coords
   // identity change, and any App re-render (GPS tick, download progress…)
@@ -161,6 +154,7 @@ export default function App() {
   )
 
   const mapRef = useRef<MapHandle>(null)
+  const menuSheetRef = useRef<MenuSheetHandle>(null)
 
   // All user tags in use — offered as quick-add suggestions in the form
   const existingCustomTags = useMemo(() => {
@@ -169,47 +163,20 @@ export default function App() {
     return [...set].sort((a, b) => a.localeCompare(b, 'nb'))
   }, [customPlaces])
 
+  const handleToggleCustom = useCallback(() => setShowCustom((v) => !v), [])
+
   const visibleCustomPlaces = useMemo(
-    () => customPlaces.filter((p) => shownCustomIds.has(p.id)),
-    [customPlaces, shownCustomIds],
+    () => (showCustom ? customPlaces : []),
+    [showCustom, customPlaces],
   )
 
-  const handleToggleCustomVisible = useCallback((id: string) => {
-    setShownCustomIds((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-  }, [])
-
-  const handleToggleAllCustomVisible = useCallback(() => {
-    setShownCustomIds((prev) =>
-      customPlaces.length > 0 && customPlaces.every((p) => prev.has(p.id))
-        ? new Set()
-        : new Set(customPlaces.map((p) => p.id)),
-    )
-  }, [customPlaces])
-
   // Stable id list for the map's heart layer
-  const favouriteMarkerIds = useMemo(() => [...shownFavouriteIds], [shownFavouriteIds])
+  const favouriteMarkerIds = useMemo(
+    () => (showFavourites ? [...favouriteIds] : []),
+    [showFavourites, favouriteIds],
+  )
 
-  const handleToggleFavouriteVisible = useCallback((id: string) => {
-    setShownFavouriteIds((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-  }, [])
-
-  const handleToggleAllFavouritesVisible = useCallback(() => {
-    setShownFavouriteIds((prev) =>
-      favouriteIds.size > 0 && [...favouriteIds].every((id) => prev.has(id))
-        ? new Set()
-        : new Set(favouriteIds),
-    )
-  }, [favouriteIds])
+  const handleToggleFavourites = useCallback(() => setShowFavourites((v) => !v), [])
 
   const getAreaEstimate = useCallback(() => {
     const bounds = mapRef.current?.getBounds()
@@ -254,9 +221,6 @@ export default function App() {
   }
 
   const handleLocationSelect = useCallback((loc: HPLocation) => {
-    // Offset upwards so the marker sits in the visible upper part while the
-    // detail sheet (33 % height) covers the bottom
-    mapRef.current?.flyTo(loc.lng, loc.lat, 13, -Math.round(window.innerHeight * 0.16))
     setSelectedLocation(loc)
     setSelectedIsCustom(false)
     setDetailOpen(true)
@@ -265,7 +229,6 @@ export default function App() {
   const handleCustomPlaceClick = useCallback((id: string) => {
     const p = customPlaces.find((cp) => cp.id === id)
     if (!p) return
-    mapRef.current?.flyTo(p.lng, p.lat, 13, -Math.round(window.innerHeight * 0.16))
     setSelectedLocation(customPlaceToHPLocation(p))
     setSelectedIsCustom(true)
     setDetailOpen(true)
@@ -282,6 +245,10 @@ export default function App() {
   useEffect(() => { detailOpenRef.current = detailOpen }, [detailOpen])
 
   const handleMapClick = useCallback(() => {
+    menuSheetRef.current?.close()
+    setQuizOpen(false)
+    setFunFactsOpen(false)
+    setShowGeocodeCard(false)
     if (detailOpenRef.current) {
       setDetailOpen(false)
     } else {
@@ -401,10 +368,8 @@ export default function App() {
       lat: pendingLongPress.lat,
       lng: pendingLongPress.lng,
     })
+    setShowCustom(true)
     setPendingLongPress(null)
-    // Saved as a custom place: the geocode pin has served its purpose, and the
-    // fresh place is shown on the map right away
-    setShownCustomIds((prev) => new Set(prev).add(p.id))
     setGeocodeMarker(null)
     setShowGeocodeCard(false)
     mapRef.current?.flyTo(p.lng, p.lat)
@@ -427,25 +392,6 @@ export default function App() {
           to know it (D12) */}
       {!online && (
         <div className="offline-chip" role="status">Frakoblet</div>
-      )}
-      {!hintDismissed && activeFilter.categories.length === 0 && !selectedLocation && (
-        <div className="map-hint-chip">
-          <button
-            type="button"
-            className="map-hint-chip__action"
-            onClick={() => setOpenToCategoriesSignal((n) => n + 1)}
-          >
-            Velg kategorier i menyen for å se steder på kartet
-          </button>
-          <button
-            type="button"
-            className="map-hint-chip__dismiss"
-            onClick={() => setHintDismissed(true)}
-            aria-label="Skjul tips"
-          >
-            <span aria-hidden="true">×</span>
-          </button>
-        </div>
       )}
       <InstallBanner />
       <MapView
@@ -480,6 +426,7 @@ export default function App() {
         />
       )}
       <MenuSheet
+        ref={menuSheetRef}
         position={position}
         active={active}
         error={error}
@@ -501,17 +448,14 @@ export default function App() {
         onCustomPlaceClick={handleCustomPlaceClick}
         activeFilter={activeFilter}
         onFilterChange={setActiveFilter}
-        shownFavouriteIds={shownFavouriteIds}
-        onToggleFavouriteVisible={handleToggleFavouriteVisible}
-        onToggleAllFavouritesVisible={handleToggleAllFavouritesVisible}
+        showFavourites={showFavourites}
+        onToggleFavourites={handleToggleFavourites}
+        showCustom={showCustom}
+        onToggleCustom={handleToggleCustom}
         onFabLongPress={() => setMapButtonsHidden((v) => {
           setSpell(v ? 'Kartknapper synlige' : 'Kartknapper skjult – hold inne for å vise')
           return !v
         })}
-        openToCategoriesSignal={openToCategoriesSignal}
-        shownCustomIds={shownCustomIds}
-        onToggleCustomVisible={handleToggleCustomVisible}
-        onToggleAllCustomVisible={handleToggleAllCustomVisible}
         showZoomControls={showZoomControls}
         onToggleZoomControls={handleToggleZoomControls}
         showLocateBtn={showLocateBtn}

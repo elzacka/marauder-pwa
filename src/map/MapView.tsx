@@ -402,8 +402,9 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
   const positionRef = useRef(position)
   useEffect(() => { positionRef.current = position }, [position])
 
-  const flyTo = useCallback((lng: number, lat: number, zoom = 13, offsetY = 0) => {
-    mapRef.current?.flyTo({ center: [lng, lat], zoom, duration: 700, offset: [0, offsetY] })
+  const flyTo = useCallback((lng: number, lat: number, zoom?: number, offsetY = 0) => {
+    const z = zoom ?? mapRef.current?.getZoom() ?? 13
+    mapRef.current?.flyTo({ center: [lng, lat], zoom: z, duration: 700, offset: [0, offsetY] })
   }, [])
   const getBounds = useCallback(() => {
     const b = mapRef.current?.getBounds()
@@ -754,9 +755,15 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
 
     if (parts.length === 0) {
       map.setLayoutProperty('hp-dots', 'visibility', 'none')
+      if (map.getLayer('selected-hp-dot')) {
+        map.setLayoutProperty('selected-hp-dot', 'visibility', 'none')
+      }
       return
     }
 
+    if (map.getLayer('selected-hp-dot')) {
+      map.setLayoutProperty('selected-hp-dot', 'visibility', 'visible')
+    }
     map.setLayoutProperty('hp-dots', 'visibility', 'visible')
     let expr: unknown = parts.length === 1 ? parts[0] : ['any', ...parts]
     if (hasFavs) {

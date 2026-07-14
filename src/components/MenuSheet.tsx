@@ -1,7 +1,7 @@
-import { useState, useMemo, useId, useRef, useCallback, useEffect } from 'react'
+import { useState, useMemo, useId, useRef, useCallback, useEffect, forwardRef, useImperativeHandle } from 'react'
 import type { CSSProperties } from 'react'
 import marauderIcon from '../assets/marauder-icon.png'
-import { Home, WandSparkles, Wrench, Settings as SettingsIcon, Search, ChevronDown, X, Check, Trash2, Heart, UserRound } from 'lucide-react'
+import { Home, WandSparkles, Wrench, Settings as SettingsIcon, Search, ChevronDown, X, Trash2, Heart, UserRound } from 'lucide-react'
 import { CategoryTree } from '../ds/CategoryTree'
 import { type FilterState, CATEGORY_META, LOCATION_TYPES, locationMatchesFilter } from '../ds/filterMeta'
 import { haversineKm, formatDistance } from '../utils/distance'
@@ -133,16 +133,13 @@ type Props = {
   onCustomPlaceClick: (id: string) => void
   activeFilter: FilterState
   onFilterChange: (f: FilterState) => void
-  /** Per-favourite map visibility (heart markers) */
-  shownFavouriteIds: Set<string>
-  onToggleFavouriteVisible: (id: string) => void
-  onToggleAllFavouritesVisible: () => void
+  /** Unified chip toggles for Favoritter and Mine steder map layers */
+  showFavourites: boolean
+  onToggleFavourites: () => void
+  showCustom: boolean
+  onToggleCustom: () => void
   /** Long-press on the FAB: hide/show the map button group */
   onFabLongPress: () => void
-  /** Per-place map visibility for Mine steder (shown-set, opt-in) */
-  shownCustomIds: Set<string>
-  onToggleCustomVisible: (id: string) => void
-  onToggleAllCustomVisible: () => void
   showZoomControls: boolean
   onToggleZoomControls: (v: boolean) => void
   showLocateBtn: boolean
@@ -173,17 +170,16 @@ type Props = {
   online: boolean
   /** Data load error from useHPLocations — shown instead of silent emptiness (K5) */
   dataError?: string | null
-  /** Increment to open the sheet on Hjem with categories expanded (P2 hint chip) */
-  openToCategoriesSignal?: number
 }
 
-export default function MenuSheet({
+export type MenuSheetHandle = { close: () => void }
+
+const MenuSheet = forwardRef<MenuSheetHandle, Props>(function MenuSheet({
   position, active, error, onToggle,
   measureMode, onToggleMeasure, onAddressSelect, onLocationSelect,
   favouriteIds, hpLocations, customPlaces, onCustomPlaceClick,
   activeFilter, onFilterChange,
-  shownFavouriteIds, onToggleFavouriteVisible, onToggleAllFavouritesVisible, onFabLongPress,
-  shownCustomIds, onToggleCustomVisible, onToggleAllCustomVisible,
+  showFavourites, onToggleFavourites, showCustom, onToggleCustom, onFabLongPress,
   showZoomControls, onToggleZoomControls,
   showLocateBtn, onToggleLocateBtn,
   baseLayer, onBaseLayerChange,
@@ -192,8 +188,7 @@ export default function MenuSheet({
   onDownloadVisibleArea, onCancelDownload, onDeleteArea,
   getAreaEstimate,
   online, dataError = null,
-  openToCategoriesSignal = 0,
-}: Props) {
+}: Props, ref: React.Ref<MenuSheetHandle>) {
   const [isOpen, setIsOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<MenuTab>('home')
   const [query, setQuery] = useState('')
@@ -212,19 +207,13 @@ export default function MenuSheet({
   const searchId = useId()
 
   const closeSheet = useCallback(() => setIsOpen(false), [])
+  useImperativeHandle(ref, () => ({ close: closeSheet }), [closeSheet])
   const { sheetRef, size, setSize, onDragStart, onDragMove, onDragEnd, onDragCancel } =
     useSheetDrag(closeSheet)
 
   useEffect(() => {
     if (isOpen) sheetRef.current?.focus()
   }, [isOpen, sheetRef])
-
-  useEffect(() => {
-    if (openToCategoriesSignal === 0) return
-    setIsOpen(true)
-    setActiveTab('home')
-    setShowCategories(true)
-  }, [openToCategoriesSignal])
 
   useEffect(() => {
     if (activeTab === 'tools') setToolsAreaEstimate(getAreaEstimate())
@@ -294,12 +283,6 @@ export default function MenuSheet({
     () => withDistAndSort(hpLocations.filter((loc) => visitedIds.has(loc.id)), position),
     [visitedIds, position, hpLocations],
   )
-
-  const allFavouritesShown =
-    favouriteIds.size > 0 && shownFavouriteIds.size === favouriteIds.size
-
-  const allCustomShown =
-    customPlaces.length > 0 && shownCustomIds.size === customPlaces.length
 
   const singleCategory = activeFilter.categories.length === 1 ? activeFilter.categories[0] : null
 
@@ -722,7 +705,18 @@ export default function MenuSheet({
                         size={16} aria-hidden="true"
                       />
                     </button>
-                    {showCategories && <CategoryTree value={activeFilter} onChange={onFilterChange} />}
+                    {showCategories && (
+                      <CategoryTree
+                        value={activeFilter}
+                        onChange={onFilterChange}
+                        showFavourites={showFavourites}
+                        onToggleFavourites={onToggleFavourites}
+                        favouriteCount={favouriteIds.size}
+                        showCustom={showCustom}
+                        onToggleCustom={onToggleCustom}
+                        customCount={customPlaces.length}
+                      />
+                    )}
 
                     <button
                       type="button"
@@ -741,62 +735,33 @@ export default function MenuSheet({
                         Ingen favoritter ennå. Trykk hjerte på et sted for å lagre.
                       </p>
                     ) : (
-                      <>
-                        <button
-                          type="button"
-                          className={`${styles.favAllRow} ${allFavouritesShown ? styles.favAllRowActive : ''}`}
-                          onClick={onToggleAllFavouritesVisible}
-                          aria-pressed={allFavouritesShown}
-                        >
-                          <span className={`${styles.toggleBox} ${allFavouritesShown ? styles.toggleBoxOn : ''}`} aria-hidden="true">
-                            {allFavouritesShown && <Check size={12} strokeWidth={2.5} aria-hidden="true" />}
-                          </span>
-                          Alle
-                        </button>
                       <ul className={styles.list} role="list">
-                        {favouriteLocations.map((loc) => {
-                          const shown = shownFavouriteIds.has(loc.id)
-                          return (
-                            <li key={loc.id} className={styles.itemBlock}>
-                              <div className={styles.itemRowFlex}>
-                                <button
-                                  type="button"
-                                  className={styles.itemCheckBtn}
-                                  onClick={() => onToggleFavouriteVisible(loc.id)}
-                                  aria-pressed={shown}
-                                  aria-label={shown ? `Skjul ${loc.name} på kartet` : `Vis ${loc.name} på kartet`}
-                                >
-                                  <span className={`${styles.toggleBox} ${shown ? styles.toggleBoxOn : ''}`} aria-hidden="true">
-                                    {shown && <Check size={12} strokeWidth={2.5} aria-hidden="true" />}
-                                  </span>
-                                </button>
-                                <button
-                                  type="button"
-                                  className={styles.itemMainBtn}
-                                  onClick={() => handleHPClick(loc)}
-                                >
-                                  <span className={styles.itemName}>{loc.name}</span>
-                                  {loc.km !== null && (
-                                    <span className={styles.itemDistance}>{formatDistance(loc.km)}</span>
-                                  )}
-                                </button>
-                              </div>
-                              <div className={styles.chipsRow}>
-                                {loc.categories.slice(0, 1).map((cat) => (
-                                  <CategoryChip
-                                    key={cat}
-                                    catKey={cat}
-                                    selected={activeFilter.categories.includes(cat)}
-                                    onToggle={() => toggleCategoryFilter(cat)}
-                                  />
-                                ))}
-                                <GeoChips city={loc.city} country={loc.country} activeTag={activeTag} onTag={toggleTag} />
-                              </div>
-                            </li>
-                          )
-                        })}
+                        {favouriteLocations.map((loc) => (
+                          <li key={loc.id} className={styles.itemBlock}>
+                            <button
+                              type="button"
+                              className={styles.itemMainBtn}
+                              onClick={() => handleHPClick(loc)}
+                            >
+                              <span className={styles.itemName}>{loc.name}</span>
+                              {loc.km !== null && (
+                                <span className={styles.itemDistance}>{formatDistance(loc.km)}</span>
+                              )}
+                            </button>
+                            <div className={styles.chipsRow}>
+                              {loc.categories.slice(0, 1).map((cat) => (
+                                <CategoryChip
+                                  key={cat}
+                                  catKey={cat}
+                                  selected={activeFilter.categories.includes(cat)}
+                                  onToggle={() => toggleCategoryFilter(cat)}
+                                />
+                              ))}
+                              <GeoChips city={loc.city} country={loc.country} activeTag={activeTag} onTag={toggleTag} />
+                            </div>
+                          </li>
+                        ))}
                       </ul>
-                      </>
                     ))}
                   </div>
                 )}
@@ -815,54 +780,26 @@ export default function MenuSheet({
                         size={16} aria-hidden="true"
                       />
                     </button>
-                    {showCustomList && (<>
-                    {/* "Alle": show/hide every custom place on the map */}
-                    <button
-                      type="button"
-                      className={`${styles.favAllRow} ${allCustomShown ? styles.favAllRowActive : ''}`}
-                      onClick={onToggleAllCustomVisible}
-                      aria-pressed={allCustomShown}
-                    >
-                      <span className={`${styles.toggleBox} ${styles.toggleBoxGreen} ${allCustomShown ? styles.toggleBoxOn : ''}`} aria-hidden="true">
-                        {allCustomShown && <Check size={12} strokeWidth={2.5} aria-hidden="true" />}
-                      </span>
-                      Alle
-                    </button>
-                    <ul className={styles.list} role="list">
-                      {customWithDist.map((p) => {
-                        const visible = shownCustomIds.has(p.id)
-                        return (
+                    {showCustomList && (
+                      <ul className={styles.list} role="list">
+                        {customWithDist.map((p) => (
                           <li key={p.id} className={styles.itemBlock}>
-                            <div className={styles.itemRowFlex}>
-                              <button
-                                type="button"
-                                className={styles.itemCheckBtn}
-                                onClick={() => onToggleCustomVisible(p.id)}
-                                aria-pressed={visible}
-                                aria-label={visible ? `Skjul ${p.name} på kartet` : `Vis ${p.name} på kartet`}
-                              >
-                                <span className={`${styles.toggleBox} ${styles.toggleBoxGreen} ${visible ? styles.toggleBoxOn : ''}`} aria-hidden="true">
-                                  {visible && <Check size={12} strokeWidth={2.5} aria-hidden="true" />}
-                                </span>
-                              </button>
-                              <button
-                                type="button"
-                                className={styles.itemMainBtn}
-                                onClick={() => { onCustomPlaceClick(p.id); setIsOpen(false) }}
-                              >
-                                <span className={styles.itemMain}>
-                                  <span className={styles.itemName}>{p.name}</span>
-                                  {p.description && <span className={styles.itemSub}>{p.description}</span>}
-                                </span>
-                                {p.km !== null && <span className={styles.itemDistance}>{formatDistance(p.km)}</span>}
-                              </button>
-                            </div>
+                            <button
+                              type="button"
+                              className={styles.itemMainBtn}
+                              onClick={() => { onCustomPlaceClick(p.id); setIsOpen(false) }}
+                            >
+                              <span className={styles.itemMain}>
+                                <span className={styles.itemName}>{p.name}</span>
+                                {p.description && <span className={styles.itemSub}>{p.description}</span>}
+                              </span>
+                              {p.km !== null && <span className={styles.itemDistance}>{formatDistance(p.km)}</span>}
+                            </button>
                             <GeoChips city={p.city ?? null} country={p.country ?? null} userTags={p.tags} activeTag={activeTag} onTag={toggleTag} />
                           </li>
-                        )
-                      })}
-                    </ul>
-                    </>)}
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 )}
               </div>
@@ -961,7 +898,7 @@ export default function MenuSheet({
                     <p className={styles.actionDesc}>
                       {measureMode
                         ? 'Aktiv. Lukk menyen og trykk på kartet for å legge til punkter.'
-                        : 'Mål avstand langs en rute med ubegrenset antall punkter.'}
+                        : 'Mål avstand mellom to eller flere punkter.'}
                     </p>
                     <div className={styles.actionRow}>
                       <button
@@ -979,7 +916,7 @@ export default function MenuSheet({
                   <p className={styles.sectionTitle}>Offline kart</p>
                   <div className={styles.card}>
                     <p className={styles.actionDesc}>
-                      Naviger kartet til området du vil ha tilgang på uten nett/dekning, og last det ned her.
+                      Naviger kartet til området du trenger offline.
                       {connectionType().startsWith('Mobil') && ' Nå bruker du mobildata.'}
                     </p>
 
@@ -1007,7 +944,7 @@ export default function MenuSheet({
                         </button>
                       ) : (
                         <button className={styles.btnPrimary} type="button" onClick={onDownloadVisibleArea}>
-                          Last ned gjeldende kartområde
+                          Last ned kartområde
                         </button>
                       )}
                     </div>
@@ -1162,7 +1099,9 @@ export default function MenuSheet({
       </div>
     </>
   )
-}
+})
+
+export default MenuSheet
 
 function TabBtn({ active, label, onClick, children }: {
   active: boolean

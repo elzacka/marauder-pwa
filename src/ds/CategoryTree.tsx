@@ -14,6 +14,12 @@ const TYPE_LABELS: Record<string, string> = {
 type Props = {
   value: FilterState
   onChange: (f: FilterState) => void
+  showFavourites: boolean
+  onToggleFavourites: () => void
+  favouriteCount: number
+  showCustom: boolean
+  onToggleCustom: () => void
+  customCount: number
 }
 
 /** Checkbox tinted with the category/type colour, so the menu doubles as a
@@ -35,12 +41,21 @@ function CheckBox({ checked, color }: { checked: boolean; color?: string }) {
  * Checking adds that category's markers to the map; unchecking removes them.
  * "All places" is a master toggle. No checked categories = empty map.
  */
-export function CategoryTree({ value, onChange }: Props) {
+export function CategoryTree({
+  value, onChange,
+  showFavourites, onToggleFavourites, favouriteCount,
+  showCustom, onToggleCustom, customCount,
+}: Props) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
 
   const selected = new Set(value.categories)
   const selectedTypes = new Set(value.locationTypes)
-  const allSelected = ALL_CATEGORY_KEYS.every((k) => selected.has(k))
+  const hasFavourites = favouriteCount > 0
+  const hasCustom = customCount > 0
+  const allSelected =
+    ALL_CATEGORY_KEYS.every((k) => selected.has(k)) &&
+    (!hasFavourites || showFavourites) &&
+    (!hasCustom || showCustom)
 
   function toggleExpand(e: React.MouseEvent, key: string) {
     e.stopPropagation()
@@ -55,8 +70,12 @@ export function CategoryTree({ value, onChange }: Props) {
   function toggleAll() {
     if (allSelected) {
       onChange({ categories: [], locationTypes: [] })
+      if (showFavourites) onToggleFavourites()
+      if (showCustom) onToggleCustom()
     } else {
       onChange({ categories: [...ALL_CATEGORY_KEYS], locationTypes: [...LOCATION_TYPES] })
+      if (!showFavourites && hasFavourites) onToggleFavourites()
+      if (!showCustom && hasCustom) onToggleCustom()
     }
   }
 
@@ -154,6 +173,30 @@ export function CategoryTree({ value, onChange }: Props) {
           </div>
         )
       })}
+
+      {hasFavourites && (
+        <button
+          type="button"
+          className={`${styles.row} ${showFavourites ? styles.rowActive : ''}`}
+          onClick={onToggleFavourites}
+          aria-pressed={showFavourites}
+        >
+          <CheckBox checked={showFavourites} color="#5C1010" />
+          <span className={styles.rowLabel}>Favoritter</span>
+        </button>
+      )}
+
+      {hasCustom && (
+        <button
+          type="button"
+          className={`${styles.row} ${showCustom ? styles.rowActive : ''}`}
+          onClick={onToggleCustom}
+          aria-pressed={showCustom}
+        >
+          <CheckBox checked={showCustom} color="#2E6B3E" />
+          <span className={styles.rowLabel}>Mine steder</span>
+        </button>
+      )}
     </div>
   )
 }
