@@ -101,14 +101,15 @@ export default function App() {
   const [mapButtonsHidden, setMapButtonsHidden] = useState(false)
   const [house, setHouse] = useState<House>(getInitialHouse)
   const [spell, setSpell] = useState<string | null>(null)
-  const [showOath, setShowOath] = useState(true)
+  const isDesktop = window.matchMedia('(hover: hover) and (pointer: fine)').matches
+  const [showOath, setShowOath] = useState(!isDesktop)
   const [quizOpen, setQuizOpen] = useState(false)
   const [funFactsOpen, setFunFactsOpen] = useState(false)
   const { visitedIds, toggleVisited, markVisited } = useVisited()
 
   // The oath — once per launch (the whole point of a Marauder's Map)
   useEffect(() => {
-    setShowOath(true)
+    if (!isDesktop) setShowOath(true)
   }, [])
 
   // House accent as a CSS variable (spell text, pass progress, stamps)
