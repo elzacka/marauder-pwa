@@ -49,7 +49,7 @@ export function useCustomPlaces() {
   }, [])
 
   const addCustomPlace = useCallback(
-    (data: { name: string; description: string; lat: number; lng: number; tags?: string[] }) => {
+    (data: { name: string; description: string; lat: number; lng: number; tags?: string[]; image_url?: string | null }) => {
       const newPlace: CustomPlace = {
         ...data,
         id: `cp-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
@@ -86,7 +86,7 @@ export function useCustomPlaces() {
   }, [])
 
   const updateCustomPlace = useCallback(
-    (id: string, data: { name: string; description: string; tags?: string[] }) => {
+    (id: string, data: { name: string; description: string; tags?: string[]; image_url?: string | null }) => {
       setPlaces((prev) => {
         const next = prev.map((p) => (p.id === id ? { ...p, ...data } : p))
         safeSetItem(KEY, JSON.stringify(next))

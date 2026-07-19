@@ -24,6 +24,8 @@ export type HPLocation = {
   tags?: string[]
   /** "Did you know?"-facts (English, hand-curated in the data file) */
   fun_fact?: string | null
+  /** Representative photo — displayed in the detail sheet hero */
+  image_url?: string | null
   lat: number
   lng: number
 }

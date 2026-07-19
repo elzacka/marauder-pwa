@@ -379,6 +379,8 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
   // re-run when the map becomes ready — otherwise the layers stay empty
   // forever and no POI markers ever appear.
   const [mapReady, setMapReady] = useState(false)
+  const baseLayerRef = useRef<BaseLayer>(baseLayer)
+  useEffect(() => { baseLayerRef.current = baseLayer }, [baseLayer])
   const markerRef = useRef<maplibregl.Marker | null>(null)
   const geocodeMarkerRef = useRef<maplibregl.Marker | null>(null)
   const firstPositionRef = useRef(false)
@@ -461,7 +463,6 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
       })
       // Default view one zoom level closer than the full-bounds fit (Lene, 2026-07-06)
       map.setZoom(map.getZoom() + 1)
-      addOverlays(map)
 
       // Cursor style for marker layers — registered once here so they survive
       // setStyle() calls without accumulating duplicate listeners.
@@ -471,7 +472,27 @@ const MapView = forwardRef<MapHandle, Props>(function MapView(props, ref) {
         map.on('mouseleave', layer, setCursor(''))
       }
 
-      setMapReady(true)
+      // If satellite was persisted in localStorage, apply it before signaling
+      // ready so the map never briefly shows Standard on reload.
+      if (baseLayerRef.current === 'satellite') {
+        appliedLayerRef.current = 'satellite'
+        buildSatelliteStyle()
+          .then((style) => {
+            map.setStyle(style as maplibregl.StyleSpecification | string, { diff: false })
+            map.once('idle', () => {
+              if (!map.getLayer('hp-dots')) addOverlays(map)
+              setMapReady(true)
+            })
+          })
+          .catch(() => {
+            appliedLayerRef.current = 'standard'
+            addOverlays(map)
+            setMapReady(true)
+          })
+      } else {
+        addOverlays(map)
+        setMapReady(true)
+      }
 
       // Long press (touch): browse mode → add custom place; measure mode →
       // add a measure point, snapped to a marker under the finger if any

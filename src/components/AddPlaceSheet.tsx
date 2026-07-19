@@ -10,22 +10,25 @@ type Props = {
   initialDescription?: string
   /** Prefilled tags — used when editing an existing place */
   initialTags?: string[]
+  /** Prefilled image URL — used when editing an existing place */
+  initialImageUrl?: string | null
   /** Tags already in use on other places — offered as quick-add chips */
   existingTags?: string[]
   /** Sheet heading; defaults to "Legg til sted" */
   title?: string
-  onSave: (name: string, description: string, tags: string[]) => void
+  onSave: (name: string, description: string, tags: string[], imageUrl: string | null) => void
   onClose: () => void
 }
 
 export default function AddPlaceSheet({
-  coords, initialName, initialDescription, initialTags, existingTags = [],
+  coords, initialName, initialDescription, initialTags, initialImageUrl, existingTags = [],
   title = 'Legg til sted', onSave, onClose,
 }: Props) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [tags, setTags] = useState<string[]>([])
   const [newTag, setNewTag] = useState('')
+  const [imageUrl, setImageUrl] = useState('')
 
   // Reset the form each time the sheet opens; prefill when provided
   // (geocode hits pass a name; editing passes name + description + tags).
@@ -35,8 +38,9 @@ export default function AddPlaceSheet({
       setDescription(initialDescription ?? '')
       setTags(initialTags ?? [])
       setNewTag('')
+      setImageUrl(initialImageUrl ?? '')
     }
-  }, [coords, initialName, initialDescription, initialTags])
+  }, [coords, initialName, initialDescription, initialTags, initialImageUrl])
 
   function addTag(raw: string) {
     const t = raw.trim()
@@ -58,6 +62,7 @@ export default function AddPlaceSheet({
   const { sheetRef, onDragStart, onDragMove, onDragEnd, onDragCancel } = useSheetDrag(onClose, { resizable: false })
   const nameId = useId()
   const descId = useId()
+  const imageId = useId()
   const tagId = useId()
 
   function handleSubmit(e: React.FormEvent) {
@@ -68,15 +73,17 @@ export default function AddPlaceSheet({
     const finalTags = pending && !tags.some((x) => x.toLowerCase() === pending.toLowerCase())
       ? [...tags, pending]
       : tags
-    onSave(name.trim(), description.trim(), finalTags)
+    const finalImageUrl = imageUrl.trim() || null
+    onSave(name.trim(), description.trim(), finalTags, finalImageUrl)
     setName('')
     setDescription('')
     setTags([])
     setNewTag('')
+    setImageUrl('')
   }
 
   function handleBackdropClose() {
-    if (name.trim() || description.trim() || tags.length > 0) {
+    if (name.trim() || description.trim() || tags.length > 0 || imageUrl.trim()) {
       if (!window.confirm('Forkaste endringer og lukke?')) return
     }
     onClose()
@@ -136,6 +143,21 @@ export default function AddPlaceSheet({
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Notater om stedet…"
                 rows={3}
+              />
+            </div>
+
+            <div className={styles.field}>
+              <label htmlFor={imageId} className={styles.label}>Bilde-URL <span className={styles.optional}>(valgfritt)</span></label>
+              <input
+                id={imageId}
+                type="url"
+                className={styles.input}
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                placeholder="https://…"
+                inputMode="url"
+                autoCapitalize="off"
+                autoCorrect="off"
               />
             </div>
 

@@ -12,4 +12,6 @@ export type CustomPlace = {
   tags?: string[]
   /** True once a reverse-geocode attempt has been made (even if it returned nothing) */
   geoTried?: boolean
+  /** Optional photo URL shown in the detail sheet */
+  image_url?: string | null
 }

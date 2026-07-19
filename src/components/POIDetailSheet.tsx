@@ -120,6 +120,16 @@ export default function POIDetailSheet({
 
           <h2 className={styles.name}>{location.name}</h2>
 
+          {location.image_url && (
+            <img
+              src={location.image_url}
+              alt={location.name}
+              loading="lazy"
+              className={styles.heroImage}
+              onError={(e) => { (e.target as HTMLElement).style.display = 'none' }}
+            />
+          )}
+
           {/* Marauder pass stamp (HP places only) */}
           {!isCustomPlace && onToggleVisited && (
             <button

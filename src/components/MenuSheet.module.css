@@ -1013,6 +1013,72 @@
   white-space: nowrap; border: 0;
 }
 
+/* Data management panel (Innstillinger tab) */
+.dataActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 0 4px;
+}
+
+.dataActionGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 5px;
+}
+
+.dataActionBtn {
+  background: none;
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-btn);
+  padding: 11px 4px;
+  min-height: 44px;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-burgundy);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.dataActionBtn:hover:not(:disabled) {
+  background: rgba(92, 16, 16, 0.06);
+}
+
+.dataActionBtn:disabled {
+  opacity: var(--opacity-disabled, 0.4);
+  cursor: not-allowed;
+}
+
+.deleteConfirmGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+}
+
+.importDoneText {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-gold);
+  padding: 2px 2px;
+  text-align: center;
+}
+
+.deleteConfirm {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.deleteConfirmText {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-burgundy);
+  padding: 0 2px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sheet {
     transition: none;

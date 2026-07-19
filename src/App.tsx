@@ -68,6 +68,7 @@ function customPlaceToHPLocation(p: CustomPlace): HPLocation {
     external_url: null,
     country: p.country ?? null,
     city: p.city ?? null,
+    image_url: p.image_url ?? null,
     lat: p.lat,
     lng: p.lng,
   }
@@ -355,9 +356,9 @@ export default function App() {
     setPendingLongPress({ lng, lat })
   }
 
-  function handleSaveCustomPlace(name: string, description: string, tags: string[]) {
+  function handleSaveCustomPlace(name: string, description: string, tags: string[], imageUrl: string | null) {
     if (editingPlace) {
-      updateCustomPlace(editingPlace.id, { name, description, tags })
+      updateCustomPlace(editingPlace.id, { name, description, tags, image_url: imageUrl })
       setEditingPlace(null)
       return
     }
@@ -366,6 +367,7 @@ export default function App() {
       name,
       description,
       tags,
+      image_url: imageUrl,
       lat: pendingLongPress.lat,
       lng: pendingLongPress.lng,
     })
@@ -505,6 +507,7 @@ export default function App() {
         initialName={editingPlace ? editingPlace.name : pendingLongPress?.name}
         initialDescription={editingPlace?.description}
         initialTags={editingPlace?.tags}
+        initialImageUrl={editingPlace?.image_url}
         existingTags={existingCustomTags}
         title={editingPlace ? 'Rediger sted' : 'Legg til sted'}
         onSave={handleSaveCustomPlace}

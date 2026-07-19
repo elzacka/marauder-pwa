@@ -1,7 +1,7 @@
 import { useState, useMemo, useId, useRef, useCallback, useEffect, forwardRef, useImperativeHandle } from 'react'
 import type { CSSProperties } from 'react'
 import marauderIcon from '../assets/marauder-icon.png'
-import { Home, WandSparkles, Wrench, Settings as SettingsIcon, Search, ChevronDown, X, Trash2, Heart, UserRound } from 'lucide-react'
+import { Home, WandSparkles, Wrench, Settings as SettingsIcon, Search, ChevronDown, X, Trash2, Heart, UserRound, Check } from 'lucide-react'
 import { CategoryTree } from '../ds/CategoryTree'
 import { type FilterState, CATEGORY_META, LOCATION_TYPES, locationMatchesFilter } from '../ds/filterMeta'
 import { haversineKm, formatDistance } from '../utils/distance'
@@ -13,6 +13,7 @@ import type { OfflineAreaStatus } from '../hooks/useOfflineAreas'
 import type { Position } from '../hooks/useGeolocation'
 import type { CustomPlace } from '../types/custom-place'
 import HouseSigil from './HouseSigil'
+import { safeSetItem } from '../utils/safeStorage'
 import styles from './MenuSheet.module.css'
 
 type HPLocationWithDist = HPLocation & { km: number | null }
@@ -1061,6 +1062,11 @@ const MenuSheet = forwardRef<MenuSheetHandle, Props>(function MenuSheet({
                 </div>
 
                 <div className={styles.section}>
+                  <p className={styles.sectionTitle}>Eksporter / importer / slett</p>
+                  <DataPanel />
+                </div>
+
+                <div className={styles.section}>
                   <p className={styles.sectionTitle}>Kildekode og dokumentasjon</p>
                   <div className={styles.card}>
                     <div className={styles.infoRow}>
@@ -1119,6 +1125,205 @@ function TabBtn({ active, label, onClick, children }: {
     >
       {children}
     </button>
+  )
+}
+
+type DataKey = 'customPlaces' | 'favourites' | 'visited' | 'quizBest' | 'settings'
+
+const DATA_ITEMS: { key: DataKey; label: string }[] = [
+  { key: 'customPlaces', label: 'Mine steder' },
+  { key: 'favourites', label: 'Favoritter' },
+  { key: 'visited', label: "Marauder's Hunt Score" },
+  { key: 'quizBest', label: 'Quiz-score' },
+  { key: 'settings', label: 'Innstillinger' },
+]
+
+const DATA_LS_KEYS: Record<DataKey, string[]> = {
+  customPlaces: ['marauder-custom-places'],
+  favourites: ['marauder-favourites'],
+  visited: ['marauder-visited'],
+  quizBest: ['marauder-quiz-best'],
+  settings: ['showZoomControls', 'showLocateBtn', 'baseLayer', 'house'],
+}
+
+function DataPanel() {
+  const [selected, setSelected] = useState<Set<DataKey>>(
+    () => new Set<DataKey>(['customPlaces', 'favourites', 'visited', 'quizBest', 'settings'])
+  )
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [importError, setImportError] = useState<string | null>(null)
+  const [importDone, setImportDone] = useState(false)
+  const importRef = useRef<HTMLInputElement>(null)
+
+  const toggleItem = (key: DataKey) => {
+    setConfirmDelete(false)
+    setSelected(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
+
+  const handleExport = () => {
+    const data: Record<string, unknown> = { version: 1 }
+    if (selected.has('customPlaces')) {
+      try { data.customPlaces = JSON.parse(localStorage.getItem('marauder-custom-places') ?? '[]') }
+      catch { data.customPlaces = [] }
+    }
+    if (selected.has('favourites')) {
+      try { data.favourites = JSON.parse(localStorage.getItem('marauder-favourites') ?? '[]') }
+      catch { data.favourites = [] }
+    }
+    if (selected.has('visited')) {
+      try { data.visited = JSON.parse(localStorage.getItem('marauder-visited') ?? '[]') }
+      catch { data.visited = [] }
+    }
+    if (selected.has('quizBest')) {
+      try { data.quizBest = JSON.parse(localStorage.getItem('marauder-quiz-best') ?? '{}') }
+      catch { data.quizBest = {} }
+    }
+    if (selected.has('settings')) {
+      data.settings = {
+        showZoomControls: localStorage.getItem('showZoomControls') !== 'false',
+        showLocateBtn: localStorage.getItem('showLocateBtn') !== 'false',
+        baseLayer: localStorage.getItem('baseLayer') ?? 'standard',
+        house: localStorage.getItem('house') ?? 'none',
+      }
+    }
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    const d = new Date()
+    const pad = (n: number) => String(n).padStart(2, '0')
+    a.download = `marauder-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
+  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setImportError(null)
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      try {
+        const raw = ev.target?.result
+        if (typeof raw !== 'string') throw new Error('read failed')
+        const data = JSON.parse(raw) as Record<string, unknown>
+        if (data.version !== 1) throw new Error('unknown version')
+        if (selected.has('customPlaces') && data.customPlaces !== undefined)
+          safeSetItem('marauder-custom-places', JSON.stringify(data.customPlaces))
+        if (selected.has('favourites') && data.favourites !== undefined)
+          safeSetItem('marauder-favourites', JSON.stringify(data.favourites))
+        if (selected.has('visited') && data.visited !== undefined)
+          safeSetItem('marauder-visited', JSON.stringify(data.visited))
+        if (selected.has('quizBest') && data.quizBest !== undefined)
+          safeSetItem('marauder-quiz-best', JSON.stringify(data.quizBest))
+        if (selected.has('settings') && data.settings !== null && typeof data.settings === 'object') {
+          const s = data.settings as Record<string, unknown>
+          if (s.showZoomControls !== undefined) safeSetItem('showZoomControls', s.showZoomControls ? 'true' : 'false')
+          if (s.showLocateBtn !== undefined) safeSetItem('showLocateBtn', s.showLocateBtn ? 'true' : 'false')
+          if (typeof s.baseLayer === 'string') safeSetItem('baseLayer', s.baseLayer)
+          if (typeof s.house === 'string') safeSetItem('house', s.house)
+        }
+        setImportError(null)
+        setImportDone(true)
+        setTimeout(() => window.location.reload(), 1200)
+      } catch {
+        setImportError('Filen kunne ikke leses. Er dette en Marauder-sikkerhetskopi?')
+      }
+    }
+    reader.onerror = () => setImportError('Klarte ikke lese filen.')
+    reader.readAsText(file)
+    e.target.value = ''
+  }
+
+  const handleDeleteClick = () => setConfirmDelete(true)
+
+  const handleDeleteConfirm = () => {
+    for (const key of selected) {
+      for (const lsKey of DATA_LS_KEYS[key]) {
+        localStorage.removeItem(lsKey)
+      }
+    }
+    window.location.reload()
+  }
+
+  const noneSelected = selected.size === 0
+
+  return (
+    <>
+      <div className={styles.card}>
+        {DATA_ITEMS.map((item) => (
+          <button
+            key={item.key}
+            type="button"
+            className={`${styles.favAllRow} ${selected.has(item.key) ? styles.favAllRowActive : ''}`}
+            onClick={() => toggleItem(item.key)}
+            aria-pressed={selected.has(item.key)}
+          >
+            <span className={`${styles.toggleBox} ${selected.has(item.key) ? styles.toggleBoxOn : ''}`} aria-hidden="true">
+              {selected.has(item.key) && <Check size={12} strokeWidth={2.5} />}
+            </span>
+            {item.label}
+          </button>
+        ))}
+      </div>
+      <div className={styles.dataActions}>
+        <div className={styles.dataActionGrid}>
+          <button
+            type="button"
+            className={styles.dataActionBtn}
+            onClick={handleExport}
+            disabled={noneSelected || importDone}
+          >
+            Eksporter
+          </button>
+          <button
+            type="button"
+            className={styles.dataActionBtn}
+            onClick={() => importRef.current?.click()}
+            disabled={noneSelected || importDone}
+          >
+            Importer
+          </button>
+          <input
+            ref={importRef}
+            type="file"
+            accept=".json,application/json"
+            style={{ display: 'none' }}
+            onChange={handleImportFile}
+          />
+          <button
+            type="button"
+            className={styles.dataActionBtn}
+            onClick={handleDeleteClick}
+            disabled={noneSelected || importDone}
+          >
+            Slett
+          </button>
+        </div>
+        {importDone && <p className={styles.importDoneText}>Import vellykket — laster inn...</p>}
+        {importError && <p className={styles.errorText}>{importError}</p>}
+        {confirmDelete && (
+          <div className={styles.deleteConfirm}>
+            <p className={styles.deleteConfirmText}>Slette valgte data permanent?</p>
+            <div className={styles.deleteConfirmGrid}>
+              <button type="button" className={styles.dataActionBtn} onClick={() => setConfirmDelete(false)}>
+                Avbryt
+              </button>
+              <button type="button" className={styles.dataActionBtn} onClick={handleDeleteConfirm}>
+                Ja, slett
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   )
 }
 

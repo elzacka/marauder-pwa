@@ -36,7 +36,7 @@ export default function InstallBanner() {
       <div className={styles.body}>
         <p className={styles.title}>Installer Marauder</p>
         <p className={styles.hint}>
-          Trykk <Share className={styles.share} size={14} strokeWidth={2} aria-label="Del" /> og velg «Legg til på Hjemskjerm»
+          Trykk <Share className={styles.share} size={14} strokeWidth={2} aria-label="Del" /> og velg «Legg til på Hjem-skjerm»
         </p>
       </div>
       <button className={styles.dismiss} onClick={dismiss} type="button" aria-label="Lukk">
