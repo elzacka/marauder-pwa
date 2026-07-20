@@ -26,6 +26,8 @@ export type HPLocation = {
   fun_fact?: string | null
   /** Representative photo — displayed in the detail sheet hero */
   image_url?: string | null
+  /** Opening hours — human-readable string, English, null if always accessible */
+  opening_hours?: string | null
   lat: number
   lng: number
 }

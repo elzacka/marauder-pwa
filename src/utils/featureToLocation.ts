@@ -47,6 +47,7 @@ export function propsToLocation(
     city: (p.city ?? null) as string | null,
     fun_fact: (p.fun_fact ?? null) as string | null,
     image_url: safeExternalUrl(p.image_url),
+    opening_hours: (p.opening_hours ?? null) as string | null,
     lat,
     lng,
   }

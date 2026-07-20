@@ -29,7 +29,8 @@
         "country": "Scotland",
         "city": "Edinburgh",
         "fun_fact": "Rowling wrote here with a view of Edinburgh Castle. The back room became a place of pilgrimage for fans.",
-        "image_url": "https://i0.wp.com/theedinburghreporter.co.uk/wp-content/uploads/2026/05/Elephant-House-scaled-e1780050831838.jpg?fit=1200%2C799&ssl=1"
+        "image_url": "https://i0.wp.com/theedinburghreporter.co.uk/wp-content/uploads/2026/05/Elephant-House-scaled-e1780050831838.jpg?fit=1200%2C799&ssl=1",
+        "opening_hours": "Daily 10:00–18:00. Walk-in only; expect queues in peak summer season."
       }
     },
     {
@@ -57,7 +58,8 @@
         "country": "Scotland",
         "city": "Edinburgh",
         "fun_fact": "Look closely at the shop signs – several lean happily into the wizarding connection.",
-        "image_url": "https://images.squarespace-cdn.com/content/v1/58cf00b21b631bf52d2edc0e/1745667974275-LQN55D6DZA34EXNP6QZE/portada.jpg?format=2500w"
+        "image_url": "https://images.squarespace-cdn.com/content/v1/58cf00b21b631bf52d2edc0e/1745667974275-LQN55D6DZA34EXNP6QZE/portada.jpg?format=2500w",
+        "opening_hours": null
       }
     },
     {
@@ -86,7 +88,8 @@
         "country": "Scotland",
         "city": "Edinburgh",
         "fun_fact": "Also buried here: William McGonagall, famously the worst poet in Britain – and quite possibly a certain Professor’s namesake.",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Greyfriars_Kirkyard_-_03.jpg/330px-Greyfriars_Kirkyard_-_03.jpg"
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Greyfriars_Kirkyard_-_03.jpg/330px-Greyfriars_Kirkyard_-_03.jpg",
+        "opening_hours": "Kirkyard open 24 hours daily. Kirk (church): Mon–Fri 10:30–16:30, Sat 12:00–16:00, Sun closed."
       }
     },
     {
@@ -115,7 +118,8 @@
         "country": "Scotland",
         "city": "Edinburgh",
         "fun_fact": "The school sorts its pupils into four houses – sound familiar?",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/George-Herriot-high-school.jpg/330px-George-Herriot-high-school.jpg"
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/George-Herriot-high-school.jpg/330px-George-Herriot-high-school.jpg",
+        "opening_hours": null
       }
     },
     {
@@ -144,7 +148,8 @@
         "country": "Scotland",
         "city": "Edinburgh",
         "fun_fact": "She signed a marble bust in the room: \"J.K. Rowling finished writing Harry Potter and the Deathly Hallows in this room (552) on 11th Jan 2007\".",
-        "image_url": "https://balmoral-edinburgh.edinburgh-hotel.org/data/Pictures/OriginalPhoto/3207/320724/320724769/edinburgh-the-balmoral-hotel-picture-91.JPEG"
+        "image_url": "https://balmoral-edinburgh.edinburgh-hotel.org/data/Pictures/OriginalPhoto/3207/320724/320724769/edinburgh-the-balmoral-hotel-picture-91.JPEG",
+        "opening_hours": null
       }
     },
     {
@@ -178,7 +183,8 @@
         "country": "Scotland",
         "city": "Glenfinnan",
         "fun_fact": "The flying Ford Anglia chases the train here in Chamber of Secrets – with Harry hanging out of the door.",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Glenfinnan_Viaduct_-_2022.jpg/330px-Glenfinnan_Viaduct_-_2022.jpg"
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Glenfinnan_Viaduct_-_2022.jpg/330px-Glenfinnan_Viaduct_-_2022.jpg",
+        "opening_hours": null
       }
     },
     {
@@ -211,7 +217,8 @@
         "country": "Scotland",
         "city": "Fort William",
         "fun_fact": "This is the actual locomotive type used as the Hogwarts Express in the films.",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/The_Jacobite_Arriving_at_Mallaig_-_geograph.org.uk_-_3119099.jpg/330px-The_Jacobite_Arriving_at_Mallaig_-_geograph.org.uk_-_3119099.jpg"
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/The_Jacobite_Arriving_at_Mallaig_-_geograph.org.uk_-_3119099.jpg/330px-The_Jacobite_Arriving_at_Mallaig_-_geograph.org.uk_-_3119099.jpg",
+        "opening_hours": "Daily 1 Jun–23 Oct. Morning: departs Fort William 10:15, arrives Mallaig 12:25, returns 16:03. Afternoon: departs 12:50, returns 18:52. Advance booking essential — July dates sell out fast."
       }
     },
     {
@@ -241,7 +248,8 @@
         "country": "Scotland",
         "city": "Glencoe",
         "fun_fact": "Hagrid’s hut was built here for Prisoner of Azkaban – near the Clachaig Inn.",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/GlencoeVillage.jpg/330px-GlencoeVillage.jpg"
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/GlencoeVillage.jpg/330px-GlencoeVillage.jpg",
+        "opening_hours": null
       }
     },
     {
@@ -270,7 +278,8 @@
         "country": "Scotland",
         "city": "Fort William",
         "fun_fact": "Quidditch scenes in the early films were set against this landscape.",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/UK-Scotland-Glen_Nevis-Steall_Waterfall-2006.jpg/330px-UK-Scotland-Glen_Nevis-Steall_Waterfall-2006.jpg"
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/UK-Scotland-Glen_Nevis-Steall_Waterfall-2006.jpg/330px-UK-Scotland-Glen_Nevis-Steall_Waterfall-2006.jpg",
+        "opening_hours": null
       }
     },
     {
@@ -299,7 +308,8 @@
         "country": "England",
         "city": "Goathland",
         "fun_fact": "Built in 1865 and barely changed since – no set dressing needed.",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Goathland_station.jpg/330px-Goathland_station.jpg"
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Goathland_station.jpg/330px-Goathland_station.jpg",
+        "opening_hours": "Daily in peak season (18 Jul–6 Sep). Trains roughly hourly from ~09:20. Day Rover tickets available; book online to save 10%."
       }
     },
     {
@@ -328,7 +338,8 @@
         "country": "England",
         "city": "Malham",
         "fun_fact": "They pitched the tent on the limestone pavement at the very top – worth the climb.",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Malham_Cove_Yorkshire_Dales.jpg/330px-Malham_Cove_Yorkshire_Dales.jpg"
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Malham_Cove_Yorkshire_Dales.jpg/330px-Malham_Cove_Yorkshire_Dales.jpg",
+        "opening_hours": null
       }
     },
     {
@@ -358,7 +369,8 @@
         "country": "England",
         "city": "Alnwick",
         "fun_fact": "\"Up!\" – the broomstick lesson happened on the lawns here. The Ford Anglia also crash-landed here in Chamber of Secrets.",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Alnwick_Castle_in_uk.jpg/330px-Alnwick_Castle_in_uk.jpg"
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Alnwick_Castle_in_uk.jpg/330px-Alnwick_Castle_in_uk.jpg",
+        "opening_hours": "Daily 10:00–17:30 (grounds); State Rooms 10:30–16:30; last admission to grounds 15:45. Walk-up or book online."
       }
     },
     {
@@ -389,7 +401,8 @@
         "country": "England",
         "city": "Gloucester",
         "fun_fact": "\"The Chamber of Secrets has been opened…\" – the writing on the wall scene was shot in these cloisters.",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Gloucester_Cathedral_exterior_2019.JPG/330px-Gloucester_Cathedral_exterior_2019.JPG"
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Gloucester_Cathedral_exterior_2019.JPG/330px-Gloucester_Cathedral_exterior_2019.JPG",
+        "opening_hours": "Mon–Fri 10:00–17:00; Sat 10:00–16:00; Sun 12:00–14:30 and 16:00–17:00. Free entry (donation suggested)."
       }
     },
     {
@@ -420,7 +433,8 @@
         "country": "England",
         "city": "Lacock",
         "fun_fact": "The Mirror of Erised stood here, in the Chapter House.",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Lacock_Abbey_from_south%2C_Wiltshire%2C_UK_-_Diliff.jpg/330px-Lacock_Abbey_from_south%2C_Wiltshire%2C_UK_-_Diliff.jpg"
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Lacock_Abbey_from_south%2C_Wiltshire%2C_UK_-_Diliff.jpg/330px-Lacock_Abbey_from_south%2C_Wiltshire%2C_UK_-_Diliff.jpg",
+        "opening_hours": "Daily 10:15–16:45 (abbey); grounds 10:00–17:00. National Trust members free."
       }
     },
     {
@@ -450,7 +464,8 @@
         "country": "England",
         "city": "Lacock",
         "fun_fact": "Horace Slughorn hid here – disguised as an armchair.",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Lacock_UK-High_Street.jpeg/330px-Lacock_UK-High_Street.jpeg"
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Lacock_UK-High_Street.jpeg/330px-Lacock_UK-High_Street.jpeg",
+        "opening_hours": null
       }
     },
     {
@@ -478,7 +493,8 @@
         "country": "England",
         "city": "Chesterfield",
         "fun_fact": "\"More window than wall\", they said in 1597 – digitally sharpened into the Malfoys’ forbidding home.",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Hardwick_Hall_3_%287027835143%29.jpg/330px-Hardwick_Hall_3_%287027835143%29.jpg"
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Hardwick_Hall_3_%287027835143%29.jpg/330px-Hardwick_Hall_3_%287027835143%29.jpg",
+        "opening_hours": "Daily. Hall (interior) 11:00–15:00; parkland and stableyard 08:30–19:30. National Trust members free."
       }
     },
     {
@@ -507,7 +523,8 @@
         "country": "England",
         "city": "Lavenham",
         "fun_fact": "The De Vere House stood in for the Potters’ cottage – where it all began.",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Lavenham_High_Street.jpg/330px-Lavenham_High_Street.jpg"
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Lavenham_High_Street.jpg/330px-Lavenham_High_Street.jpg",
+        "opening_hours": null
       }
     },
     {
@@ -537,7 +554,8 @@
         "country": "England",
         "city": "Oxford",
         "fun_fact": "Hogwarts’ Great Hall was built in the studio – but modelled on the dining hall here.",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Tom_Quad%2C_Christ_Church%2C_Oxford.jpg/330px-Tom_Quad%2C_Christ_Church%2C_Oxford.jpg"
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Tom_Quad%2C_Christ_Church%2C_Oxford.jpg/330px-Tom_Quad%2C_Christ_Church%2C_Oxford.jpg",
+        "opening_hours": "Mon–Sat 10:00–17:00; Sun 14:00–17:00. Great Hall closed 12:00–14:00 (Sat 10:30–14:00). Book tickets online (released each Friday for the following week)."
       }
     },
     {
@@ -567,7 +585,8 @@
         "country": "England",
         "city": "Oxford",
         "fun_fact": "Harry sneaks through here under the Invisibility Cloak in the Restricted Section scene.",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Bibliotheca_Bodleiana.jpg/330px-Bibliotheca_Bodleiana.jpg"
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Bibliotheca_Bodleiana.jpg/330px-Bibliotheca_Bodleiana.jpg",
+        "opening_hours": "Mon–Fri 09:00–17:00; Sat 10:00–13:00 (Divinity School only); Sun 11:00–16:00. Tours sell out fast in summer — book 1 month ahead online or arrive at opening for walk-up tickets."
       }
     },
     {
@@ -595,7 +614,8 @@
         "country": "England",
         "city": "Oxford",
         "fun_fact": "\"Mad-Eye\" Moody’s amazing bouncing ferret scene happened under the great oak here.",
-        "image_url": "https://www.new.ox.ac.uk/sites/default/files/styles/large_navigation/public/2022-10/Garden%20Quad.jpg.webp?itok=95FAJRWX"
+        "image_url": "https://www.new.ox.ac.uk/sites/default/files/styles/large_navigation/public/2022-10/Garden%20Quad.jpg.webp?itok=95FAJRWX",
+        "opening_hours": "Daily 10:00–17:00 (some Saturdays closed — check planned-closures page before visiting). Card payment only; no cash."
       }
     },
     {
@@ -625,7 +645,8 @@
         "country": "England",
         "city": "Durham",
         "fun_fact": "Harry releases Hedwig into the snow here – and McGonagall’s Transfiguration class met in the Chapter House.",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Durham_MMB_02_Cathedral.jpg/330px-Durham_MMB_02_Cathedral.jpg"
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Durham_MMB_02_Cathedral.jpg/330px-Durham_MMB_02_Cathedral.jpg",
+        "opening_hours": "Mon–Sat 09:30–16:30; Sun 12:30–15:00. Free entry (£5 donation encouraged)."
       }
     },
     {
@@ -661,7 +682,8 @@
         "country": "England",
         "city": "Leavesden",
         "fun_fact": "The Great Hall, Diagon Alley and the original Hogwarts Express – plus Butterbeer.",
-        "image_url": "https://media.tacdn.com/media/attractions-splice-spp-674x446/09/1e/7b/57.jpg"
+        "image_url": "https://media.tacdn.com/media/attractions-splice-spp-674x446/09/1e/7b/57.jpg",
+        "opening_hours": "Daily 08:30–22:00; first timed entry 09:00. Advance booking mandatory — no walk-ups. First shuttle from Watford Junction at 08:15."
       }
     },
     {
@@ -697,7 +719,8 @@
         "country": "England",
         "city": "London",
         "fun_fact": "The film scenes were actually shot between platforms 4 and 5 – the station’s own secret.",
-        "image_url": "https://static.wikia.nocookie.net/harrypotter/images/d/d2/King%27s_Cross_Station_PSF.png/revision/latest?cb=20211127075418"
+        "image_url": "https://static.wikia.nocookie.net/harrypotter/images/d/d2/King%27s_Cross_Station_PSF.png/revision/latest?cb=20211127075418",
+        "opening_hours": null
       }
     },
     {
@@ -725,7 +748,8 @@
         "country": "England",
         "city": "London",
         "fun_fact": "The blue door in Bull’s Head Passage was the entrance to the Leaky Cauldron.",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Leadenhall_Market_In_London_-_Feb_2006_rotated.jpg/330px-Leadenhall_Market_In_London_-_Feb_2006_rotated.jpg"
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Leadenhall_Market_In_London_-_Feb_2006_rotated.jpg/330px-Leadenhall_Market_In_London_-_Feb_2006_rotated.jpg",
+        "opening_hours": null
       }
     },
     {
@@ -754,7 +778,8 @@
         "country": "England",
         "city": "London",
         "fun_fact": "The goblin-filled banking hall itself was built in the studio – modelled on the marble hall inside.",
-        "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtOHapk8_oeBt19GXA-dmDDfDZhk3TTedB4tGQNcDiVLT2aAmWCPERm-x7&s=10"
+        "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtOHapk8_oeBt19GXA-dmDDfDZhk3TTedB4tGQNcDiVLT2aAmWCPERm-x7&s=10",
+        "opening_hours": null
       }
     },
     {
@@ -783,7 +808,8 @@
         "country": "England",
         "city": "London",
         "fun_fact": "The house that squeezes itself into view between the neighbours – no Muggles noticed a thing.",
-        "image_url": "https://www.countryandtownhouse.com/wp-content/uploads/2023/03/Claremont-Square-exterior.jpg"
+        "image_url": "https://www.countryandtownhouse.com/wp-content/uploads/2023/03/Claremont-Square-exterior.jpg",
+        "opening_hours": null
       }
     },
     {
@@ -811,7 +837,8 @@
         "country": "England",
         "city": "London",
         "fun_fact": "The bridge really did wobble when it opened in 2000 – Londoners nicknamed it the Wobbly Bridge.",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Millenium_bridge_2015.jpg/330px-Millenium_bridge_2015.jpg"
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Millenium_bridge_2015.jpg/330px-Millenium_bridge_2015.jpg",
+        "opening_hours": null
       }
     },
     {
@@ -840,7 +867,8 @@
         "country": "England",
         "city": "London",
         "fun_fact": "\"Thanksss, amigo.\" The snake was off to Brazil.",
-        "image_url": "https://cms.londonzoo.org/sites/default/files/styles/responsive/public/1024/634/1/2022-12/ZSL_London_Zoo_108.jpg.iCeylqvNMQARAA.5Nh3JHdfx1.jpg.webp"
+        "image_url": "https://cms.londonzoo.org/sites/default/files/styles/responsive/public/1024/634/1/2022-12/ZSL_London_Zoo_108.jpg.iCeylqvNMQARAA.5Nh3JHdfx1.jpg.webp",
+        "opening_hours": "Daily 10:00–18:00 (last admission 17:00). Book online in advance to save and guarantee entry."
       }
     },
     {
@@ -867,7 +895,8 @@
         "country": "England",
         "city": "London",
         "fun_fact": "Come at dusk when the gas lamps glow – it is the closest London gets to Knockturn Alley.",
-        "image_url": "https://www.bulgarihotels.com/.imaging/bhr-wide-big-jpg/dam/arteit/68011---like-a-page-out-of-dickens---goodwin%E2%80%99s-cou/format-2560x1600-68011/jcr%3Acontent"
+        "image_url": "https://www.bulgarihotels.com/.imaging/bhr-wide-big-jpg/dam/arteit/68011---like-a-page-out-of-dickens---goodwin%E2%80%99s-cou/format-2560x1600-68011/jcr%3Acontent",
+        "opening_hours": null
       }
     },
     {
@@ -896,7 +925,8 @@
         "country": "Wales",
         "city": "Pembrokeshire",
         "fun_fact": "\"Here lies Dobby, a free elf.\" Fans still leave socks on the beach.",
-        "image_url": "https://live-production.wcms.abc-cdn.net.au/ec92e210daf7fd7ee3d9d9540c785717?impolicy=wcms_crop_resize&cropH=1052&cropW=1870&xPos=666&yPos=0&width=862&height=485"
+        "image_url": "https://live-production.wcms.abc-cdn.net.au/ec92e210daf7fd7ee3d9d9540c785717?impolicy=wcms_crop_resize&cropH=1052&cropW=1870&xPos=666&yPos=0&width=862&height=485",
+        "opening_hours": null
       }
     },
     {
@@ -925,7 +955,8 @@
         "country": "England",
         "city": "London",
         "fun_fact": "Harry and Mr Weasley dialled 6-2-4-4-2 – MAGIC – in the phone box here in Order of the Phoenix.",
-        "image_url": "https://www.the-magician.co.uk/images/ministry-of-magic1.jpg"
+        "image_url": "https://www.the-magician.co.uk/images/ministry-of-magic1.jpg",
+        "opening_hours": null
       }
     },
     {
@@ -954,7 +985,8 @@
         "country": "England",
         "city": "Forest of Dean",
         "fun_fact": "Hermione’s parents took her here as a child – and J.K. Rowling grew up in Tutshill, on the forest’s edge.",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Symonds_Yat_Rock_View.JPG/330px-Symonds_Yat_Rock_View.JPG"
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Symonds_Yat_Rock_View.JPG/330px-Symonds_Yat_Rock_View.JPG",
+        "opening_hours": null
       }
     },
     {
@@ -984,7 +1016,8 @@
         "country": "England",
         "city": "London",
         "fun_fact": "The Palace Theatre on this street has hosted Harry Potter and the Cursed Child since 2016.",
-        "image_url": "https://www.the-magician.co.uk/images/goodwins-court.jpg"
+        "image_url": "https://www.the-magician.co.uk/images/goodwins-court.jpg",
+        "opening_hours": null
       }
     },
     {
@@ -1013,7 +1046,8 @@
         "fun_fact": "The station was closed for a full day of filming – Mr Weasley remained delighted by the ticket barriers.",
         "source": "manual",
         "external_url": "https://en.wikipedia.org/wiki/Westminster_tube_station",
-        "image_url": "https://images.squarespace-cdn.com/content/v1/6115d66cb356dc2356e173ca/1628833028872-90HLH7MFNLD10U4I7JNE/13922059674_9ba0a3d34c_z.jpg"
+        "image_url": "https://images.squarespace-cdn.com/content/v1/6115d66cb356dc2356e173ca/1628833028872-90HLH7MFNLD10U4I7JNE/13922059674_9ba0a3d34c_z.jpg",
+        "opening_hours": null
       }
     },
     {
@@ -1042,7 +1076,8 @@
         "fun_fact": "The pub entrance was the flower shop at 7 Stoney Street; next door became the Third Hand Book Emporium.",
         "source": "manual",
         "external_url": "https://boroughmarket.org.uk/",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/London_2018_March_IMG_0663.jpg/330px-London_2018_March_IMG_0663.jpg"
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/London_2018_March_IMG_0663.jpg/330px-London_2018_March_IMG_0663.jpg",
+        "opening_hours": "Tue–Fri 10:00–17:00; Sat 09:00–17:00; Sun 10:00–16:00; Mon closed."
       }
     },
     {
@@ -1070,7 +1105,8 @@
         "fun_fact": "They narrowly miss a double-decker bus on Shaftesbury Avenue – Apparition in central London is precision work.",
         "source": "manual",
         "external_url": "https://en.wikipedia.org/wiki/Piccadilly_Circus",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Open_Happiness_Piccadilly_Circus_Blue-Pink_Hour_120917-1126-jikatu.jpg/330px-Open_Happiness_Piccadilly_Circus_Blue-Pink_Hour_120917-1126-jikatu.jpg"
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Open_Happiness_Piccadilly_Circus_Blue-Pink_Hour_120917-1126-jikatu.jpg/330px-Open_Happiness_Piccadilly_Circus_Blue-Pink_Hour_120917-1126-jikatu.jpg",
+        "opening_hours": null
       }
     },
     {
@@ -1099,7 +1135,8 @@
         "fun_fact": "The broomstick flight follows the real Thames route – you can trace it on foot along the Embankment.",
         "source": "manual",
         "external_url": "https://en.wikipedia.org/wiki/Palace_of_Westminster",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Houses_of_Parliament_in_2022_%28cropped%29.jpg/330px-Houses_of_Parliament_in_2022_%28cropped%29.jpg"
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Houses_of_Parliament_in_2022_%28cropped%29.jpg/330px-Houses_of_Parliament_in_2022_%28cropped%29.jpg",
+        "opening_hours": "Mon–Sat ~09:00–16:15 during summer recess (Jul–Aug); Sun closed. Guided tours from £18. Advance booking strongly recommended."
       }
     },
     {
@@ -1129,7 +1166,8 @@
         "fun_fact": "You pass it on the Jacobite steam train and the A830 – bring the camera ready between Glenfinnan and Lochailort.",
         "source": "manual",
         "external_url": "https://en.wikipedia.org/wiki/Loch_Eilt",
-        "image_url": "https://www.myhighlands.de/wp-content/uploads/2021/10/Loch-Eilt-Dumbledores-Grab-01.jpg"
+        "image_url": "https://www.myhighlands.de/wp-content/uploads/2021/10/Loch-Eilt-Dumbledores-Grab-01.jpg",
+        "opening_hours": null
       }
     },
     {
@@ -1159,7 +1197,8 @@
         "fun_fact": "The Durmstrang ship rises from these waters in Goblet of Fire.",
         "source": "manual",
         "external_url": "https://en.wikipedia.org/wiki/Loch_Shiel",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Glenfinnan_monument_and_Loch_Shiel.jpg/330px-Glenfinnan_monument_and_Loch_Shiel.jpg"
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Glenfinnan_monument_and_Loch_Shiel.jpg/330px-Glenfinnan_monument_and_Loch_Shiel.jpg",
+        "opening_hours": null
       }
     },
     {
@@ -1189,7 +1228,8 @@
         "fun_fact": "Hagrid leads the first-years’ detention into these woods in Philosopher’s Stone.",
         "source": "manual",
         "external_url": "https://en.wikipedia.org/wiki/Black_Park",
-        "image_url": "https://toddledoddle.com/wp-content/uploads/2022/05/Black-Park-Country-Park-Wexham-Slough-Berkshire-02.jpg"
+        "image_url": "https://toddledoddle.com/wp-content/uploads/2022/05/Black-Park-Country-Park-Wexham-Slough-Berkshire-02.jpg",
+        "opening_hours": "Daily. Car park open 08:00–20:00 (summer). Park open 08:00 until dusk. Free entry on foot; parking charged."
       }
     },
     {
@@ -1217,7 +1257,8 @@
         "fun_fact": "Later films rebuilt Privet Drive at Leavesden – the studio set is on the Studio Tour.",
         "source": "manual",
         "external_url": "https://harrypotter.fandom.com/wiki/Picket_Post_Closet",
-        "image_url": "https://media-cldnry.s-nbcnews.com/image/upload/newscms/2016_38/1159528/135563_7_-_copy.jpg"
+        "image_url": "https://media-cldnry.s-nbcnews.com/image/upload/newscms/2016_38/1159528/135563_7_-_copy.jpg",
+        "opening_hours": null
       }
     },
     {
@@ -1246,7 +1287,8 @@
         "fun_fact": "Hagrid buys Harry a hamburger here – magic and Muggle fast food, side by side.",
         "source": "manual",
         "external_url": "https://en.wikipedia.org/wiki/London_Paddington_station",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Paddington_Station_GWR.jpg/330px-Paddington_Station_GWR.jpg"
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Paddington_Station_GWR.jpg/330px-Paddington_Station_GWR.jpg",
+        "opening_hours": null
       }
     },
     {
@@ -1274,7 +1316,8 @@
         "fun_fact": "Hermione had a knack for escapes: the beaded bag with everything they needed was already packed.",
         "source": "manual",
         "external_url": "https://en.wikipedia.org/wiki/Tottenham_Court_Road",
-        "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTCy-xmGbrx_wio-9kehSb50GL2f1o3ekPwRB30VrCOB2MQyQIdnpXfSGA&s=10"
+        "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTCy-xmGbrx_wio-9kehSb50GL2f1o3ekPwRB30VrCOB2MQyQIdnpXfSGA&s=10",
+        "opening_hours": null
       }
     },
     {
@@ -1309,7 +1352,8 @@
         "fun_fact": "Miraphora Mina and Eduardo Lima designed the graphic universe of all eight films – entry to the gallery is free.",
         "source": "manual",
         "external_url": "https://minalima.com/",
-        "image_url": "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/21/a8/e2/fb/house-of-minalima.jpg?w=1200&h=-1&s=1"
+        "image_url": "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/21/a8/e2/fb/house-of-minalima.jpg?w=1200&h=-1&s=1",
+        "opening_hours": "Daily 11:00–18:45. Free entry, no booking required. Groups of 8+ contact in advance."
       }
     }
   ]
