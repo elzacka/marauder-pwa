@@ -146,6 +146,13 @@ export default function POIDetailSheet({
             <p className={styles.description}>{location.description}</p>
           )}
 
+          {location.opening_hours && (
+            <div className={styles.openingHours}>
+              <span className={styles.openingHoursTitle}>Opening hours</span>
+              <p className={styles.openingHoursText}>{location.opening_hours}</p>
+            </div>
+          )}
+
           {location.fun_fact && (
             <div className={styles.funFact}>
               <span className={styles.funFactTitle}>Did you know?</span>
