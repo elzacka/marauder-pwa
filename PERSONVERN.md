@@ -1,10 +1,10 @@
 # Personvernerklæring – Marauder
 
-Sist oppdatert: 19.10.2026
+Sist oppdatert: 26.10.2026
 
 ## Hva samles inn
 
-Marauder har ingen brukerkontoer og sender ikke data til egne servere. Appen teller besøk på startsiden, se [Besøksstatistikk](#besøksstatistikk).
+Marauder har ingen brukerkontoer og sender ikke data til egne servere.
 
 ## Data som behandles lokalt på enheten
 
@@ -25,17 +25,6 @@ Marauder har ingen brukerkontoer og sender ikke data til egne servere. Appen tel
 **Esri**: Satellittkart. Når du velger satellittkart, henter appen bilder fra `server.arcgisonline.com`.
 
 **GitHub Pages**: Appen ligger på GitHub Pages. GitHub får IP-adressen din når du åpner appen.
-
-## Besøksstatistikk
-
-Appen teller besøk med GoatCounter. Tallene viser hvor mye appen blir brukt.
-
-- Appen sender bare adressen til startsiden, `/marauder-pwa/`. Steder, søk, posisjon og annet innhold sendes ikke.
-- Appen lagrer ingenting på enheten din for å telle besøk.
-- GoatCounter bruker IP-adressen din og informasjon om nettleseren i opptil 8 timer for å telle deg én gang. De lagres ikke.
-- GoatCounter lagrer bare samlede tall. GoatCounter drives fra Irland og lagrer tallene hos Hetzner i Finland og Tyskland.
-- Grunnlaget er berettiget interesse (personvernforordningen artikkel 6 nr. 1 bokstav f): Å se hvilke apper som brukes.
-- Du kan unngå tellingen ved å blokkere `goatcounter.com`, for eksempel med en annonseblokkering.
 
 ## Dine rettigheter: Sletting
 

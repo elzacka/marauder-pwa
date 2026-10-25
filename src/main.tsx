@@ -3,7 +3,6 @@ import type { ReactNode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './main.css'
 import App from './App.tsx'
-import { countVisit } from './utils/visitCount'
 
 type EBState = { hasError: boolean }
 
@@ -44,5 +43,3 @@ createRoot(document.getElementById('root')!).render(
     </ErrorBoundary>
   </StrictMode>,
 )
-
-countVisit(import.meta.env.BASE_URL)
